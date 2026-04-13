@@ -91,36 +91,23 @@
     <div class="success" id="success-msg"></div>
     <div class="input-group">
       <label>Correo electrónico</label>
-      <input type="email" placeholder="tu@correo.com" id="email">
+      <input type="email" placeholder="tu@correo.com" id="email" autocomplete="email">
     </div>
     <div class="input-group">
       <label>Contraseña</label>
-      <input type="password" placeholder="••••••••" id="password">
+      <input type="password" placeholder="••••••••" id="password" autocomplete="current-password">
     </div>
-    <button class="btn" id="main-btn" onclick="handleAuth()">Entrar</button>
+    <button class="btn" id="main-btn">Entrar</button>
     <div class="register">
       <span id="toggle-text">¿No tienes cuenta?</span>
-      <a onclick="toggleMode()"> <span id="toggle-link">Regístrate</span></a>
+      <a id="toggle-link"> Regístrate</a>
     </div>
   </div>
 
-  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const { createClient } = supabase
 
     const SUPABASE_URL = 'kzqnsbztfyhyyageuboz'
     const SUPABASE_KEY = 'sb_publishable_WwUD-bkBrAdwC9J2JEi4Eg_CXJHj6R3'
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
-
-    let isRegister = false
-
-    window.toggleMode = () => {
-      isRegister = !isRegister
-      document.getElementById('form-title').textContent = isRegister ? 'Crear cuenta' : 'Iniciar sesión'
-      document.getElementById('main-btn').textContent = isRegister ? 'Registrarse' : 'Entrar'
-      document.getElementById('toggle-link').textContent = isRegister ? 'Inicia sesión' : 'Regístrate'
-      document.getElementById('toggle-text').textContent = isRegister ? '¿Ya tienes cuenta?' : '¿No tienes cuenta?'
-    }
-
-    window.handleAuth = async () => {
-      const email = document.getElementById('email').value
-      const passwo
+    const client = createClient(SUPABASE_URL, SUPABASE_
