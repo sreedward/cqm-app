@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CQM - Biblioteca</title>
+  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a0a;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    header {
+      background: #1a1a1a;
+      border-bottom: 1px solid #333;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo { font-size: 1.2rem; font-weight: 700; }
+    .logo span { color: #f59e0b; }
+    .logout {
+      background: none;
+      border: 1px solid #444;
+      color: #888;
+      border-radius: 8px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .search-bar {
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 57px;
+      background: #0a0a0a;
+      z-index: 9;
+    }
+    .search-bar input {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: #ffffff;
+      font-size: 1rem;
+      outline: none;
+    }
+    .search-bar input:focus { border-color: #f59e0b; }
+    .songs-list { padding: 0 1.5rem 2rem; }
+    .song-card {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .song-card:hover { border-color: #f59e0b; }
+    .song-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.2rem; }
+    .song-info p { font-size: 0.8rem; color: #888; }
+    .song-key {
+      background: #f59e0b22;
+      color: #f59e0b;
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .empty {
+      text-align: center;
+      color: #555;
+      padding: 3rem 0;
+      font-size: 0.9rem;
+    }
+    .loading {
+      text-align: center;
+      color: #555;
+      padding: 3rem 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Chart<span>Quick</span></div>
+    <button class="logout" onclick="cerrarSesion()">Salir</button>
+  </header>
+  <div class="search-bar">
+    <input type="text" id="buscar" placeholder="Buscar canción o artista..." oninput="filtrar()">
+  </div>
+  <div class="songs-list" id="lista">
+    <div class="loading">Cargando canciones...</div>
+  </div>
+
+  <script>
+    const _supabase = supabase.createClient('https://kzqnsbztfyhyyageuboz.supabase.co', '\eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w')
+
+    let todasLasCanciones = []
+
+    async function verificarSesion() {
+      const { data: { session } } = await _supabase.auth.getSession()
+      if (!session) {
+        window.location.href = '/login.html'
+      }
+    }
+
+    async function cargarCanciones() {
+      const { data, error } = await _supabase
+        .from('songs')
+        .select('*')
+        .order('title')
+
+      if (error) {
+        document.getElementById('lista').innerHTML = '<div class="empty">Error cargando canciones.</div>'
+        return
+      }
+
+      todasLasCanciones = data
+      mostrarCanciones(data)
+    }
+
+    function mostrarCanciones(canciones) {
+      const lista = document.getElementById('lista')
+      if (canciones.length === 0) {
+        lista.innerHTML = '<div class="empty">No se encontraron canciones.</div>'
+        return
+      }
+      lista.innerHTML = canciones.map(c => `
+        <div class="song-card" onclick="verCancion(${c.id})">
+          <div class="song-info">
+            <h3>${c.title}</h3>
+            <p>${c.artist || 'Artista desconocido'}</p>
+          </div>
+          <div class="song-key">${c.original_key || '?'}</div>
+        </div>
+      `).join('')
+    }
+
+    function filtrar() {
+      const query = document.getElementById('buscar').value.toLowerCase()
+      const filtradas = todasLasCanciones.filter(c =>
+        c.title.toLowerCase().includes(query) ||
+        (c.artist && c.artist.toLowerCase().includes(query))
+      )
+      mostrarCanciones(filtradas)
+    }
+
+    function verCancion(id) {
+      window.location.href = `/song.html?id=${id}`
+    }
+
+    async function cerrarSesion() {
+      await _supabase.auth.signOut()
+      window.location.href = '/login.html'
+    }
+
+    verificarSesion()
+    cargarCanciones()
+  </script>
+</body>
