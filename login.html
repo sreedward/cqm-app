@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CQM - Iniciar Sesión</title>
+  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -54,60 +55,99 @@
       font-weight: 700;
       cursor: pointer;
       margin-top: 0.5rem;
-      transition: background 0.2s;
     }
-    .btn:hover { background: #d97706; }
     .btn:disabled { background: #555; cursor: not-allowed; }
-    .error {
-      background: #3a1a1a;
-      border: 1px solid #f87171;
-      color: #f87171;
+    .mensaje {
       border-radius: 8px;
       padding: 0.75rem;
       font-size: 0.85rem;
       margin-bottom: 1rem;
       display: none;
+      text-align: center;
     }
-    .success {
-      background: #1a3a1a;
-      border: 1px solid #4ade80;
-      color: #4ade80;
-      border-radius: 8px;
-      padding: 0.75rem;
-      font-size: 0.85rem;
-      margin-bottom: 1rem;
-      display: none;
-    }
-    .register { text-align: center; font-size: 0.85rem; color: #888; margin-top: 1.25rem; }
-    .register a { color: #f59e0b; text-decoration: none; font-weight: 600; cursor: pointer; }
+    .error { background: #3a1a1a; border: 1px solid #f87171; color: #f87171; }
+    .success { background: #1a3a1a; border: 1px solid #4ade80; color: #4ade80; }
+    .toggle { text-align: center; font-size: 0.85rem; color: #888; margin-top: 1.25rem; }
+    .toggle a { color: #f59e0b; text-decoration: none; font-weight: 600; cursor: pointer; }
   </style>
 </head>
 <body>
   <div class="logo">Chart<span>Quick</span></div>
   <p class="tagline">by Musishens</p>
   <div class="card">
-    <h2 id="form-title">Iniciar sesión</h2>
-    <div class="error" id="error-msg"></div>
-    <div class="success" id="success-msg"></div>
+    <h2 id="titulo">Iniciar sesión</h2>
+    <div class="mensaje error" id="error"></div>
+    <div class="mensaje success" id="success"></div>
     <div class="input-group">
       <label>Correo electrónico</label>
-      <input type="email" placeholder="tu@correo.com" id="email" autocomplete="email">
+      <input type="email" id="email" placeholder="tu@correo.com" autocomplete="email">
     </div>
     <div class="input-group">
       <label>Contraseña</label>
-      <input type="password" placeholder="••••••••" id="password" autocomplete="current-password">
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
     </div>
-    <button class="btn" id="main-btn">Entrar</button>
-    <div class="register">
-      <span id="toggle-text">¿No tienes cuenta?</span>
-      <a id="toggle-link"> Regístrate</a>
+    <button class="btn" id="btn">Entrar</button>
+    <div class="toggle">
+      <span id="toggle-texto">¿No tienes cuenta?</span>
+      <a id="toggle-link">Regístrate</a>
     </div>
   </div>
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
-    const { createClient } = supabase
+    const _supabase = supabase.createClient('https://kzqnsbztfyhyyageuboz.supabase.com', 'sb_publishable_WwUD-bkBrAdwC9J2JEi4Eg_CXJHj6R3')
+    let modoRegistro = false
 
-    const SUPABASE_URL = 'kzqnsbztfyhyyageuboz'
-    const SUPABASE_KEY = 'sb_publishable_WwUD-bkBrAdwC9J2JEi4Eg_CXJHj6R3'
-    const client = createClient(SUPABASE_URL, SUPABASE_
+    document.getElementById('toggle-link').addEventListener('click', function() {
+      modoRegistro = !modoRegistro
+      document.getElementById('titulo').textContent = modoRegistro ? 'Crear cuenta' : 'Iniciar sesión'
+      document.getElementById('btn').textContent = modoRegistro ? 'Registrarse' : 'Entrar'
+      document.getElementById('toggle-link').textContent = modoRegistro ? 'Inicia sesión' : 'Regístrate'
+      document.getElementById('toggle-texto').textContent = modoRegistro ? '¿Ya tienes cuenta?' : '¿No tienes cuenta?'
+      document.getElementById('error').style.display = 'none'
+      document.getElementById('success').style.display = 'none'
+    })
+
+    document.getElementById('btn').addEventListener('click', async function() {
+      const email = document.getElementById('email').value.trim()
+      const password = document.getElementById('password').value.trim()
+      const errorEl = document.getElementById('error')
+      const successEl = document.getElementById('success')
+      const btn = document.getElementById('btn')
+
+      errorEl.style.display = 'none'
+      successEl.style.display = 'none'
+
+      if (!email || !password) {
+        errorEl.textContent = 'Por favor llena todos los campos.'
+        errorEl.style.display = 'block'
+        return
+      }
+
+      btn.disabled = true
+      btn.textContent = 'Cargando...'
+
+      if (modoRegistro) {
+        const { error } = await _supabase.auth.signUp({ email, password })
+        if (error) {
+          errorEl.textContent = error.message
+          errorEl.style.display = 'block'
+        } else {
+          successEl.textContent = '¡Cuenta creada! Revisa tu correo para confirmar.'
+          successEl.style.display = 'block'
+        }
+      } else {
+        const { data, error } = await _supabase.auth.signInWithPassword({ email, password })
+        if (error) {
+          errorEl.textContent = 'Correo o contraseña incorrectos.'
+          errorEl.style.display = 'block'
+        } else {
+          window.location.href = '/library.html'
+        }
+      }
+
+      btn.disabled = false
+      btn.textContent = modoRegistro ? 'Registrarse' : 'Entrar'
+    })
+  </script>
+</body>
+</html>
