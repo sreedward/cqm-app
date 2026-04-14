@@ -24,13 +24,7 @@
       top: 0;
       z-index: 10;
     }
-    .back {
-      background: none;
-      border: none;
-      color: #f59e0b;
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
+    .back { background: none; border: none; color: #f59e0b; font-size: 1.2rem; cursor: pointer; }
     .song-title { font-size: 1rem; font-weight: 700; flex: 1; }
     .song-artist { font-size: 0.8rem; color: #888; }
     .transpose-bar {
@@ -54,9 +48,6 @@
       height: 32px;
       font-size: 1.1rem;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
     .key-display {
       background: #f59e0b22;
@@ -85,7 +76,8 @@
       font-weight: 600;
     }
     .cifrado-btn.active { background: #f59e0b; color: #0a0a0a; }
-    .sections { padding: 1.5rem; }
+    .page { display: none; padding: 1.5rem 1.5rem 5rem; }
+    .page.active { display: block; }
     .section {
       border-radius: 12px;
       padding: 1rem 1.25rem;
@@ -97,23 +89,53 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-bottom: 0.75rem;
-      opacity: 0.7;
     }
-    .section.verso { background: #1a2a3a; border-left: 3px solid #3b82f6; }
-    .section.verso .section-label { color: #3b82f6; }
-    .section.coro { background: #2a1a3a; border-left: 3px solid #a855f7; }
-    .section.coro .section-label { color: #a855f7; }
-    .section.bridge { background: #2a2a1a; border-left: 3px solid #f59e0b; }
-    .section.bridge .section-label { color: #f59e0b; }
-    .section.intro { background: #1a3a2a; border-left: 3px solid #22c55e; }
+    .section.intro { background: #0f2a1a; border-left: 3px solid #22c55e; }
     .section.intro .section-label { color: #22c55e; }
-    .section.outro { background: #3a1a1a; border-left: 3px solid #ef4444; }
-    .section.outro .section-label { color: #ef4444; }
-    .section.instrumental { background: #2a2a2a; border-left: 3px solid #888; }
+    .section.verso { background: #0f1a2a; border-left: 3px solid #3b82f6; }
+    .section.verso .section-label { color: #3b82f6; }
+    .section.pre-coro { background: #2a1a0f; border-left: 3px solid #f97316; }
+    .section.pre-coro .section-label { color: #f97316; }
+    .section.coro { background: #1a0f2a; border-left: 3px solid #a855f7; }
+    .section.coro .section-label { color: #a855f7; }
+    .section.bridge { background: #2a2a0f; border-left: 3px solid #f59e0b; }
+    .section.bridge .section-label { color: #f59e0b; }
+    .section.instrumental { background: #1a1a1a; border-left: 3px solid #888; }
     .section.instrumental .section-label { color: #888; }
+    .section.outro { background: #2a0f0f; border-left: 3px solid #ef4444; }
+    .section.outro .section-label { color: #ef4444; }
     .line { margin-bottom: 0.75rem; }
-    .chords { font-size: 0.9rem; font-weight: 700; color: #f59e0b; letter-spacing: 1px; margin-bottom: 0.1rem; }
+    .chords { font-size: 1rem; font-weight: 700; color: #f59e0b; letter-spacing: 2px; margin-bottom: 0.15rem; }
     .lyrics { font-size: 1rem; color: #e5e5e5; line-height: 1.5; }
+    .fab {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #f59e0b;
+      color: #0a0a0a;
+      border: none;
+      border-radius: 50px;
+      padding: 0.75rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .page-indicator {
+      position: fixed;
+      bottom: 2rem;
+      right: 1.5rem;
+      background: #333;
+      color: #888;
+      border-radius: 20px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.75rem;
+      z-index: 20;
+    }
     .loading { text-align: center; color: #555; padding: 3rem; }
   </style>
 </head>
@@ -135,20 +157,26 @@
       <button class="cifrado-btn" id="btn-nashville" onclick="setCifrado('nashville')">NNS</button>
     </div>
   </div>
-  <div class="sections" id="sections">
-    <div class="loading">Cargando canción...</div>
-  </div>
+
+  <div class="page active" id="page-1"></div>
+  <div class="page" id="page-2"></div>
+
+  <button class="fab" id="fab" onclick="togglePage()">↓ Siguiente</button>
+  <div class="page-indicator" id="page-indicator">1 / 2</div>
 
   <script>
     const _supabase = supabase.createClient('https://kzqnsbztfyhyyageuboz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w')
 
     const NOTAS_AM = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
     const NOTAS_NNS = ['1','#1','2','#2','3','4','#4','5','#5','6','#6','7']
+    const PAGE1_TYPES = ['intro','verso','pre-coro']
+    const PAGE2_TYPES = ['coro','instrumental','bridge','outro']
 
     let semitones = 0
     let cifrado = 'americano'
     let originalKey = 'C'
     let sections = []
+    let currentPage = 1
 
     const params = new URLSearchParams(window.location.search)
     const songId = params.get('id')
@@ -158,7 +186,7 @@
       if (!session) { window.location.href = '/login.html'; return }
 
       const { data: song } = await _supabase.from('Songs').select('*').eq('id', songId).single()
-      if (!song) { document.getElementById('sections').innerHTML = '<div class="loading">Canción no encontrada.</div>'; return }
+      if (!song) return
 
       document.getElementById('song-title').textContent = song.title
       document.getElementById('song-artist').textContent = song.artist || ''
@@ -168,26 +196,11 @@
 
       const { data: secs } = await _supabase.from('sections').select('*').eq('song_id', songId).order('order')
       sections = secs || []
-      renderSections()
-    }
-
-    function transpose(n) {
-      semitones += n
-      const idx = (NOTAS_AM.indexOf(originalKey) + semitones + 120) % 12
-      document.getElementById('key-display').textContent = NOTAS_AM[idx]
-      renderSections()
-    }
-
-    function setCifrado(tipo) {
-      cifrado = tipo
-      document.getElementById('btn-americano').classList.toggle('active', tipo === 'americano')
-      document.getElementById('btn-nashville').classList.toggle('active', tipo === 'nashville')
-      renderSections()
+      renderAll()
     }
 
     function transponerAcorde(acorde) {
-      if (!acorde) return ''
-      return acorde.replace(/[A-G]#?/g, nota => {
+      return acorde.replace(/[A-G]#?(?=m|7|maj|dim|sus|add|\/|$|\s)/g, nota => {
         const idx = NOTAS_AM.indexOf(nota)
         if (idx === -1) return nota
         const newIdx = (idx + semitones + 120) % 12
@@ -200,27 +213,63 @@
       })
     }
 
-    function renderSections() {
-      const container = document.getElementById('sections')
-      if (sections.length === 0) {
-        container.innerHTML = '<div class="loading">Esta canción aún no tiene contenido.</div>'
-        return
+    function procesarLinea(line) {
+      if (line.startsWith('[') && line.endsWith(']')) {
+        const inner = line.slice(1, -1)
+        const acordes = inner.split(/\s+/).map(a => {
+          const nota = a.match(/^[A-G]#?/)
+          if (!nota) return a
+          const sufijo = cifrado === 'nashville' ? '' : a.slice(nota[0].length)
+          return transponerAcorde(nota[0]) + sufijo
+        }).join('  ')
+        return `<div class="line"><div class="chords">${acordes}</div></div>`
       }
-      container.innerHTML = sections.map(sec => {
-        const lines = (sec.content || '').split('\n').filter(l => l.trim())
-        const linesHTML = lines.map(line => {
-          if (line.startsWith('[') && line.endsWith(']')) {
-            const chords = line.slice(1,-1).split(' ').map(transponerAcorde).join(' ')
-            return `<div class="line"><div class="chords">${chords}</div></div>`
-          }
-          return `<div class="line"><div class="lyrics">${line}</div></div>`
-        }).join('')
-        return `
-          <div class="section ${sec.type}">
-            <div class="section-label">${sec.type}</div>
-            ${linesHTML}
-          </div>`
-      }).join('')
+      return `<div class="line"><div class="lyrics">${line}</div></div>`
+    }
+
+    function renderSeccion(sec) {
+      const lines = (sec.content || '').split('\n').filter(l => l.trim())
+      const linesHTML = lines.map(procesarLinea).join('')
+      const tipo = sec.type.toLowerCase().replace(' ', '-')
+      return `
+        <div class="section ${tipo}">
+          <div class="section-label">${sec.type}</div>
+          ${linesHTML}
+        </div>`
+    }
+
+    function renderAll() {
+      const page1 = document.getElementById('page-1')
+      const page2 = document.getElementById('page-2')
+
+      const secs1 = sections.filter(s => PAGE1_TYPES.includes(s.type.toLowerCase()))
+      const secs2 = sections.filter(s => PAGE2_TYPES.includes(s.type.toLowerCase()))
+
+      page1.innerHTML = secs1.length ? secs1.map(renderSeccion).join('') : '<div class="loading">Sin secciones en esta página.</div>'
+      page2.innerHTML = secs2.length ? secs2.map(renderSeccion).join('') : '<div class="loading">Sin secciones en esta página.</div>'
+    }
+
+    function togglePage() {
+      currentPage = currentPage === 1 ? 2 : 1
+      document.getElementById('page-1').classList.toggle('active', currentPage === 1)
+      document.getElementById('page-2').classList.toggle('active', currentPage === 2)
+      document.getElementById('fab').textContent = currentPage === 1 ? '↓ Siguiente' : '↑ Anterior'
+      document.getElementById('page-indicator').textContent = `${currentPage} / 2`
+      window.scrollTo(0, 0)
+    }
+
+    function transpose(n) {
+      semitones += n
+      const idx = (NOTAS_AM.indexOf(originalKey) + semitones + 120) % 12
+      document.getElementById('key-display').textContent = NOTAS_AM[idx]
+      renderAll()
+    }
+
+    function setCifrado(tipo) {
+      cifrado = tipo
+      document.getElementById('btn-americano').classList.toggle('active', tipo === 'americano')
+      document.getElementById('btn-nashville').classList.toggle('active', tipo === 'nashville')
+      renderAll()
     }
 
     init()
