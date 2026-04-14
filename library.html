@@ -116,7 +116,7 @@
 
     async function cargarCanciones() {
       const { data, error } = await _supabase
-        .from('songs')
+        .from('Songs')
         .select('*')
         .order('title')
 
