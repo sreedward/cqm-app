@@ -196,7 +196,7 @@
       document.getElementById('song-title').textContent = song.title
       document.getElementById('song-artist').textContent = song.artist || ''
       document.title = song.title
-      const rawKey = song.original_key || 'C'
+      const rawKey = song['original key'] || 'C'
       originalKey = BEMOLES[rawKey] || rawKey
       document.getElementById('key-display').textContent = rawKey
 
