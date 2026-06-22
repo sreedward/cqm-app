@@ -201,13 +201,16 @@ originalKey = BEMOLES[rawKey] || rawKey
       renderAll()
     }
 
-    function transponerAcorde(acorde) {
-      return acorde.replace(/[A-G]#?(?=m|7|maj|dim|sus|add|\/|$|\s)/g, nota => {
-        const idx = NOTAS_AM.indexOf(nota)
+   function transponerAcorde(acorde) {
+      return acorde.replace(/[A-G]b?#?(?=m|7|maj|dim|sus|add|\/|$|\s)/g, nota => {
+        const BEMOLES_MAP = {'Db':'C#','Eb':'D#','Fb':'E','Gb':'F#','Ab':'G#','Bb':'A#','Cb':'B'}
+        const notaNorm = BEMOLES_MAP[nota] || nota
+        const idx = NOTAS_AM.indexOf(notaNorm)
         if (idx === -1) return nota
         const newIdx = (idx + semitones + 120) % 12
         if (cifrado === 'nashville') {
-          const rootIdx = NOTAS_AM.indexOf(originalKey)
+          const rootNorm = BEMOLES_MAP[originalKey] || originalKey
+          const rootIdx = NOTAS_AM.indexOf(rootNorm)
           const relative = (newIdx - rootIdx + 12) % 12
           return NOTAS_NNS[relative]
         }
