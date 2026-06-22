@@ -105,7 +105,7 @@
     .section.outro { background: #2a0f0f; border-left: 3px solid #ef4444; }
     .section.outro .section-label { color: #ef4444; }
     .line { margin-bottom: 0.75rem; }
-    .chords { font-size: 1rem; font-weight: 700; color: #f59e0b; letter-spacing: 2px; margin-bottom: 0.15rem; }
+    .chords { font-size: 1rem; font-weight: 700; color: #f59e0b; letter-spacing: 2px; margin-bottom: 0.15rem; font-family: monospace; }
     .lyrics { font-size: 1rem; color: #e5e5e5; line-height: 1.5; }
     .fab {
       position: fixed;
@@ -117,13 +117,10 @@
       border: none;
       border-radius: 50px;
       padding: 0.75rem 2rem;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 700;
       cursor: pointer;
       z-index: 20;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
     }
     .page-indicator {
       position: fixed;
@@ -165,11 +162,18 @@
   <div class="page-indicator" id="page-indicator">1 / 2</div>
 
   <script>
-    const _supabase = supabase.createClient('https://kzqnsbztfyhyyageuboz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w')
+    const _supabase = supabase.createClient(
+      'https://kzqnsbztfyhyyageuboz.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+    )
 
-    const NOTAS_AM = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
-const BEMOLES = {'Db':'C#','Eb':'D#','Fb':'E','Gb':'F#','Ab':'G#','Bb':'A#','Cb':'B'}
-    const NOTAS_NNS = ['1','#1','2','#2','3','4','#4','5','#5','6','#6','7']
+    const NOTAS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
+    const BEMOLES = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}
+    const MAYOR = [0,2,4,5,7,9,11]
+    const MENOR = [0,2,3,5,7,8,10]
+    const GRADOS = ['1','2','3','4','5','6','7']
+    const CALIDAD = ['','m','m','','','m','dim']
+
     const PAGE1_TYPES = ['intro','verso','pre-coro']
     const PAGE2_TYPES = ['coro','instrumental','bridge','outro']
 
@@ -193,40 +197,50 @@ const BEMOLES = {'Db':'C#','Eb':'D#','Fb':'E','Gb':'F#','Ab':'G#','Bb':'A#','Cb'
       document.getElementById('song-artist').textContent = song.artist || ''
       document.title = song.title
       const rawKey = song.original_key || 'C'
-originalKey = BEMOLES[rawKey] || rawKey
-      document.getElementById('key-display').textContent = originalKey
+      originalKey = BEMOLES[rawKey] || rawKey
+      document.getElementById('key-display').textContent = rawKey
 
       const { data: secs } = await _supabase.from('sections').select('*').eq('song_id', songId).order('order')
       sections = secs || []
       renderAll()
     }
 
-   function transponerAcorde(acorde) {
-      return acorde.replace(/[A-G]b?#?(?=m|7|maj|dim|sus|add|\/|$|\s)/g, nota => {
-        const BEMOLES_MAP = {'Db':'C#','Eb':'D#','Fb':'E','Gb':'F#','Ab':'G#','Bb':'A#','Cb':'B'}
-        const notaNorm = BEMOLES_MAP[nota] || nota
-        const idx = NOTAS_AM.indexOf(notaNorm)
-        if (idx === -1) return nota
-        const newIdx = (idx + semitones + 120) % 12
-        if (cifrado === 'nashville') {
-          const rootNorm = BEMOLES_MAP[originalKey] || originalKey
-          const rootIdx = NOTAS_AM.indexOf(rootNorm)
-          const relative = (newIdx - rootIdx + 12) % 12
-          return NOTAS_NNS[relative]
-        }
-        return NOTAS_AM[newIdx]
-      })
+    function getNota(gradoNum, semis) {
+      const rootIdx = NOTAS.indexOf(originalKey)
+      const grado = parseInt(gradoNum) - 1
+      const intervalo = MAYOR[grado] !== undefined ? MAYOR[grado] : 0
+      const idx = (rootIdx + intervalo + semis + 120) % 12
+      return NOTAS[idx]
+    }
+
+    function traducirAcorde(acorde) {
+      // Acepta formato Nashville: 1, 2m, 4, 5sus4, 6m7, etc
+      const match = acorde.match(/^(#?)(\d)(m?)(.*)?$/)
+      if (!match) return acorde
+
+      const sharp = match[1]
+      const grado = parseInt(match[2])
+      const menor = match[3]
+      const extra = match[4] || ''
+
+      if (cifrado === 'nashville') return acorde
+
+      const rootIdx = NOTAS.indexOf(originalKey)
+      const intervalos = [0,2,4,5,7,9,11]
+      let intervalo = intervalos[grado - 1] || 0
+      if (sharp) intervalo += 1
+
+      const idx = (rootIdx + intervalo + semitones + 120) % 12
+      const nota = NOTAS[idx]
+      const calidad = menor ? 'm' : CALIDAD[grado - 1] || ''
+
+      return nota + calidad + extra
     }
 
     function procesarLinea(line) {
       if (line.startsWith('[') && line.endsWith(']')) {
         const inner = line.slice(1, -1)
-        const acordes = inner.split(/\s+/).map(a => {
-          const nota = a.match(/^[A-G]#?/)
-          if (!nota) return a
-          const sufijo = cifrado === 'nashville' ? '' : a.slice(nota[0].length)
-          return transponerAcorde(nota[0]) + sufijo
-        }).join('  ')
+        const acordes = inner.split(/\s+/).map(traducirAcorde).join('   ')
         return `<div class="line"><div class="chords">${acordes}</div></div>`
       }
       return `<div class="line"><div class="lyrics">${line}</div></div>`
@@ -246,12 +260,25 @@ originalKey = BEMOLES[rawKey] || rawKey
     function renderAll() {
       const page1 = document.getElementById('page-1')
       const page2 = document.getElementById('page-2')
-
       const secs1 = sections.filter(s => PAGE1_TYPES.includes(s.type.toLowerCase()))
       const secs2 = sections.filter(s => PAGE2_TYPES.includes(s.type.toLowerCase()))
+      page1.innerHTML = secs1.length ? secs1.map(renderSeccion).join('') : '<div class="loading">Sin secciones.</div>'
+      page2.innerHTML = secs2.length ? secs2.map(renderSeccion).join('') : '<div class="loading">Sin secciones.</div>'
+    }
 
-      page1.innerHTML = secs1.length ? secs1.map(renderSeccion).join('') : '<div class="loading">Sin secciones en esta página.</div>'
-      page2.innerHTML = secs2.length ? secs2.map(renderSeccion).join('') : '<div class="loading">Sin secciones en esta página.</div>'
+    function transpose(n) {
+      semitones = (semitones + n + 12) % 12
+      const rootIdx = NOTAS.indexOf(originalKey)
+      const newIdx = (rootIdx + semitones) % 12
+      document.getElementById('key-display').textContent = NOTAS[newIdx]
+      renderAll()
+    }
+
+    function setCifrado(tipo) {
+      cifrado = tipo
+      document.getElementById('btn-americano').classList.toggle('active', tipo === 'americano')
+      document.getElementById('btn-nashville').classList.toggle('active', tipo === 'nashville')
+      renderAll()
     }
 
     function togglePage() {
@@ -261,20 +288,6 @@ originalKey = BEMOLES[rawKey] || rawKey
       document.getElementById('fab').textContent = currentPage === 1 ? '↓ Siguiente' : '↑ Anterior'
       document.getElementById('page-indicator').textContent = `${currentPage} / 2`
       window.scrollTo(0, 0)
-    }
-
-    function transpose(n) {
-      semitones += n
-      const idx = (NOTAS_AM.indexOf(originalKey) + semitones + 120) % 12
-      document.getElementById('key-display').textContent = NOTAS_AM[idx]
-      renderAll()
-    }
-
-    function setCifrado(tipo) {
-      cifrado = tipo
-      document.getElementById('btn-americano').classList.toggle('active', tipo === 'americano')
-      document.getElementById('btn-nashville').classList.toggle('active', tipo === 'nashville')
-      renderAll()
     }
 
     init()
