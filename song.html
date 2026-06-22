@@ -168,6 +168,7 @@
     const _supabase = supabase.createClient('https://kzqnsbztfyhyyageuboz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w')
 
     const NOTAS_AM = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
+const BEMOLES = {'Db':'C#','Eb':'D#','Fb':'E','Gb':'F#','Ab':'G#','Bb':'A#','Cb':'B'}
     const NOTAS_NNS = ['1','#1','2','#2','3','4','#4','5','#5','6','#6','7']
     const PAGE1_TYPES = ['intro','verso','pre-coro']
     const PAGE2_TYPES = ['coro','instrumental','bridge','outro']
@@ -191,7 +192,8 @@
       document.getElementById('song-title').textContent = song.title
       document.getElementById('song-artist').textContent = song.artist || ''
       document.title = song.title
-      originalKey = song.original_key || 'C'
+      const rawKey = song.original_key || 'C'
+originalKey = BEMOLES[rawKey] || rawKey
       document.getElementById('key-display').textContent = originalKey
 
       const { data: secs } = await _supabase.from('sections').select('*').eq('song_id', songId).order('order')
