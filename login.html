@@ -99,6 +99,28 @@
   <script>
    const _supabase = supabase.createClient('https://kzqnsbztfyhyyageuboz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w')
     let modoRegistro = false
+    document.getElementById('forgot-link').addEventListener('click', async function() {
+      const email = document.getElementById('email').value.trim()
+      const errorEl = document.getElementById('error')
+      const successEl = document.getElementById('success')
+      errorEl.style.display = 'none'
+      successEl.style.display = 'none'
+      if (!email) {
+        errorEl.textContent = 'Escribe tu correo arriba primero.'
+        errorEl.style.display = 'block'
+        return
+      }
+      const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://cqm-app.vercel.app/reset.html'
+      })
+      if (error) {
+        errorEl.textContent = error.message
+        errorEl.style.display = 'block'
+      } else {
+        successEl.textContent = '¡Revisa tu correo! Te enviamos un enlace para restablecer tu contraseña.'
+        successEl.style.display = 'block'
+      }
+    })
 
     document.getElementById('toggle-link').addEventListener('click', function() {
       modoRegistro = !modoRegistro
