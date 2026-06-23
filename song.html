@@ -405,23 +405,36 @@ function goBack() {
       if (!line.includes('[')) {
         return `<div class="line"><div class="lyrics">${line}</div></div>`
       }
-      if (line.match(/^\[[^\]]+\]$/) ) {
+      if (line.match(/^\[[^\]]+\]$/)) {
         const inner = line.slice(1, -1)
         const acordes = inner.split(/\s+/).map(traducirAcorde).join('   ')
         return `<div class="line"><div class="chords">${acordes}</div></div>`
       }
       const parts = line.split(/(\[[^\]]+\])/)
-      let chordRow = ''
-      let lyricRow = ''
+      let cells = []
+      let pendingChord = null
       parts.forEach(part => {
         if (part.startsWith('[') && part.endsWith(']')) {
-          const acorde = traducirAcorde(part.slice(1,-1).trim())
-          const pad = Math.max(0, lyricRow.length - chordRow.length)
-          chordRow += ' '.repeat(pad) + acorde
+          pendingChord = traducirAcorde(part.slice(1,-1).trim())
         } else {
-          const pad = Math.max(0, chordRow.length - lyricRow.length)
-          lyricRow += ' '.repeat(pad) + part
+          const words = part.split(/(\s+)/)
+          words.forEach((word, i) => {
+            if (i === 0 && pendingChord) {
+              cells.push({ chord: pendingChord, lyric: word })
+              pendingChord = null
+            } else {
+              cells.push({ chord: '', lyric: word })
+            }
+          })
         }
+      })
+      const html = cells.map(c => `
+        <span style="display:inline-block;vertical-align:bottom;text-align:left">
+          <span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.2em;white-space:pre">${c.chord || ' '}</span>
+          <span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre">${c.lyric}</span>
+        </span>`).join('')
+      return `<div class="line" style="line-height:1">${html}</div>`
+    }
       })
       return `<div class="line"><div class="chords" style="white-space:pre;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;letter-spacing:1px">${chordRow}</div><div class="lyrics" style="white-space:pre;font-size:0.95rem;color:#cbd5e1">${lyricRow}</div></div>`
     }
