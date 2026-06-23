@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CQM - Más</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #080c14;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    header {
+      background: #0d1626;
+      border-bottom: 1px solid #1e2d45;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { font-size: 1.1rem; font-weight: 700; color: #e2e8f0; letter-spacing: -0.5px; }
+    .logo span { color: #3b82f6; }
+    .logo small { font-size: 0.65rem; color: #4a5568; font-weight: 400; letter-spacing: 1px; text-transform: uppercase; display: block; margin-top: -2px; }
+    .news-card {
+      margin: 1rem 1.25rem;
+      background: #0d1626;
+      border: 1px solid #1e2d45;
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .news-tag { font-size: 0.65rem; color: #3b82f6; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+    .news-title { font-size: 0.95rem; font-weight: 500; color: #e2e8f0; line-height: 1.5; margin-bottom: 4px; }
+    .news-date { font-size: 0.75rem; color: #4a5568; }
+    .section-label {
+      font-size: 0.7rem;
+      color: #4a5568;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 0.75rem 1.25rem 0.25rem;
+    }
+    .social-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid #0d1626;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .social-item:active { opacity: 0.7; }
+    .social-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: #1e2d45;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .social-info { flex: 1; }
+    .social-name { font-size: 0.9rem; color: #e2e8f0; font-weight: 500; }
+    .social-handle { font-size: 0.75rem; color: #4a5568; margin-top: 1px; }
+    .social-arrow { color: #4a5568; font-size: 1rem; }
+    .app-info {
+      margin: 1.5rem 1.25rem 0;
+      background: #0d1626;
+      border: 1px solid #1e2d45;
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .app-logo { font-size: 1.2rem; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+    .app-logo span { color: #3b82f6; }
+    .app-version { font-size: 0.75rem; color: #4a5568; margin-bottom: 0.75rem; }
+    .app-desc { font-size: 0.8rem; color: #4a5568; line-height: 1.6; }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0d1626;
+      border-top: 1px solid #1e2d45;
+      display: flex;
+      padding: 8px 0 12px;
+      z-index: 20;
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      padding: 4px 0;
+      text-decoration: none;
+    }
+    .nav-item i { font-size: 1.2rem; color: #4a5568; }
+    .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
+    .nav-item.active i { color: #3b82f6; }
+    .nav-item.active span { color: #3b82f6; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      Chart<span>Quick</span>
+      <small>by Musishens</small>
+    </div>
+  </header>
+
+  <div class="news-card">
+    <div class="news-tag">🎸 Novedad</div>
+    <div class="news-title">ChartQuick ya está disponible — Tu songbook digital para músicos en vivo</div>
+    <div class="news-date">Junio 2026</div>
+  </div>
+
+  <div class="section-label">Síguenos</div>
+
+  <a class="social-item" href="https://instagram.com/musishens" target="_blank">
+    <div class="social-icon" style="color:#a855f7"><i class="ti ti-brand-instagram"></i></div>
+    <div class="social-info">
+      <div class="social-name">Instagram</div>
+      <div class="social-handle">@musishens</div>
+    </div>
+    <i class="ti ti-chevron-right social-arrow"></i>
+  </a>
+
+  <a class="social-item" href="https://youtube.com/@musishens" target="_blank">
+    <div class="social-icon" style="color:#ef4444"><i class="ti ti-brand-youtube"></i></div>
+    <div class="social-info">
+      <div class="social-name">YouTube</div>
+      <div class="social-handle">@musishens</div>
+    </div>
+    <i class="ti ti-chevron-right social-arrow"></i>
+  </a>
+
+  <a class="social-item" href="https://tiktok.com/@musishens" target="_blank">
+    <div class="social-icon" style="color:#e2e8f0"><i class="ti ti-brand-tiktok"></i></div>
+    <div class="social-info">
+      <div class="social-name">TikTok</div>
+      <div class="social-handle">@musishens</div>
+    </div>
+    <i class="ti ti-chevron-right social-arrow"></i>
+  </a>
+
+  <a class="social-item" href="https://facebook.com/musishens" target="_blank">
+    <div class="social-icon" style="color:#3b82f6"><i class="ti ti-brand-facebook"></i></div>
+    <div class="social-info">
+      <div class="social-name">Facebook</div>
+      <div class="social-handle">Musishens</div>
+    </div>
+    <i class="ti ti-chevron-right social-arrow"></i>
+  </a>
+
+  <div class="app-info">
+    <div class="app-logo">Chart<span>Quick</span></div>
+    <div class="app-version">v1.0 — by Musishens</div>
+    <div class="app-desc">Tu songbook digital para tocar en vivo. Acordes, cifrado Nashville, transpose y setlists en un solo lugar.</div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a class="nav-item" href="/library.html">
+      <i class="ti ti-music"></i>
+      <span>Canciones</span>
+    </a>
+    <a class="nav-item" href="/setlist.html">
+      <i class="ti ti-list-check"></i>
+      <span>Setlist</span>
+    </a>
+    <a class="nav-item active" href="/more.html">
+      <i class="ti ti-dots-circle-horizontal"></i>
+      <span>Más</span>
+    </a>
+  </nav>
+</body>
+</html>
