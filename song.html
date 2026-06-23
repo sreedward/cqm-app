@@ -426,8 +426,6 @@ function goBack() {
               cells.push({ chord: '', lyric: word })
             }
           })
-        }
-      })
       const html = cells.map(c => `
         <span style="display:inline-block;vertical-align:bottom;text-align:left">
           <span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.2em;white-space:pre">${c.chord || ' '}</span>
