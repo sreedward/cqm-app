@@ -176,6 +176,31 @@
       font-size: 0.7rem;
       z-index: 20;
     }
+    .setlist-nav {
+      position: fixed;
+      bottom: 4rem;
+      left: 0;
+      right: 0;
+      display: none;
+      justify-content: space-between;
+      padding: 0 1.25rem;
+      z-index: 19;
+    }
+    .setlist-nav.show { display: flex; }
+    .nav-song-btn {
+      background: #0d1626;
+      border: 1px solid #1e2d45;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-song-btn.prev { color: #4a5568; }
+    .nav-song-btn.next { color: #3b82f6; font-weight: 600; }
+    .nav-song-btn:hover { border-color: #3b82f6; }
     .loading { text-align: center; color: #4a5568; padding: 3rem; }
     .modal-overlay {
       position: fixed;
@@ -264,6 +289,15 @@
   <div class="page active" id="page-1"></div>
   <div class="page" id="page-2"></div>
 
+  <div class="setlist-nav" id="setlist-nav">
+    <button class="nav-song-btn prev" id="prev-btn" onclick="irACancion(-1)">
+      <i class="ti ti-arrow-left"></i> Anterior
+    </button>
+    <button class="nav-song-btn next" id="next-btn" onclick="irACancion(1)">
+      Siguiente <i class="ti ti-arrow-right"></i>
+    </button>
+  </div>
+
   <button class="fab" id="fab" onclick="togglePage()">
     <i class="ti ti-arrow-down" id="fab-icon"></i>
     <span id="fab-text">Siguiente</span>
@@ -300,6 +334,9 @@
 
     const params = new URLSearchParams(window.location.search)
     const songId = params.get('id')
+    const setlistId = params.get('setlist')
+    const setlistIndex = parseInt(params.get('index') || '0')
+    const setlistSongs = params.get('songs') ? params.get('songs').split(',') : []
 
     async function init() {
       const { data: { session } } = await _supabase.auth.getSession()
@@ -318,6 +355,21 @@
       const { data: secs } = await _supabase.from('sections').select('*').eq('song_id', songId).order('order')
       sections = secs || []
       renderAll()
+
+      if (setlistSongs.length > 0) {
+        const nav = document.getElementById('setlist-nav')
+        nav.classList.add('show')
+        if (setlistIndex === 0) document.getElementById('prev-btn').style.visibility = 'hidden'
+        if (setlistIndex === setlistSongs.length - 1) document.getElementById('next-btn').style.visibility = 'hidden'
+      }
+    }
+
+    function irACancion(direction) {
+      const newIndex = setlistIndex + direction
+      if (newIndex < 0 || newIndex >= setlistSongs.length) return
+      const newSongId = setlistSongs[newIndex]
+      const songs = setlistSongs.join(',')
+      window.location.href = `/song.html?id=${newSongId}&setlist=${setlistId}&index=${newIndex}&songs=${songs}`
     }
 
     function traducirAcorde(acorde) {
