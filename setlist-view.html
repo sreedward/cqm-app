@@ -231,7 +231,12 @@
       'https://kzqnsbztfyhyyageuboz.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
     )
-
+async function eliminarSetlist() {
+      if (!confirm('¿Eliminar este setlist completo?')) return
+      await _supabase.from('setlist_songs').delete().eq('setlist_id', setlistId)
+      await _supabase.from('setlist').delete().eq('id', setlistId)
+      window.location.href = '/setlist.html'
+    }
     const params = new URLSearchParams(window.location.search)
     const setlistId = params.get('id')
     let songsOrdered = []
