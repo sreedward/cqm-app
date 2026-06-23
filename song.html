@@ -200,8 +200,7 @@
         if (part.startsWith('[') && part.endsWith(']')) {
           pendingChord = traducirAcorde(part.slice(1,-1).trim())
         } else {
-          const words = part.split(/(\s+)/)
-          words.forEach((word, i) => {
+          part.split(/(\s+)/).forEach((word, i) => {
             if (i === 0 && pendingChord !== null) {
               cells.push({ chord: pendingChord, lyric: word })
               pendingChord = null
@@ -211,6 +210,10 @@
           })
         }
       })
+      const row1 = cells.map(c => `<td style="font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;white-space:nowrap;padding:0;vertical-align:bottom;min-width:${Math.max((c.lyric||'').length, (c.chord||'').length)}ch">${c.chord || ''}</td>`).join('')
+      const row2 = cells.map(c => `<td style="font-size:0.95rem;color:#cbd5e1;white-space:nowrap;padding:0;vertical-align:top">${c.lyric || ''}</td>`).join('')
+      return `<div class="line" style="margin-bottom:0.75rem;overflow-x:auto"><table style="border-collapse:collapse;border-spacing:0"><tr>${row1}</tr><tr>${row2}</tr></table></div>`
+    }
       const html = cells.map(c =>
         `<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:0px">` +
         `<span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre">${c.chord || ''}</span>`
