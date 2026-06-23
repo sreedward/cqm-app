@@ -5,18 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CQM - Biblioteca</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #0a0a0a;
+      background: #080c14;
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
+      padding-bottom: 70px;
     }
     header {
-      background: #1a1a1a;
-      border-bottom: 1px solid #333;
-      padding: 1rem 1.5rem;
+      background: #0d1626;
+      border-bottom: 1px solid #1e2d45;
+      padding: 1rem 1.25rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -24,94 +26,168 @@
       top: 0;
       z-index: 10;
     }
-    .logo { font-size: 1.2rem; font-weight: 700; }
-    .logo span { color: #f59e0b; }
-    .logout {
+    .logo { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.5px; color: #e2e8f0; }
+    .logo span { color: #3b82f6; }
+    .logo small { font-size: 0.65rem; color: #4a5568; font-weight: 400; letter-spacing: 1px; text-transform: uppercase; display: block; margin-top: -2px; }
+    .profile-btn {
       background: none;
-      border: 1px solid #444;
-      color: #888;
-      border-radius: 8px;
-      padding: 0.4rem 0.8rem;
-      font-size: 0.8rem;
+      border: none;
+      color: #4a5568;
+      font-size: 1.3rem;
       cursor: pointer;
+      padding: 4px;
     }
+    .profile-btn:hover { color: #3b82f6; }
     .search-bar {
-      padding: 1rem 1.5rem;
+      padding: 0.75rem 1.25rem;
+      background: #080c14;
       position: sticky;
       top: 57px;
-      background: #0a0a0a;
       z-index: 9;
     }
-    .search-bar input {
-      width: 100%;
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 0.75rem 1rem;
-      color: #ffffff;
-      font-size: 1rem;
-      outline: none;
-    }
-    .search-bar input:focus { border-color: #f59e0b; }
-    .songs-list { padding: 0 1.5rem 2rem; }
-    .song-card {
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 0.75rem;
+    .search-input-wrap {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      transition: border-color 0.2s;
+      gap: 8px;
+      background: #0d1626;
+      border: 1px solid #1e2d45;
+      border-radius: 10px;
+      padding: 0.6rem 1rem;
     }
-    .song-card:hover { border-color: #f59e0b; }
-    .song-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.2rem; }
-    .song-info p { font-size: 0.8rem; color: #888; }
-    .song-key {
-      background: #f59e0b22;
-      color: #f59e0b;
-      border-radius: 6px;
-      padding: 0.3rem 0.6rem;
-      font-size: 0.8rem;
-      font-weight: 700;
-    }
-    .empty {
-      text-align: center;
-      color: #555;
-      padding: 3rem 0;
+    .search-input-wrap i { color: #4a5568; font-size: 1rem; }
+    .search-input-wrap input {
+      background: none;
+      border: none;
+      outline: none;
+      color: #e2e8f0;
       font-size: 0.9rem;
+      flex: 1;
     }
-    .loading {
-      text-align: center;
-      color: #555;
-      padding: 3rem 0;
+    .search-input-wrap input::placeholder { color: #4a5568; }
+    .section-label {
+      font-size: 0.7rem;
+      color: #4a5568;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 0.5rem 1.25rem 0.25rem;
     }
+    .songs-list { padding: 0 1.25rem 1rem; }
+    .song-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #0d1626;
+      cursor: pointer;
+    }
+    .song-card:last-child { border-bottom: none; }
+    .song-card:active { opacity: 0.7; }
+    .song-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: #0d1626;
+      border: 1px solid #1e2d45;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: #3b82f6;
+      font-weight: 700;
+      flex-shrink: 0;
+      font-family: monospace;
+    }
+    .song-info { flex: 1; }
+    .song-title { font-size: 0.9rem; font-weight: 500; color: #e2e8f0; margin-bottom: 2px; }
+    .song-artist { font-size: 0.75rem; color: #4a5568; }
+    .song-key {
+      font-size: 0.7rem;
+      color: #3b82f6;
+      font-weight: 700;
+      background: #1e2d45;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-family: monospace;
+    }
+    .empty { text-align: center; color: #4a5568; padding: 3rem 0; font-size: 0.9rem; }
+    .loading { text-align: center; color: #4a5568; padding: 3rem 0; }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0d1626;
+      border-top: 1px solid #1e2d45;
+      display: flex;
+      padding: 8px 0 12px;
+      z-index: 20;
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      padding: 4px 0;
+      text-decoration: none;
+    }
+    .nav-item i { font-size: 1.2rem; color: #4a5568; }
+    .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
+    .nav-item.active i { color: #3b82f6; }
+    .nav-item.active span { color: #3b82f6; }
   </style>
 </head>
 <body>
   <header>
-    <div class="logo">Chart<span>Quick</span></div>
-    <button class="logout" onclick="cerrarSesion()">Salir</button>
+    <div class="logo">
+      Chart<span>Quick</span>
+      <small>by Musishens</small>
+    </div>
+    <button class="profile-btn" onclick="window.location.href='/profile.html'">
+      <i class="ti ti-user-circle"></i>
+    </button>
   </header>
+
   <div class="search-bar">
-    <input type="text" id="buscar" placeholder="Buscar canción o artista..." oninput="filtrar()">
+    <div class="search-input-wrap">
+      <i class="ti ti-search"></i>
+      <input type="text" id="buscar" placeholder="Buscar canción o artista..." oninput="filtrar()">
+    </div>
   </div>
+
+  <div class="section-label" id="count-label">Cargando...</div>
   <div class="songs-list" id="lista">
     <div class="loading">Cargando canciones...</div>
   </div>
 
+  <nav class="bottom-nav">
+    <a class="nav-item active" href="/library.html">
+      <i class="ti ti-music"></i>
+      <span>Canciones</span>
+    </a>
+    <a class="nav-item" href="/setlist.html">
+      <i class="ti ti-list-check"></i>
+      <span>Setlist</span>
+    </a>
+    <a class="nav-item" href="/more.html">
+      <i class="ti ti-dots-circle-horizontal"></i>
+      <span>Más</span>
+    </a>
+  </nav>
+
   <script>
-    const _supabase = supabase.createClient('https://kzqnsbztfyhyyageuboz.supabase.co', '\eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w')
+    const _supabase = supabase.createClient(
+      'https://kzqnsbztfyhyyageuboz.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+    )
 
     let todasLasCanciones = []
 
-    async function verificarSesion() {
+    async function init() {
       const { data: { session } } = await _supabase.auth.getSession()
-      if (!session) {
-        window.location.href = '/login.html'
-      }
+      if (!session) { window.location.href = '/login.html'; return }
+      cargarCanciones()
     }
 
     async function cargarCanciones() {
@@ -129,19 +205,28 @@
       mostrarCanciones(data)
     }
 
+    function getInitials(title) {
+      return title.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
+    }
+
     function mostrarCanciones(canciones) {
       const lista = document.getElementById('lista')
+      const label = document.getElementById('count-label')
+      label.textContent = `Catálogo — ${canciones.length} canciones`
+
       if (canciones.length === 0) {
         lista.innerHTML = '<div class="empty">No se encontraron canciones.</div>'
         return
       }
+
       lista.innerHTML = canciones.map(c => `
-        <div class="song-card" onclick="verCancion(${c.id})">
+        <div class="song-card" onclick="window.location.href='/song.html?id=${c.id}'">
+          <div class="song-icon">${getInitials(c.title)}</div>
           <div class="song-info">
-            <h3>${c.title}</h3>
-            <p>${c.artist || 'Artista desconocido'}</p>
+            <div class="song-title">${c.title}</div>
+            <div class="song-artist">${c.artist || 'Artista desconocido'}</div>
           </div>
-          <div class="song-key">${c.original_key || '?'}</div>
+          <div class="song-key">${c['original key'] || '?'}</div>
         </div>
       `).join('')
     }
@@ -155,16 +240,7 @@
       mostrarCanciones(filtradas)
     }
 
-    function verCancion(id) {
-      window.location.href = `/song.html?id=${id}`
-    }
-
-    async function cerrarSesion() {
-      await _supabase.auth.signOut()
-      window.location.href = '/login.html'
-    }
-
-    verificarSesion()
-    cargarCanciones()
+    init()
   </script>
 </body>
+</html>
