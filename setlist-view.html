@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CQM - Setlist</title>
+  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #080c14;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    header {
+      background: #0d1626;
+      border-bottom: 1px solid #1e2d45;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      color: #3b82f6;
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .header-info { flex: 1; }
+    .setlist-title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; }
+    .setlist-date { font-size: 0.75rem; color: #4a5568; }
+    .section-label {
+      font-size: 0.7rem;
+      color: #4a5568;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 0.75rem 1.25rem 0.25rem;
+    }
+    .songs-list { padding: 0 1.25rem 1rem; }
+    .song-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #0d1626;
+      cursor: pointer;
+    }
+    .song-card:last-child { border-bottom: none; }
+    .song-card:active { opacity: 0.7; }
+    .song-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #1e2d45;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: #3b82f6;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .song-info { flex: 1; }
+    .song-title { font-size: 0.9rem; font-weight: 500; color: #e2e8f0; margin-bottom: 2px; }
+    .song-artist { font-size: 0.75rem; color: #4a5568; }
+    .song-key {
+      font-size: 0.7rem;
+      color: #3b82f6;
+      font-weight: 700;
+      background: #1e2d45;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-family: monospace;
+    }
+    .remove-btn {
+      background: none;
+      border: none;
+      color: #4a5568;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .remove-btn:hover { color: #ef4444; }
+    .empty {
+      text-align: center;
+      color: #4a5568;
+      padding: 4rem 2rem;
+    }
+    .empty i { font-size: 3rem; display: block; margin-bottom: 1rem; }
+    .empty p { font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .empty-btn {
+      background: #3b82f6;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0d1626;
+      border-top: 1px solid #1e2d45;
+      display: flex;
+      padding: 8px 0 12px;
+      z-index: 20;
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      padding: 4px 0;
+      text-decoration: none;
+    }
+    .nav-item i { font-size: 1.2rem; color: #4a5568; }
+    .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
+    .nav-item.active i { color: #3b82f6; }
+    .nav-item.active span { color: #3b82f6; }
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e2d45;
+      border: 1px solid #3b82f6;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.85rem;
+      z-index: 60;
+      display: none;
+      white-space: nowrap;
+    }
+    .loading { text-align: center; color: #4a5568; padding: 3rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <button class="back-btn" onclick="history.back()">
+      <i class="ti ti-arrow-left"></i>
+    </button>
+    <div class="header-info">
+      <div class="setlist-title" id="setlist-title">Cargando...</div>
+      <div class="setlist-date" id="setlist-date"></div>
+    </div>
+  </header>
+
+  <div class="section-label" id="count-label"></div>
+  <div class="songs-list" id="lista">
+    <div class="loading">Cargando...</div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a class="nav-item" href="/library.html">
+      <i class="ti ti-music"></i>
+      <span>Canciones</span>
+    </a>
+    <a class="nav-item active" href="/setlist.html">
+      <i class="ti ti-list-check"></i>
+      <span>Setlist</span>
+    </a>
+    <a class="nav-item" href="/more.html">
+      <i class="ti ti-dots-circle-horizontal"></i>
+      <span>Más</span>
+    </a>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const _supabase = supabase.createClient(
+      'https://kzqnsbztfyhyyageuboz.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+    )
+
+    const params = new URLSearchParams(window.location.search)
+    const setlistId = params.get('id')
+
+    async function init() {
+      const { data: { session } } = await _supabase.auth.getSession()
+      if (!session) { window.location.href = '/login.html'; return }
+      cargarSetlist()
+    }
+
+    async function cargarSetlist() {
+      const { data: setlist } = await _supabase
+        .from('setlist')
+        .select('*')
+        .eq('id', setlistId)
+        .single()
+
+      if (!setlist) {
+        window.location.href = '/setlist.html'
+        return
+      }
+
+      document.getElementById('setlist-title').textContent = setlist.name
+      document.title = setlist.name
+
+      if (setlist.date) {
+        const fecha = new Date(setlist.date).toLocaleDateString('es-MX', {
+          weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+        })
+        document.getElementById('setlist-date').textContent = fecha
+      }
+
+      const { data: setlistSongs } = await _supabase
+        .from('setlist_songs')
+        .select('id, order, song_id')
+        .eq('setlist_id', setlistId)
+        .order('order')
+
+      if (!setlistSongs || setlistSongs.length === 0) {
+        document.getElementById('count-label').textContent = '0 canciones'
+        document.getElementById('lista').innerHTML = `
+          <div class="empty">
+            <i class="ti ti-music-off"></i>
+            <p>Este setlist está vacío.<br>Agrega canciones desde la biblioteca.</p>
+            <button class="empty-btn" onclick="window.location.href='/library.html'">Ir a Biblioteca</button>
+          </div>`
+        return
+      }
+
+      const songIds = setlistSongs.map(s => s.song_id)
+      const { data: songs } = await _supabase
+        .from('Songs')
+        .select('id, title, artist, "original key"')
+        .in('id', songIds)
+
+      const songsMap = {}
+      songs.forEach(s => songsMap[s.id] = s)
+
+      document.getElementById('count-label').textContent = `${setlistSongs.length} canción${setlistSongs.length !== 1 ? 'es' : ''}`
+
+      document.getElementById('lista').innerHTML = setlistSongs.map((item, idx) => {
+        const song = songsMap[item.song_id]
+        if (!song) return ''
+        return `
+          <div class="song-card">
+            <div class="song-num">${idx + 1}</div>
+            <div class="song-info" onclick="window.location.href='/song.html?id=${song.id}'">
+              <div class="song-title">${song.title}</div>
+              <div class="song-artist">${song.artist || 'Artista desconocido'}</div>
+            </div>
+            <div class="song-key">${song['original key'] || '?'}</div>
+            <button class="remove-btn" onclick="eliminarCancion(${item.id}, '${song.title}')">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>`
+      }).join('')
+    }
+
+    async function eliminarCancion(itemId, titulo) {
+      if (!confirm(`¿Quitar "${titulo}" del setlist?`)) return
+
+      const { error } = await _supabase
+        .from('setlist_songs')
+        .delete()
+        .eq('id', itemId)
+
+      if (error) {
+        mostrarToast('Error al eliminar')
+      } else {
+        mostrarToast(`✓ "${titulo}" eliminado`)
+        cargarSetlist()
+      }
+    }
+
+    function mostrarToast(msg) {
+      const toast = document.getElementById('toast')
+      toast.textContent = msg
+      toast.style.display = 'block'
+      setTimeout(() => { toast.style.display = 'none' }, 2500)
+    }
+
+    init()
+  </script>
+</body>
+</html>
