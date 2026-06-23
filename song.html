@@ -257,6 +257,8 @@
       }
       return `<div class="line"><div class="lyrics">${line}</div></div>`
     }
+      return `<div class="line"><div class="lyrics">${line}</div></div>`
+    }
 
     function renderSeccion(sec) {
       const lines = (sec.content || '').split('\n').filter(l => l.trim())
