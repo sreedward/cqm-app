@@ -144,11 +144,7 @@
       margin-bottom: 3px;
       font-family: monospace;
     }
-    .lyrics {
-      font-size: 0.95rem;
-      color: #cbd5e1;
-      line-height: 1.5;
-    }
+    .lyrics { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
     .fab {
       position: fixed;
       bottom: 1.5rem;
@@ -181,6 +177,63 @@
       z-index: 20;
     }
     .loading { text-align: center; color: #4a5568; padding: 3rem; }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 50;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #0d1626;
+      border: 1px solid #1e2d45;
+      border-radius: 16px 16px 0 0;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 480px;
+    }
+    .modal h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; color: #e2e8f0; }
+    .modal-cancel {
+      width: 100%;
+      background: #1e2d45;
+      border: none;
+      border-radius: 8px;
+      color: #888;
+      padding: 0.75rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .setlist-opcion {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #1e2d45;
+      cursor: pointer;
+    }
+    .setlist-opcion:last-child { border-bottom: none; }
+    .opcion-name { font-size: 0.9rem; color: #e2e8f0; }
+    .opcion-date { font-size: 0.75rem; color: #4a5568; }
+    .opcion-add { color: #3b82f6; font-size: 1.2rem; }
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e2d45;
+      border: 1px solid #3b82f6;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.85rem;
+      z-index: 60;
+      display: none;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -192,9 +245,9 @@
       <div class="song-title" id="song-title">Cargando...</div>
       <div class="song-artist" id="song-artist"></div>
     </div>
-  <button class="add-setlist-btn" onclick="abrirModalSetlist()">
+    <button class="add-setlist-btn" onclick="abrirModalSetlist()">
       <i class="ti ti-plus"></i> Setlist
-    </button>  
+    </button>
   </header>
 
   <div class="transpose-bar">
@@ -216,6 +269,16 @@
     <span id="fab-text">Siguiente</span>
   </button>
   <div class="page-indicator" id="page-indicator">1 / 2</div>
+
+  <div class="modal-overlay" id="modal-setlist">
+    <div class="modal">
+      <h3>Agregar a Setlist</h3>
+      <div id="setlist-opciones"><div class="loading">Cargando...</div></div>
+      <button class="modal-cancel" onclick="cerrarModalSetlist()">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
 
   <script>
     const _supabase = supabase.createClient(
@@ -332,6 +395,76 @@
       document.getElementById('fab-text').textContent = currentPage === 1 ? 'Siguiente' : 'Anterior'
       document.getElementById('page-indicator').textContent = `${currentPage} / 2`
       window.scrollTo(0, 0)
+    }
+
+    async function abrirModalSetlist() {
+      document.getElementById('modal-setlist').classList.add('show')
+      const { data: { session } } = await _supabase.auth.getSession()
+      const { data: setlists } = await _supabase
+        .from('setlist')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false })
+
+      const container = document.getElementById('setlist-opciones')
+      if (!setlists || setlists.length === 0) {
+        container.innerHTML = '<div style="color:#4a5568;font-size:0.85rem;text-align:center;padding:1rem">No tienes setlists. <a href="/setlist.html" style="color:#3b82f6">Crea uno primero.</a></div>'
+        return
+      }
+      container.innerHTML = setlists.map(s => `
+        <div class="setlist-opcion" onclick="agregarASetlist(${s.id}, '${s.name}')">
+          <div>
+            <div class="opcion-name">${s.name}</div>
+            ${s.date ? `<div class="opcion-date">${new Date(s.date).toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long'})}</div>` : ''}
+          </div>
+          <i class="ti ti-plus opcion-add"></i>
+        </div>
+      `).join('')
+    }
+
+    function cerrarModalSetlist() {
+      document.getElementById('modal-setlist').classList.remove('show')
+    }
+
+    async function agregarASetlist(setlistId, setlistName) {
+      const { data: existing } = await _supabase
+        .from('setlist_songs')
+        .select('id')
+        .eq('setlist_id', setlistId)
+        .eq('song_id', songId)
+
+      if (existing && existing.length > 0) {
+        mostrarToast('Ya está en este setlist')
+        cerrarModalSetlist()
+        return
+      }
+
+      const { data: songs } = await _supabase
+        .from('setlist_songs')
+        .select('order')
+        .eq('setlist_id', setlistId)
+        .order('order', { ascending: false })
+        .limit(1)
+
+      const nextOrder = songs && songs.length > 0 ? songs[0].order + 1 : 1
+
+      const { error } = await _supabase
+        .from('setlist_songs')
+        .insert({ setlist_id: setlistId, song_id: parseInt(songId), order: nextOrder })
+
+      if (error) {
+        mostrarToast('Error al agregar')
+      } else {
+        mostrarToast(`✓ Agregado a "${setlistName}"`)
+        cerrarModalSetlist()
+      }
+    }
+
+    function mostrarToast(msg) {
+      const toast = document.getElementById('toast')
+      toast.textContent = msg
+      toast.style.display = 'block'
+      setTimeout(() => { toast.style.display = 'none' }, 2500)
     }
 
     init()
