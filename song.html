@@ -1,150 +1,17 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CQM - Canción</title>
-  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #080c14;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      min-height: 100vh;
-      padding-bottom: 80px;
-    }
-    header {
-      background: #0d1626;
-      border-bottom: 1px solid #1e2d45;
-      padding: 0.85rem 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .back-btn { background: none; border: none; color: #3b82f6; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
-    .header-info { flex: 1; }
-    .song-title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; }
-    .song-artist { font-size: 0.75rem; color: #4a5568; }
-    .add-setlist-btn { background: none; border: 1px solid #1e2d45; border-radius: 8px; color: #4a5568; font-size: 0.72rem; padding: 5px 10px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-    .add-setlist-btn:hover { border-color: #3b82f6; color: #3b82f6; }
-    .transpose-bar { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; position: sticky; top: 57px; z-index: 9; }
-    .t-label { font-size: 0.75rem; color: #4a5568; }
-    .t-btn { background: #1e2d45; border: none; color: #e2e8f0; border-radius: 6px; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .t-btn:hover { background: #3b82f6; }
-    .key-display { background: #1e2d45; color: #3b82f6; border-radius: 6px; padding: 3px 10px; font-size: 0.85rem; font-weight: 700; font-family: monospace; min-width: 36px; text-align: center; }
-    .cifrado-toggle { margin-left: auto; display: flex; background: #1e2d45; border-radius: 6px; overflow: hidden; }
-    .cifrado-btn { background: none; border: none; color: #4a5568; padding: 4px 10px; font-size: 0.72rem; cursor: pointer; font-weight: 700; }
-    .cifrado-btn.active { background: #3b82f6; color: #fff; }
-    .page { display: none; padding: 1rem 1.25rem 2rem; }
-    .page.active { display: block; }
-    .section { border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.85rem; }
-    .section-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.75rem; }
-    .section.intro { background: #0a1f12; border-left: 3px solid #22c55e; }
-    .section.intro .section-label { color: #22c55e; }
-    .section.verso { background: #0a1226; border-left: 3px solid #3b82f6; }
-    .section.verso .section-label { color: #3b82f6; }
-    .section.pre-coro { background: #1f120a; border-left: 3px solid #f97316; }
-    .section.pre-coro .section-label { color: #f97316; }
-    .section.coro { background: #130a26; border-left: 3px solid #a855f7; }
-    .section.coro .section-label { color: #a855f7; }
-    .section.bridge { background: #1f1a0a; border-left: 3px solid #f59e0b; }
-    .section.bridge .section-label { color: #f59e0b; }
-    .section.instrumental { background: #141414; border-left: 3px solid #555; }
-    .section.instrumental .section-label { color: #555; }
-    .section.outro { background: #1f0a0a; border-left: 3px solid #ef4444; }
-    .section.outro .section-label { color: #ef4444; }
-    .line { margin-bottom: 0.75rem; overflow-x: auto; }
-    .chords { font-size: 1rem; font-weight: 700; color: #facc15; letter-spacing: 2px; margin-bottom: 3px; font-family: monospace; }
-    .lyrics { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
-    .fab { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #3b82f6; color: #fff; border: none; border-radius: 20px; padding: 0.7rem 1.75rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; z-index: 20; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-    .page-indicator { position: fixed; bottom: 1.5rem; right: 1.25rem; background: #0d1626; border: 1px solid #1e2d45; color: #4a5568; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; z-index: 20; }
-    .setlist-nav { position: fixed; bottom: 4rem; left: 0; right: 0; display: none; justify-content: space-between; padding: 0 1.25rem; z-index: 19; }
-    .setlist-nav.show { display: flex; }
-    .nav-song-btn { background: #0d1626; border: 1px solid #1e2d45; border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-    .nav-song-btn.prev { color: #4a5568; }
-    .nav-song-btn.next { color: #3b82f6; font-weight: 600; }
-    .loading { text-align: center; color: #4a5568; padding: 3rem; }
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; display: none; align-items: flex-end; justify-content: center; }
-    .modal-overlay.show { display: flex; }
-    .modal { background: #0d1626; border: 1px solid #1e2d45; border-radius: 16px 16px 0 0; padding: 1.5rem; width: 100%; max-width: 480px; }
-    .modal h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; color: #e2e8f0; }
-    .modal-cancel { width: 100%; background: #1e2d45; border: none; border-radius: 8px; color: #888; padding: 0.75rem; font-size: 0.9rem; cursor: pointer; margin-top: 1rem; }
-    .setlist-opcion { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #1e2d45; cursor: pointer; }
-    .setlist-opcion:last-child { border-bottom: none; }
-    .opcion-name { font-size: 0.9rem; color: #e2e8f0; }
-    .opcion-date { font-size: 0.75rem; color: #4a5568; }
-    .opcion-add { color: #3b82f6; font-size: 1.2rem; }
-    .toast { position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%); background: #1e2d45; border: 1px solid #3b82f6; color: #e2e8f0; border-radius: 8px; padding: 0.6rem 1.25rem; font-size: 0.85rem; z-index: 60; display: none; white-space: nowrap; }
-  </style>
-</head>
-<body>
-  <header>
-    <button class="back-btn" onclick="goBack()"><i class="ti ti-arrow-left"></i></button>
-    <div class="header-info">
-      <div class="song-title" id="song-title">Cargando...</div>
-      <div class="song-artist" id="song-artist"></div>
-    </div>
-    <button class="add-setlist-btn" onclick="abrirModalSetlist()"><i class="ti ti-plus"></i> Setlist</button>
-  </header>
-
-  <div class="transpose-bar">
-    <span class="t-label">Tono:</span>
-    <button class="t-btn" onclick="transpose(-1)"><i class="ti ti-minus"></i></button>
-    <div class="key-display" id="key-display">-</div>
-    <button class="t-btn" onclick="transpose(1)"><i class="ti ti-plus"></i></button>
-    <div class="cifrado-toggle">
-      <button class="cifrado-btn active" id="btn-americano" onclick="setCifrado('americano')">Am</button>
-      <button class="cifrado-btn" id="btn-nashville" onclick="setCifrado('nashville')">NNS</button>
-    </div>
-  </div>
-
-  <div class="page active" id="page-1"></div>
-  <div class="page" id="page-2"></div>
-
-  <div class="setlist-nav" id="setlist-nav">
-    <button class="nav-song-btn prev" id="prev-btn" onclick="irACancion(-1)"><i class="ti ti-arrow-left"></i> Anterior</button>
-    <button class="nav-song-btn next" id="next-btn" onclick="irACancion(1)">Siguiente <i class="ti ti-arrow-right"></i></button>
-  </div>
-
-  <button class="fab" id="fab" onclick="togglePage()">
-    <i class="ti ti-arrow-down" id="fab-icon"></i>
-    <span id="fab-text">Siguiente</span>
-  </button>
-  <div class="page-indicator" id="page-indicator">1 / 2</div>
-
-  <div class="modal-overlay" id="modal-setlist">
-    <div class="modal">
-      <h3>Agregar a Setlist</h3>
-      <div id="setlist-opciones"><div class="loading">Cargando...</div></div>
-      <button class="modal-cancel" onclick="cerrarModalSetlist()">Cancelar</button>
-    </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
-  <script>
-    const _supabase = supabase.createClient(
+const _supabase = supabase.createClient(
       'https://kzqnsbztfyhyyageuboz.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
     )
-
     const NOTAS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
     const BEMOLES = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}
     const CALIDAD = ['','m','m','','','m','dim']
     const PAGE1_TYPES = ['intro','verso','pre-coro']
     const PAGE2_TYPES = ['coro','instrumental','bridge','outro']
-
     let semitones = 0
     let cifrado = 'americano'
     let originalKey = 'C'
     let sections = []
     let currentPage = 1
-
     const params = new URLSearchParams(window.location.search)
     const songId = params.get('id')
     const setlistId = params.get('setlist')
@@ -184,43 +51,37 @@
       return nota + calidad + extra
     }
 
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[ch]))
+    }
+
+    // Tokeniza la lÃ­nea en: [acorde]palabra-pegada | palabra-suelta | espacios
+    // Cada token se convierte en una columna de tabla, asÃ­ el acorde
+    // queda exactamente arriba de la sÃ­laba/palabra donde cae.
     function procesarLinea(line) {
       if (!line.includes('[')) {
-        return `<div class="line"><div class="lyrics">${line}</div></div>`
+        return `<div class="line"><div class="lyrics">${escapeHtml(line)}</div></div>`
       }
-      if (line.match(/^\[[^\]]+\]$/)) {
-        const inner = line.slice(1, -1)
-        const acordes = inner.split(/\s+/).map(traducirAcorde).join('   ')
-        return `<div class="line"><div class="chords">${acordes}</div></div>`
-      }
-      const parts = line.split(/(\[[^\]]+\])/)
-      let cells = []
-      let pendingChord = null
-      parts.forEach(part => {
-        if (part.startsWith('[') && part.endsWith(']')) {
-          pendingChord = traducirAcorde(part.slice(1,-1).trim())
-        } else {
-          part.split(/(\s+)/).forEach((word, i) => {
-            if (i === 0 && pendingChord !== null) {
-              cells.push({ chord: pendingChord, lyric: word })
-              pendingChord = null
-            } else {
-              cells.push({ chord: '', lyric: word })
-            }
-          })
+
+      const tokens = line.match(/\[[^\]]+\]\S*|\S+|\s+/g) || []
+
+      const cells = tokens.map(token => {
+        const chordMatch = token.match(/^\[([^\]]+)\](.*)$/)
+        if (chordMatch) {
+          return { chord: traducirAcorde(chordMatch[1].trim()), lyric: chordMatch[2] || '' }
         }
+        return { chord: '', lyric: token }
       })
-      const row1 = cells.map(c => `<td style="font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;white-space:nowrap;padding:0;vertical-align:bottom;min-width:${Math.max((c.lyric||'').length, (c.chord||'').length)}ch">${c.chord || ''}</td>`).join('')
-      const row2 = cells.map(c => `<td style="font-size:0.95rem;color:#cbd5e1;white-space:nowrap;padding:0;vertical-align:top">${c.lyric || ''}</td>`).join('')
-      return `<div class="line" style="margin-bottom:0.75rem;overflow-x:auto"><table style="border-collapse:collapse;border-spacing:0"><tr>${row1}</tr><tr>${row2}</tr></table></div>`
-    }
-      const html = cells.map(c =>
-        `<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:0px">` +
-        `<span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre">${c.chord || ''}</span>`
-        `<span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre">${c.lyric}</span>` +
-        `</span>`
-      ).join('')
-      return `<div class="line" style="line-height:1;margin-bottom:0.75rem">${html}</div>`
+
+      const tdChord = c => `<td style="font-family:'SF Mono',Consolas,monospace;font-size:1rem;font-weight:700;color:#facc15;white-space:pre;padding:0 0 2px 0;vertical-align:bottom">${c.chord ? escapeHtml(c.chord) : '&nbsp;'}</td>`
+      const tdLyric = c => `<td style="font-size:0.95rem;color:#cbd5e1;white-space:pre;padding:0;vertical-align:top">${c.lyric ? escapeHtml(c.lyric) : '&nbsp;'}</td>`
+
+      const row1 = cells.map(tdChord).join('')
+      const row2 = cells.map(tdLyric).join('')
+
+      return `<div class="line"><table><tr>${row1}</tr><tr>${row2}</tr></table></div>`
     }
 
     function renderSeccion(sec) {
@@ -307,11 +168,11 @@
 
     async function agregarASetlist(setlistId, setlistName) {
       const { data: existing } = await _supabase.from('setlist_songs').select('id').eq('setlist_id', setlistId).eq('song_id', songId)
-      if (existing && existing.length > 0) { mostrarToast('Ya está en este setlist'); cerrarModalSetlist(); return }
+      if (existing && existing.length > 0) { mostrarToast('Ya estÃ¡ en este setlist'); cerrarModalSetlist(); return }
       const { data: songs } = await _supabase.from('setlist_songs').select('order').eq('setlist_id', setlistId).order('order', { ascending: false }).limit(1)
       const nextOrder = songs && songs.length > 0 ? songs[0].order + 1 : 1
       const { error } = await _supabase.from('setlist_songs').insert({ setlist_id: setlistId, song_id: parseInt(songId), order: nextOrder })
-      if (error) { mostrarToast('Error al agregar') } else { mostrarToast(`✓ Agregado a "${setlistName}"`); cerrarModalSetlist() }
+      if (error) { mostrarToast('Error al agregar') } else { mostrarToast(`âœ“ Agregado a "${setlistName}"`); cerrarModalSetlist() }
     }
 
     function mostrarToast(msg) {
@@ -322,6 +183,4 @@
     }
 
     init()
-  </script>
-</body>
-</html>
+  
