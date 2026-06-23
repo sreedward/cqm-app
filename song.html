@@ -26,101 +26,24 @@
       top: 0;
       z-index: 10;
     }
-    .back-btn {
-      background: none;
-      border: none;
-      color: #3b82f6;
-      font-size: 1.3rem;
-      cursor: pointer;
-      padding: 4px;
-      display: flex;
-      align-items: center;
-    }
+    .back-btn { background: none; border: none; color: #3b82f6; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
     .header-info { flex: 1; }
     .song-title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; }
     .song-artist { font-size: 0.75rem; color: #4a5568; }
-    .add-setlist-btn {
-      background: none;
-      border: 1px solid #1e2d45;
-      border-radius: 8px;
-      color: #4a5568;
-      font-size: 0.72rem;
-      padding: 5px 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
+    .add-setlist-btn { background: none; border: 1px solid #1e2d45; border-radius: 8px; color: #4a5568; font-size: 0.72rem; padding: 5px 10px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
     .add-setlist-btn:hover { border-color: #3b82f6; color: #3b82f6; }
-    .transpose-bar {
-      background: #0d1626;
-      border-bottom: 1px solid #1e2d45;
-      padding: 0.6rem 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      position: sticky;
-      top: 57px;
-      z-index: 9;
-    }
+    .transpose-bar { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; position: sticky; top: 57px; z-index: 9; }
     .t-label { font-size: 0.75rem; color: #4a5568; }
-    .t-btn {
-      background: #1e2d45;
-      border: none;
-      color: #e2e8f0;
-      border-radius: 6px;
-      width: 28px;
-      height: 28px;
-      font-size: 1rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    .t-btn { background: #1e2d45; border: none; color: #e2e8f0; border-radius: 6px; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .t-btn:hover { background: #3b82f6; }
-    .key-display {
-      background: #1e2d45;
-      color: #3b82f6;
-      border-radius: 6px;
-      padding: 3px 10px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      font-family: monospace;
-      min-width: 36px;
-      text-align: center;
-    }
-    .cifrado-toggle {
-      margin-left: auto;
-      display: flex;
-      background: #1e2d45;
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    .cifrado-btn {
-      background: none;
-      border: none;
-      color: #4a5568;
-      padding: 4px 10px;
-      font-size: 0.72rem;
-      cursor: pointer;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
+    .key-display { background: #1e2d45; color: #3b82f6; border-radius: 6px; padding: 3px 10px; font-size: 0.85rem; font-weight: 700; font-family: monospace; min-width: 36px; text-align: center; }
+    .cifrado-toggle { margin-left: auto; display: flex; background: #1e2d45; border-radius: 6px; overflow: hidden; }
+    .cifrado-btn { background: none; border: none; color: #4a5568; padding: 4px 10px; font-size: 0.72rem; cursor: pointer; font-weight: 700; }
     .cifrado-btn.active { background: #3b82f6; color: #fff; }
     .page { display: none; padding: 1rem 1.25rem 2rem; }
     .page.active { display: block; }
-    .section {
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
-      margin-bottom: 0.85rem;
-    }
-    .section-label {
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 0.75rem;
-    }
+    .section { border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.85rem; }
+    .section-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.75rem; }
     .section.intro { background: #0a1f12; border-left: 3px solid #22c55e; }
     .section.intro .section-label { color: #22c55e; }
     .section.verso { background: #0a1226; border-left: 3px solid #3b82f6; }
@@ -135,144 +58,38 @@
     .section.instrumental .section-label { color: #555; }
     .section.outro { background: #1f0a0a; border-left: 3px solid #ef4444; }
     .section.outro .section-label { color: #ef4444; }
-    .line { margin-bottom: 0.75rem; }
-    .chords {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #facc15;
-      letter-spacing: 2px;
-      margin-bottom: 3px;
-      font-family: monospace;
-    }
+    .line { margin-bottom: 0.75rem; overflow-x: auto; }
+    .chords { font-size: 1rem; font-weight: 700; color: #facc15; letter-spacing: 2px; margin-bottom: 3px; font-family: monospace; }
     .lyrics { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
-    .fab {
-      position: fixed;
-      bottom: 1.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #3b82f6;
-      color: #fff;
-      border: none;
-      border-radius: 20px;
-      padding: 0.7rem 1.75rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      z-index: 20;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-    }
-    .page-indicator {
-      position: fixed;
-      bottom: 1.5rem;
-      right: 1.25rem;
-      background: #0d1626;
-      border: 1px solid #1e2d45;
-      color: #4a5568;
-      border-radius: 20px;
-      padding: 4px 10px;
-      font-size: 0.7rem;
-      z-index: 20;
-    }
-    .setlist-nav {
-      position: fixed;
-      bottom: 4rem;
-      left: 0;
-      right: 0;
-      display: none;
-      justify-content: space-between;
-      padding: 0 1.25rem;
-      z-index: 19;
-    }
+    .fab { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #3b82f6; color: #fff; border: none; border-radius: 20px; padding: 0.7rem 1.75rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; z-index: 20; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .page-indicator { position: fixed; bottom: 1.5rem; right: 1.25rem; background: #0d1626; border: 1px solid #1e2d45; color: #4a5568; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; z-index: 20; }
+    .setlist-nav { position: fixed; bottom: 4rem; left: 0; right: 0; display: none; justify-content: space-between; padding: 0 1.25rem; z-index: 19; }
     .setlist-nav.show { display: flex; }
-    .nav-song-btn {
-      background: #0d1626;
-      border: 1px solid #1e2d45;
-      border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
+    .nav-song-btn { background: #0d1626; border: 1px solid #1e2d45; border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px; }
     .nav-song-btn.prev { color: #4a5568; }
     .nav-song-btn.next { color: #3b82f6; font-weight: 600; }
-    .nav-song-btn:hover { border-color: #3b82f6; }
     .loading { text-align: center; color: #4a5568; padding: 3rem; }
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 50;
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-    }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; display: none; align-items: flex-end; justify-content: center; }
     .modal-overlay.show { display: flex; }
-    .modal {
-      background: #0d1626;
-      border: 1px solid #1e2d45;
-      border-radius: 16px 16px 0 0;
-      padding: 1.5rem;
-      width: 100%;
-      max-width: 480px;
-    }
+    .modal { background: #0d1626; border: 1px solid #1e2d45; border-radius: 16px 16px 0 0; padding: 1.5rem; width: 100%; max-width: 480px; }
     .modal h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; color: #e2e8f0; }
-    .modal-cancel {
-      width: 100%;
-      background: #1e2d45;
-      border: none;
-      border-radius: 8px;
-      color: #888;
-      padding: 0.75rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      margin-top: 1rem;
-    }
-    .setlist-opcion {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem 0;
-      border-bottom: 1px solid #1e2d45;
-      cursor: pointer;
-    }
+    .modal-cancel { width: 100%; background: #1e2d45; border: none; border-radius: 8px; color: #888; padding: 0.75rem; font-size: 0.9rem; cursor: pointer; margin-top: 1rem; }
+    .setlist-opcion { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #1e2d45; cursor: pointer; }
     .setlist-opcion:last-child { border-bottom: none; }
     .opcion-name { font-size: 0.9rem; color: #e2e8f0; }
     .opcion-date { font-size: 0.75rem; color: #4a5568; }
     .opcion-add { color: #3b82f6; font-size: 1.2rem; }
-    .toast {
-      position: fixed;
-      bottom: 5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1e2d45;
-      border: 1px solid #3b82f6;
-      color: #e2e8f0;
-      border-radius: 8px;
-      padding: 0.6rem 1.25rem;
-      font-size: 0.85rem;
-      z-index: 60;
-      display: none;
-      white-space: nowrap;
-    }
+    .toast { position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%); background: #1e2d45; border: 1px solid #3b82f6; color: #e2e8f0; border-radius: 8px; padding: 0.6rem 1.25rem; font-size: 0.85rem; z-index: 60; display: none; white-space: nowrap; }
   </style>
 </head>
 <body>
   <header>
-    <button class="back-btn" onclick="goBack()">
-      <i class="ti ti-arrow-left"></i>
-    </button>
+    <button class="back-btn" onclick="goBack()"><i class="ti ti-arrow-left"></i></button>
     <div class="header-info">
       <div class="song-title" id="song-title">Cargando...</div>
       <div class="song-artist" id="song-artist"></div>
     </div>
-    <button class="add-setlist-btn" onclick="abrirModalSetlist()">
-      <i class="ti ti-plus"></i> Setlist
-    </button>
+    <button class="add-setlist-btn" onclick="abrirModalSetlist()"><i class="ti ti-plus"></i> Setlist</button>
   </header>
 
   <div class="transpose-bar">
@@ -290,12 +107,8 @@
   <div class="page" id="page-2"></div>
 
   <div class="setlist-nav" id="setlist-nav">
-    <button class="nav-song-btn prev" id="prev-btn" onclick="irACancion(-1)">
-      <i class="ti ti-arrow-left"></i> Anterior
-    </button>
-    <button class="nav-song-btn next" id="next-btn" onclick="irACancion(1)">
-      Siguiente <i class="ti ti-arrow-right"></i>
-    </button>
+    <button class="nav-song-btn prev" id="prev-btn" onclick="irACancion(-1)"><i class="ti ti-arrow-left"></i> Anterior</button>
+    <button class="nav-song-btn next" id="next-btn" onclick="irACancion(1)">Siguiente <i class="ti ti-arrow-right"></i></button>
   </div>
 
   <button class="fab" id="fab" onclick="togglePage()">
@@ -337,36 +150,12 @@
     const setlistId = params.get('setlist')
     const setlistIndex = parseInt(params.get('index') || '0')
     const setlistSongs = params.get('songs') ? params.get('songs').split(',') : []
-function goBack() {
+
+    function goBack() {
       if (setlistId) {
         window.location.href = `/setlist-view.html?id=${setlistId}`
       } else {
         window.location.href = '/library.html'
-      }
-    }
-    async function init() {
-      const { data: { session } } = await _supabase.auth.getSession()
-      if (!session) { window.location.href = '/login.html'; return }
-
-      const { data: song } = await _supabase.from('Songs').select('*').eq('id', songId).single()
-      if (!song) return
-
-      document.getElementById('song-title').textContent = song.title
-      document.getElementById('song-artist').textContent = song.artist || ''
-      document.title = song.title
-      const rawKey = song['original key'] || 'C'
-      originalKey = BEMOLES[rawKey] || rawKey
-      document.getElementById('key-display').textContent = rawKey
-
-      const { data: secs } = await _supabase.from('sections').select('*').eq('song_id', songId).order('order')
-      sections = secs || []
-      renderAll()
-
-      if (setlistSongs.length > 0) {
-        const nav = document.getElementById('setlist-nav')
-        nav.classList.add('show')
-        if (setlistIndex === 0) document.getElementById('prev-btn').style.visibility = 'hidden'
-        if (setlistIndex === setlistSongs.length - 1) document.getElementById('next-btn').style.visibility = 'hidden'
       }
     }
 
@@ -374,34 +163,28 @@ function goBack() {
       const newIndex = setlistIndex + direction
       if (newIndex < 0 || newIndex >= setlistSongs.length) return
       const newSongId = setlistSongs[newIndex]
-      const songs = setlistSongs.join(',')
-      window.location.href = `/song.html?id=${newSongId}&setlist=${setlistId}&index=${newIndex}&songs=${songs}`
+      window.location.href = `/song.html?id=${newSongId}&setlist=${setlistId}&index=${newIndex}&songs=${setlistSongs.join(',')}`
     }
 
     function traducirAcorde(acorde) {
-     const match = acorde.match(/^(#?)(\d)(m?)(sus\d*|add\d*|maj\d*|dim|aug|\d*)?(\/.+)?$/)
+      const match = acorde.match(/^(#?)(\d)(m?)(sus\d*|add\d*|maj\d*|dim|aug|\d*)?(\/.+)?$/)
       if (!match) return acorde
-
       const sharp = match[1]
       const grado = parseInt(match[2])
       const menor = match[3]
       const extra = (match[4] || '') + (match[5] || '')
-
       if (cifrado === 'nashville') return acorde
-
       const intervalos = [0,2,4,5,7,9,11]
       const rootIdx = NOTAS.indexOf(originalKey)
       let intervalo = intervalos[grado - 1] || 0
       if (sharp) intervalo += 1
-
       const idx = (rootIdx + intervalo + semitones + 120) % 12
       const nota = NOTAS[idx]
       const calidad = menor ? 'm' : CALIDAD[grado - 1] || ''
-
       return nota + calidad + extra
     }
 
-  function procesarLinea(line) {
+    function procesarLinea(line) {
       if (!line.includes('[')) {
         return `<div class="line"><div class="lyrics">${line}</div></div>`
       }
@@ -419,7 +202,7 @@ function goBack() {
         } else {
           const words = part.split(/(\s+)/)
           words.forEach((word, i) => {
-            if (i === 0 && pendingChord) {
+            if (i === 0 && pendingChord !== null) {
               cells.push({ chord: pendingChord, lyric: word })
               pendingChord = null
             } else {
@@ -428,23 +211,20 @@ function goBack() {
           })
         }
       })
-      const html = cells.map(c => `
-        <span style="display:inline-block;vertical-align:bottom;text-align:left">
-          <span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.2em;white-space:pre">${c.chord || ' '}</span>
-          <span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre">${c.lyric}</span>
-        </span>`).join('')
-      return `<div class="line" style="line-height:1">${html}</div>`
-      return `<div class="line"><div class="chords" style="white-space:pre;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;letter-spacing:1px">${chordRow}</div><div class="lyrics" style="white-space:pre;font-size:0.95rem;color:#cbd5e1">${lyricRow}</div></div>`
+      const html = cells.map(c =>
+        `<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:0px">` +
+        `<span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre">${c.chord ? c.chord + ' ' : ' '.repeat((c.lyric||'').length || 1)}</span>` +
+        `<span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre">${c.lyric}</span>` +
+        `</span>`
+      ).join('')
+      return `<div class="line" style="line-height:1;margin-bottom:0.75rem">${html}</div>`
     }
+
     function renderSeccion(sec) {
       const lines = (sec.content || '').split('\n').filter(l => l.trim())
       const linesHTML = lines.map(procesarLinea).join('')
       const tipo = sec.type.toLowerCase().replace(' ', '-')
-      return `
-        <div class="section ${tipo}">
-          <div class="section-label">${sec.type}</div>
-          ${linesHTML}
-        </div>`
+      return `<div class="section ${tipo}"><div class="section-label">${sec.type}</div>${linesHTML}</div>`
     }
 
     function renderAll() {
@@ -481,15 +261,31 @@ function goBack() {
       window.scrollTo(0, 0)
     }
 
+    async function init() {
+      const { data: { session } } = await _supabase.auth.getSession()
+      if (!session) { window.location.href = '/login.html'; return }
+      const { data: song } = await _supabase.from('Songs').select('*').eq('id', songId).single()
+      if (!song) return
+      document.getElementById('song-title').textContent = song.title
+      document.getElementById('song-artist').textContent = song.artist || ''
+      document.title = song.title
+      const rawKey = song['original key'] || 'C'
+      originalKey = BEMOLES[rawKey] || rawKey
+      document.getElementById('key-display').textContent = rawKey
+      const { data: secs } = await _supabase.from('sections').select('*').eq('song_id', songId).order('order')
+      sections = secs || []
+      renderAll()
+      if (setlistSongs.length > 0) {
+        document.getElementById('setlist-nav').classList.add('show')
+        if (setlistIndex === 0) document.getElementById('prev-btn').style.visibility = 'hidden'
+        if (setlistIndex === setlistSongs.length - 1) document.getElementById('next-btn').style.visibility = 'hidden'
+      }
+    }
+
     async function abrirModalSetlist() {
       document.getElementById('modal-setlist').classList.add('show')
       const { data: { session } } = await _supabase.auth.getSession()
-      const { data: setlists } = await _supabase
-        .from('setlist')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false })
-
+      const { data: setlists } = await _supabase.from('setlist').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false })
       const container = document.getElementById('setlist-opciones')
       if (!setlists || setlists.length === 0) {
         container.innerHTML = '<div style="color:#4a5568;font-size:0.85rem;text-align:center;padding:1rem">No tienes setlists. <a href="/setlist.html" style="color:#3b82f6">Crea uno primero.</a></div>'
@@ -497,13 +293,9 @@ function goBack() {
       }
       container.innerHTML = setlists.map(s => `
         <div class="setlist-opcion" onclick="agregarASetlist(${s.id}, '${s.name}')">
-          <div>
-            <div class="opcion-name">${s.name}</div>
-            ${s.date ? `<div class="opcion-date">${new Date(s.date).toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long'})}</div>` : ''}
-          </div>
+          <div><div class="opcion-name">${s.name}</div>${s.date ? `<div class="opcion-date">${new Date(s.date).toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long'})}</div>` : ''}</div>
           <i class="ti ti-plus opcion-add"></i>
-        </div>
-      `).join('')
+        </div>`).join('')
     }
 
     function cerrarModalSetlist() {
@@ -511,37 +303,12 @@ function goBack() {
     }
 
     async function agregarASetlist(setlistId, setlistName) {
-      const { data: existing } = await _supabase
-        .from('setlist_songs')
-        .select('id')
-        .eq('setlist_id', setlistId)
-        .eq('song_id', songId)
-
-      if (existing && existing.length > 0) {
-        mostrarToast('Ya está en este setlist')
-        cerrarModalSetlist()
-        return
-      }
-
-      const { data: songs } = await _supabase
-        .from('setlist_songs')
-        .select('order')
-        .eq('setlist_id', setlistId)
-        .order('order', { ascending: false })
-        .limit(1)
-
+      const { data: existing } = await _supabase.from('setlist_songs').select('id').eq('setlist_id', setlistId).eq('song_id', songId)
+      if (existing && existing.length > 0) { mostrarToast('Ya está en este setlist'); cerrarModalSetlist(); return }
+      const { data: songs } = await _supabase.from('setlist_songs').select('order').eq('setlist_id', setlistId).order('order', { ascending: false }).limit(1)
       const nextOrder = songs && songs.length > 0 ? songs[0].order + 1 : 1
-
-      const { error } = await _supabase
-        .from('setlist_songs')
-        .insert({ setlist_id: setlistId, song_id: parseInt(songId), order: nextOrder })
-
-      if (error) {
-        mostrarToast('Error al agregar')
-      } else {
-        mostrarToast(`✓ Agregado a "${setlistName}"`)
-        cerrarModalSetlist()
-      }
+      const { error } = await _supabase.from('setlist_songs').insert({ setlist_id: setlistId, song_id: parseInt(songId), order: nextOrder })
+      if (error) { mostrarToast('Error al agregar') } else { mostrarToast(`✓ Agregado a "${setlistName}"`); cerrarModalSetlist() }
     }
 
     function mostrarToast(msg) {
