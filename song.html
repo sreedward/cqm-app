@@ -401,31 +401,30 @@ function goBack() {
       return nota + calidad + extra
     }
 
-    function procesarLinea(line) {
+   function procesarLinea(line) {
       if (!line.includes('[')) {
         return `<div class="line"><div class="lyrics">${line}</div></div>`
       }
-      if (line.startsWith('[') && line.endsWith(']') && line.indexOf(']') === line.length - 1) {
+      if (line.match(/^\[[^\]]+\]$/) ) {
         const inner = line.slice(1, -1)
         const acordes = inner.split(/\s+/).map(traducirAcorde).join('   ')
         return `<div class="line"><div class="chords">${acordes}</div></div>`
       }
       const parts = line.split(/(\[[^\]]+\])/)
-      let chordLine = ''
-      let lyricLine = ''
+      let chordRow = ''
+      let lyricRow = ''
       parts.forEach(part => {
         if (part.startsWith('[') && part.endsWith(']')) {
-          const acorde = traducirAcorde(part.slice(1, -1).trim())
-          const spaces = Math.max(0, lyricLine.length - chordLine.length)
-          chordLine += ' '.repeat(spaces) + acorde
+          const acorde = traducirAcorde(part.slice(1,-1).trim())
+          const pad = Math.max(0, lyricRow.length - chordRow.length)
+          chordRow += ' '.repeat(pad) + acorde
         } else {
-          const spaces = Math.max(0, chordLine.length - lyricLine.length)
-          lyricLine += ' '.repeat(spaces) + part
+          const pad = Math.max(0, chordRow.length - lyricRow.length)
+          lyricRow += ' '.repeat(pad) + part
         }
       })
-      return `<div class="line"><div class="chords" style="white-space:pre;font-family:monospace">${chordLine}</div><div class="lyrics" style="white-space:pre">${lyricLine}</div></div>`
+      return `<div class="line"><div class="chords" style="white-space:pre;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;letter-spacing:1px">${chordRow}</div><div class="lyrics" style="white-space:pre;font-size:0.95rem;color:#cbd5e1">${lyricRow}</div></div>`
     }
-
     function renderSeccion(sec) {
       const lines = (sec.content || '').split('\n').filter(l => l.trim())
       const linesHTML = lines.map(procesarLinea).join('')
