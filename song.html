@@ -5,150 +5,199 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CQM - Canción</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #0a0a0a;
+      background: #080c14;
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
+      padding-bottom: 80px;
     }
     header {
-      background: #1a1a1a;
-      border-bottom: 1px solid #333;
-      padding: 1rem 1.5rem;
+      background: #0d1626;
+      border-bottom: 1px solid #1e2d45;
+      padding: 0.85rem 1.25rem;
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
       position: sticky;
       top: 0;
       z-index: 10;
     }
-    .back { background: none; border: none; color: #f59e0b; font-size: 1.2rem; cursor: pointer; }
-    .song-title { font-size: 1rem; font-weight: 700; flex: 1; }
-    .song-artist { font-size: 0.8rem; color: #888; }
-    .transpose-bar {
-      background: #1a1a1a;
-      border-bottom: 1px solid #333;
-      padding: 0.75rem 1.5rem;
+    .back-btn {
+      background: none;
+      border: none;
+      color: #3b82f6;
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 4px;
       display: flex;
       align-items: center;
-      gap: 1rem;
+    }
+    .header-info { flex: 1; }
+    .song-title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; }
+    .song-artist { font-size: 0.75rem; color: #4a5568; }
+    .add-setlist-btn {
+      background: none;
+      border: 1px solid #1e2d45;
+      border-radius: 8px;
+      color: #4a5568;
+      font-size: 0.75rem;
+      padding: 5px 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .add-setlist-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+    .transpose-bar {
+      background: #0d1626;
+      border-bottom: 1px solid #1e2d45;
+      padding: 0.6rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
       position: sticky;
       top: 57px;
       z-index: 9;
     }
-    .transpose-label { font-size: 0.8rem; color: #888; }
-    .transpose-btn {
-      background: #333;
+    .t-label { font-size: 0.75rem; color: #4a5568; }
+    .t-btn {
+      background: #1e2d45;
       border: none;
-      color: #fff;
+      color: #e2e8f0;
       border-radius: 6px;
-      width: 32px;
-      height: 32px;
-      font-size: 1.1rem;
+      width: 28px;
+      height: 28px;
+      font-size: 1rem;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+    .t-btn:hover { background: #3b82f6; }
     .key-display {
-      background: #f59e0b22;
-      color: #f59e0b;
+      background: #1e2d45;
+      color: #3b82f6;
       border-radius: 6px;
-      padding: 0.3rem 0.8rem;
-      font-size: 0.9rem;
+      padding: 3px 10px;
+      font-size: 0.85rem;
       font-weight: 700;
-      min-width: 40px;
+      font-family: monospace;
+      min-width: 36px;
       text-align: center;
     }
     .cifrado-toggle {
       margin-left: auto;
       display: flex;
-      background: #333;
-      border-radius: 8px;
+      background: #1e2d45;
+      border-radius: 6px;
       overflow: hidden;
     }
     .cifrado-btn {
       background: none;
       border: none;
-      color: #888;
-      padding: 0.35rem 0.7rem;
-      font-size: 0.75rem;
+      color: #4a5568;
+      padding: 4px 10px;
+      font-size: 0.72rem;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: 0.5px;
     }
-    .cifrado-btn.active { background: #f59e0b; color: #0a0a0a; }
-    .page { display: none; padding: 1.5rem 1.5rem 5rem; }
+    .cifrado-btn.active { background: #3b82f6; color: #fff; }
+    .page { display: none; padding: 1rem 1.25rem 2rem; }
     .page.active { display: block; }
     .section {
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 1rem;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.85rem;
     }
     .section-label {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 0.75rem;
+      letter-spacing: 1.5px;
+      margin-bottom: 0.6rem;
     }
-    .section.intro { background: #0f2a1a; border-left: 3px solid #22c55e; }
+    .section.intro { background: #0a1f12; border-left: 3px solid #22c55e; }
     .section.intro .section-label { color: #22c55e; }
-    .section.verso { background: #0f1a2a; border-left: 3px solid #3b82f6; }
+    .section.verso { background: #0a1226; border-left: 3px solid #3b82f6; }
     .section.verso .section-label { color: #3b82f6; }
-    .section.pre-coro { background: #2a1a0f; border-left: 3px solid #f97316; }
+    .section.pre-coro { background: #1f120a; border-left: 3px solid #f97316; }
     .section.pre-coro .section-label { color: #f97316; }
-    .section.coro { background: #1a0f2a; border-left: 3px solid #a855f7; }
+    .section.coro { background: #130a26; border-left: 3px solid #a855f7; }
     .section.coro .section-label { color: #a855f7; }
-    .section.bridge { background: #2a2a0f; border-left: 3px solid #f59e0b; }
+    .section.bridge { background: #1f1a0a; border-left: 3px solid #f59e0b; }
     .section.bridge .section-label { color: #f59e0b; }
-    .section.instrumental { background: #1a1a1a; border-left: 3px solid #888; }
-    .section.instrumental .section-label { color: #888; }
-    .section.outro { background: #2a0f0f; border-left: 3px solid #ef4444; }
+    .section.instrumental { background: #141414; border-left: 3px solid #555; }
+    .section.instrumental .section-label { color: #555; }
+    .section.outro { background: #1f0a0a; border-left: 3px solid #ef4444; }
     .section.outro .section-label { color: #ef4444; }
-    .line { margin-bottom: 0.75rem; }
-    .chords { font-size: 1rem; font-weight: 700; color: #f59e0b; letter-spacing: 2px; margin-bottom: 0.15rem; font-family: monospace; }
-    .lyrics { font-size: 1rem; color: #e5e5e5; line-height: 1.5; }
+    .line { margin-bottom: 0.6rem; }
+    .chords {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #facc15;
+      letter-spacing: 1.5px;
+      margin-bottom: 2px;
+      font-family: monospace;
+    }
+    .lyrics { font-size: 0.95rem; color: #94a3b8; line-height: 1.5; }
     .fab {
       position: fixed;
-      bottom: 2rem;
+      bottom: 1.5rem;
       left: 50%;
       transform: translateX(-50%);
-      background: #f59e0b;
-      color: #0a0a0a;
+      background: #3b82f6;
+      color: #fff;
       border: none;
-      border-radius: 50px;
-      padding: 0.75rem 2rem;
-      font-size: 1rem;
-      font-weight: 700;
+      border-radius: 20px;
+      padding: 0.7rem 1.75rem;
+      font-size: 0.85rem;
+      font-weight: 600;
       cursor: pointer;
       z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 20px rgba(59,130,246,0.3);
     }
     .page-indicator {
       position: fixed;
-      bottom: 2rem;
-      right: 1.5rem;
-      background: #333;
-      color: #888;
+      bottom: 1.5rem;
+      right: 1.25rem;
+      background: #0d1626;
+      border: 1px solid #1e2d45;
+      color: #4a5568;
       border-radius: 20px;
-      padding: 0.4rem 0.8rem;
-      font-size: 0.75rem;
+      padding: 4px 10px;
+      font-size: 0.7rem;
       z-index: 20;
     }
-    .loading { text-align: center; color: #555; padding: 3rem; }
+    .loading { text-align: center; color: #4a5568; padding: 3rem; }
   </style>
 </head>
 <body>
   <header>
-    <button class="back" onclick="history.back()">←</button>
-    <div>
+    <button class="back-btn" onclick="history.back()">
+      <i class="ti ti-arrow-left"></i>
+    </button>
+    <div class="header-info">
       <div class="song-title" id="song-title">Cargando...</div>
       <div class="song-artist" id="song-artist"></div>
     </div>
+    <button class="add-setlist-btn">
+      <i class="ti ti-plus"></i> Setlist
+    </button>
   </header>
+
   <div class="transpose-bar">
-    <span class="transpose-label">Tono:</span>
-    <button class="transpose-btn" onclick="transpose(-1)">−</button>
+    <span class="t-label">Tono:</span>
+    <button class="t-btn" onclick="transpose(-1)"><i class="ti ti-minus"></i></button>
     <div class="key-display" id="key-display">-</div>
-    <button class="transpose-btn" onclick="transpose(1)">+</button>
+    <button class="t-btn" onclick="transpose(1)"><i class="ti ti-plus"></i></button>
     <div class="cifrado-toggle">
       <button class="cifrado-btn active" id="btn-americano" onclick="setCifrado('americano')">Am</button>
       <button class="cifrado-btn" id="btn-nashville" onclick="setCifrado('nashville')">NNS</button>
@@ -158,7 +207,9 @@
   <div class="page active" id="page-1"></div>
   <div class="page" id="page-2"></div>
 
-  <button class="fab" id="fab" onclick="togglePage()">↓ Siguiente</button>
+  <button class="fab" id="fab" onclick="togglePage()">
+    <i class="ti ti-arrow-down"></i> Siguiente
+  </button>
   <div class="page-indicator" id="page-indicator">1 / 2</div>
 
   <script>
@@ -169,11 +220,7 @@
 
     const NOTAS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
     const BEMOLES = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}
-    const MAYOR = [0,2,4,5,7,9,11]
-    const MENOR = [0,2,3,5,7,8,10]
-    const GRADOS = ['1','2','3','4','5','6','7']
     const CALIDAD = ['','m','m','','','m','dim']
-
     const PAGE1_TYPES = ['intro','verso','pre-coro']
     const PAGE2_TYPES = ['coro','instrumental','bridge','outro']
 
@@ -205,22 +252,12 @@
       renderAll()
     }
 
-    function getNota(gradoNum, semis) {
-      const rootIdx = NOTAS.indexOf(originalKey)
-      const grado = parseInt(gradoNum) - 1
-      const intervalo = MAYOR[grado] !== undefined ? MAYOR[grado] : 0
-      const idx = (rootIdx + intervalo + semis + 120) % 12
-      return NOTAS[idx]
-    }
-
     function traducirAcorde(acorde) {
       const ROMANOS = {
         'I':1,'II':2,'III':3,'IV':4,'V':5,'VI':6,'VII':7,
         'i':1,'ii':2,'iii':3,'iv':4,'v':5,'vi':6,'vii':7
       }
-      const MENOR_ROMANO = ['i','ii','iii','iv','v','vi','vii']
-      
-      const match = acorde.match(/^(#?)(I{1,3}|IV|VI{0,2}|V|i{1,3}|iv|vi{0,2}|v)(sus\d?|add\d?|maj\d?|dim|aug|m?\d?|\/[IiVv]+)?(\/[A-G]b?#?)?$/)
+      const match = acorde.match(/^(#?)(I{1,3}|IV|VI{0,2}|V|i{1,3}|iv|vi{0,2}|v)(sus\d?|add\d?|maj\d?|dim|aug|\d?|\/[IiVv]+)?(\/[A-G]b?#?)?$/)
       if (!match) return acorde
 
       const sharp = match[1]
@@ -232,9 +269,9 @@
       const esMenor = romano === romano.toLowerCase()
 
       if (cifrado === 'nashville') {
-        const num = grado
-        const calNNS = esMenor ? 'm' : ''
-        return (sharp ? '#' : '') + num + calNNS + extra
+        const ROMANOS_DISPLAY = ['I','II','III','IV','V','VI','VII']
+        const display = esMenor ? ROMANOS_DISPLAY[grado-1].toLowerCase() : ROMANOS_DISPLAY[grado-1]
+        return (sharp ? '#' : '') + display + extra
       }
 
       const intervalos = [0,2,4,5,7,9,11]
@@ -297,7 +334,10 @@
       currentPage = currentPage === 1 ? 2 : 1
       document.getElementById('page-1').classList.toggle('active', currentPage === 1)
       document.getElementById('page-2').classList.toggle('active', currentPage === 2)
-      document.getElementById('fab').textContent = currentPage === 1 ? '↓ Siguiente' : '↑ Anterior'
+      const fab = document.getElementById('fab')
+      fab.innerHTML = currentPage === 1
+        ? '<i class="ti ti-arrow-down"></i> Siguiente'
+        : '<i class="ti ti-arrow-up"></i> Anterior'
       document.getElementById('page-indicator').textContent = `${currentPage} / 2`
       window.scrollTo(0, 0)
     }
