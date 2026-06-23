@@ -1,1 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CQM - Perfil</title>
+  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #080c14;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    header {
+      background: #0d1626;
+      border-bottom: 1px solid #1e2d45;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      color: #3b82f6;
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; }
+    .avatar-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.25rem 1.5rem;
+      border-bottom: 1px solid #1e2d45;
+    }
+    .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: #1e2d45;
+      border: 2px solid #3b82f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      color: #3b82f6;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+    .user-email { font-size: 0.9rem; color: #e2e8f0; font-weight: 500; }
+    .user-since { font-size: 0.75rem; color: #4a5568; margin-top: 4px; }
+    .admin-badge {
+      background: #1e2d45;
+      color: #3b82f6;
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-top: 8px;
+      display: none;
+    }
+    .section-label {
+      font-size: 0.7rem;
+      color: #4a5568;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 1rem 1.25rem 0.25rem;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid #0d1626;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .menu-item:active { opacity: 0.7; }
+    .menu-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #1e2d45;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .menu-icon.blue { color: #3b82f6; }
+    .menu-icon.green { color: #22c55e; }
+    .menu-icon.orange { color: #f97316; }
+    .menu-icon.red { color: #ef4444; }
+    .menu-info { flex: 1; }
+    .menu-title { font-size: 0.9rem; color: #e2e8f0; }
+    .menu-sub { font-size: 0.75rem; color: #4a5568; margin-top: 1px; }
+    .menu-arrow { color: #4a5568; font-size: 1rem; }
+    .logout-btn {
+      margin: 1.5rem 1.25rem;
+      width: calc(100% - 2.5rem);
+      background: #1a0808;
+      border: 1px solid #7f1d1d;
+      border-radius: 10px;
+      color: #ef4444;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .logout-btn:hover { background: #2a0808; }
+    .version {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #2a3a4a;
+      padding: 1rem;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0d1626;
+      border-top: 1px solid #1e2d45;
+      display: flex;
+      padding: 8px 0 12px;
+      z-index: 20;
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      padding: 4px 0;
+      text-decoration: none;
+    }
+    .nav-item i { font-size: 1.2rem; color: #4a5568; }
+    .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
+    .nav-item.active i { color: #3b82f6; }
+    .nav-item.active span { color: #3b82f6; }
+  </style>
+</head>
+<body>
+  <header>
+    <button class="back-btn" onclick="history.back()">
+      <i class="ti ti-arrow-left"></i>
+    </button>
+    <div class="header-title">Mi Perfil</div>
+  </header>
 
+  <div class="avatar-section">
+    <div class="avatar" id="avatar">?</div>
+    <div class="user-email" id="user-email">Cargando...</div>
+    <div class="user-since" id="user-since"></div>
+    <div class="admin-badge" id="admin-badge">ADMIN</div>
+  </div>
+
+  <div class="section-label">Cuenta</div>
+  <a class="menu-item" href="/reset.html">
+    <div class="menu-icon blue"><i class="ti ti-lock"></i></div>
+    <div class="menu-info">
+      <div class="menu-title">Cambiar contraseña</div>
+      <div class="menu-sub">Actualiza tu contraseña de acceso</div>
+    </div>
+    <i class="ti ti-chevron-right menu-arrow"></i>
+  </a>
+
+  <div class="section-label" id="admin-section" style="display:none">Admin</div>
+  <a class="menu-item" href="/admin.html" id="admin-link" style="display:none">
+    <div class="menu-icon orange"><i class="ti ti-music-plus"></i></div>
+    <div class="menu-info">
+      <div class="menu-title">Panel de canciones</div>
+      <div class="menu-sub">Agregar y editar canciones del catálogo</div>
+    </div>
+    <i class="ti ti-chevron-right menu-arrow"></i>
+  </a>
+
+  <div class="section-label">Acerca de</div>
+  <a class="menu-item" href="/more.html">
+    <div class="menu-icon green"><i class="ti ti-brand-instagram"></i></div>
+    <div class="menu-info">
+      <div class="menu-title">Síguenos</div>
+      <div class="menu-sub">Redes sociales de Musishens</div>
+    </div>
+    <i class="ti ti-chevron-right menu-arrow"></i>
+  </a>
+
+  <button class="logout-btn" onclick="cerrarSesion()">
+    <i class="ti ti-logout"></i> Cerrar sesión
+  </button>
+
+  <div class="version">ChartQuick by Musishens — v1.0</div>
+
+  <nav class="bottom-nav">
+    <a class="nav-item" href="/library.html">
+      <i class="ti ti-music"></i>
+      <span>Canciones</span>
+    </a>
+    <a class="nav-item" href="/setlist.html">
+      <i class="ti ti-list-check"></i>
+      <span>Setlist</span>
+    </a>
+    <a class="nav-item" href="/more.html">
+      <i class="ti ti-dots-circle-horizontal"></i>
+      <span>Más</span>
+    </a>
+  </nav>
+
+  <script>
+    const _supabase = supabase.createClient(
+      'https://kzqnsbztfyhyyageuboz.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+    )
+
+    async function init() {
+      const { data: { session } } = await _supabase.auth.getSession()
+      if (!session) { window.location.href = '/login.html'; return }
+
+      const user = session.user
+      const email = user.email
+      const initials = email.substring(0, 2).toUpperCase()
+
+      document.getElementById('avatar').textContent = initials
+      document.getElementById('user-email').textContent = email
+
+      const since = new Date(user.created_at).toLocaleDateString('es-MX', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      })
+      document.getElementById('user-since').textContent = `Miembro desde ${since}`
+
+      const { data: profile } = await _supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single()
+
+      if (profile && profile.is_admin) {
+        document.getElementById('admin-badge').style.display = 'block'
+        document.getElementById('admin-section').style.display = 'block'
+        document.getElementById('admin-link').style.display = 'flex'
+      }
+    }
+
+    async function cerrarSesion() {
+      await _supabase.auth.signOut()
+      window.location.href = '/login.html'
+    }
+
+    init()
+  </script>
+</body>
+</html>
