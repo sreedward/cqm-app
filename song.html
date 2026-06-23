@@ -214,25 +214,37 @@
     }
 
     function traducirAcorde(acorde) {
-      // Acepta formato Nashville: 1, 2m, 4, 5sus4, 6m7, etc
-      const match = acorde.match(/^(#?)(\d)(m?)(.*)?$/)
+      const ROMANOS = {
+        'I':1,'II':2,'III':3,'IV':4,'V':5,'VI':6,'VII':7,
+        'i':1,'ii':2,'iii':3,'iv':4,'v':5,'vi':6,'vii':7
+      }
+      const MENOR_ROMANO = ['i','ii','iii','iv','v','vi','vii']
+      
+      const match = acorde.match(/^(#?)(I{1,3}|IV|VI{0,2}|V|i{1,3}|iv|vi{0,2}|v)(sus\d?|add\d?|maj\d?|dim|aug|m?\d?|\/[IiVv]+)?(\/[A-G]b?#?)?$/)
       if (!match) return acorde
 
       const sharp = match[1]
-      const grado = parseInt(match[2])
-      const menor = match[3]
-      const extra = match[4] || ''
+      const romano = match[2]
+      const extra = (match[3] || '') + (match[4] || '')
+      const grado = ROMANOS[romano]
+      if (!grado) return acorde
 
-      if (cifrado === 'nashville') return acorde
+      const esMenor = romano === romano.toLowerCase()
 
-      const rootIdx = NOTAS.indexOf(originalKey)
+      if (cifrado === 'nashville') {
+        const num = grado
+        const calNNS = esMenor ? 'm' : ''
+        return (sharp ? '#' : '') + num + calNNS + extra
+      }
+
       const intervalos = [0,2,4,5,7,9,11]
+      const rootIdx = NOTAS.indexOf(originalKey)
       let intervalo = intervalos[grado - 1] || 0
       if (sharp) intervalo += 1
 
       const idx = (rootIdx + intervalo + semitones + 120) % 12
       const nota = NOTAS[idx]
-      const calidad = menor ? 'm' : CALIDAD[grado - 1] || ''
+      const calidad = esMenor ? 'm' : CALIDAD[grado - 1] || ''
 
       return nota + calidad + extra
     }
