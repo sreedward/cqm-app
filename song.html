@@ -44,7 +44,7 @@
       border: 1px solid #1e2d45;
       border-radius: 8px;
       color: #4a5568;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       padding: 5px 10px;
       cursor: pointer;
       display: flex;
@@ -118,8 +118,8 @@
       font-size: 0.65rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-bottom: 0.6rem;
+      letter-spacing: 2px;
+      margin-bottom: 0.75rem;
     }
     .section.intro { background: #0a1f12; border-left: 3px solid #22c55e; }
     .section.intro .section-label { color: #22c55e; }
@@ -135,16 +135,20 @@
     .section.instrumental .section-label { color: #555; }
     .section.outro { background: #1f0a0a; border-left: 3px solid #ef4444; }
     .section.outro .section-label { color: #ef4444; }
-    .line { margin-bottom: 0.6rem; }
+    .line { margin-bottom: 0.75rem; }
     .chords {
-      font-size: 0.85rem;
+      font-size: 1rem;
       font-weight: 700;
       color: #facc15;
-      letter-spacing: 1.5px;
-      margin-bottom: 2px;
+      letter-spacing: 2px;
+      margin-bottom: 3px;
       font-family: monospace;
     }
-    .lyrics { font-size: 0.95rem; color: #94a3b8; line-height: 1.5; }
+    .lyrics {
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
     .fab {
       position: fixed;
       bottom: 1.5rem;
@@ -162,7 +166,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+      white-space: nowrap;
     }
     .page-indicator {
       position: fixed;
@@ -208,7 +212,8 @@
   <div class="page" id="page-2"></div>
 
   <button class="fab" id="fab" onclick="togglePage()">
-    <i class="ti ti-arrow-down"></i> Siguiente
+    <i class="ti ti-arrow-down" id="fab-icon"></i>
+    <span id="fab-text">Siguiente</span>
   </button>
   <div class="page-indicator" id="page-indicator">1 / 2</div>
 
@@ -253,26 +258,15 @@
     }
 
     function traducirAcorde(acorde) {
-      const ROMANOS = {
-        'I':1,'II':2,'III':3,'IV':4,'V':5,'VI':6,'VII':7,
-        'i':1,'ii':2,'iii':3,'iv':4,'v':5,'vi':6,'vii':7
-      }
-      const match = acorde.match(/^(#?)(I{1,3}|IV|VI{0,2}|V|i{1,3}|iv|vi{0,2}|v)(sus\d?|add\d?|maj\d?|dim|aug|\d?|\/[IiVv]+)?(\/[A-G]b?#?)?$/)
+      const match = acorde.match(/^(#?)(\d)(m?)(sus\d?|add\d?|maj\d?|dim|aug|\d?)?(\/[A-G]b?#?)?$/)
       if (!match) return acorde
 
       const sharp = match[1]
-      const romano = match[2]
-      const extra = (match[3] || '') + (match[4] || '')
-      const grado = ROMANOS[romano]
-      if (!grado) return acorde
+      const grado = parseInt(match[2])
+      const menor = match[3]
+      const extra = (match[4] || '') + (match[5] || '')
 
-      const esMenor = romano === romano.toLowerCase()
-
-      if (cifrado === 'nashville') {
-        const ROMANOS_DISPLAY = ['I','II','III','IV','V','VI','VII']
-        const display = esMenor ? ROMANOS_DISPLAY[grado-1].toLowerCase() : ROMANOS_DISPLAY[grado-1]
-        return (sharp ? '#' : '') + display + extra
-      }
+      if (cifrado === 'nashville') return acorde
 
       const intervalos = [0,2,4,5,7,9,11]
       const rootIdx = NOTAS.indexOf(originalKey)
@@ -281,7 +275,7 @@
 
       const idx = (rootIdx + intervalo + semitones + 120) % 12
       const nota = NOTAS[idx]
-      const calidad = esMenor ? 'm' : CALIDAD[grado - 1] || ''
+      const calidad = menor ? 'm' : CALIDAD[grado - 1] || ''
 
       return nota + calidad + extra
     }
@@ -334,10 +328,8 @@
       currentPage = currentPage === 1 ? 2 : 1
       document.getElementById('page-1').classList.toggle('active', currentPage === 1)
       document.getElementById('page-2').classList.toggle('active', currentPage === 2)
-      const fab = document.getElementById('fab')
-      fab.innerHTML = currentPage === 1
-        ? '<i class="ti ti-arrow-down"></i> Siguiente'
-        : '<i class="ti ti-arrow-up"></i> Anterior'
+      document.getElementById('fab-icon').className = currentPage === 1 ? 'ti ti-arrow-down' : 'ti ti-arrow-up'
+      document.getElementById('fab-text').textContent = currentPage === 1 ? 'Siguiente' : 'Anterior'
       document.getElementById('page-indicator').textContent = `${currentPage} / 2`
       window.scrollTo(0, 0)
     }
