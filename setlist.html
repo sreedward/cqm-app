@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CQM - Setlist</title>
+  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #080c14;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 70px;
+    }
+    header {
+      background: #0d1626;
+      border-bottom: 1px solid #1e2d45;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; }
+    .new-btn {
+      background: #3b82f6;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .section-label {
+      font-size: 0.7rem;
+      color: #4a5568;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 0.75rem 1.25rem 0.25rem;
+    }
+    .setlist-card {
+      background: #0d1626;
+      border: 1px solid #1e2d45;
+      border-radius: 12px;
+      margin: 0 1.25rem 0.75rem;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .setlist-card:active { opacity: 0.7; }
+    .setlist-header {
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1e2d45;
+    }
+    .setlist-name { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; }
+    .setlist-date { font-size: 0.75rem; color: #4a5568; margin-top: 2px; }
+    .setlist-count {
+      background: #1e2d45;
+      color: #3b82f6;
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .setlist-songs { padding: 0.5rem 1rem; }
+    .setlist-song-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #0d1626;
+    }
+    .setlist-song-item:last-child { border-bottom: none; }
+    .song-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #1e2d45;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #3b82f6;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .song-name { font-size: 0.85rem; color: #e2e8f0; flex: 1; }
+    .song-key-tag {
+      font-size: 0.7rem;
+      color: #3b82f6;
+      font-weight: 700;
+      background: #1e2d45;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: monospace;
+    }
+    .empty {
+      text-align: center;
+      color: #4a5568;
+      padding: 4rem 2rem;
+    }
+    .empty i { font-size: 3rem; display: block; margin-bottom: 1rem; }
+    .empty p { font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .empty-btn {
+      background: #3b82f6;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0d1626;
+      border-top: 1px solid #1e2d45;
+      display: flex;
+      padding: 8px 0 12px;
+      z-index: 20;
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      padding: 4px 0;
+      text-decoration: none;
+    }
+    .nav-item i { font-size: 1.2rem; color: #4a5568; }
+    .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
+    .nav-item.active i { color: #3b82f6; }
+    .nav-item.active span { color: #3b82f6; }
+
+    /* Modal nueva setlist */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 50;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #0d1626;
+      border: 1px solid #1e2d45;
+      border-radius: 16px 16px 0 0;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 480px;
+    }
+    .modal h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; color: #e2e8f0; }
+    .modal-input {
+      width: 100%;
+      background: #080c14;
+      border: 1px solid #1e2d45;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      outline: none;
+      margin-bottom: 1rem;
+    }
+    .modal-input:focus { border-color: #3b82f6; }
+    .modal-btns { display: flex; gap: 0.75rem; }
+    .modal-cancel {
+      flex: 1;
+      background: #1e2d45;
+      border: none;
+      border-radius: 8px;
+      color: #888;
+      padding: 0.75rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .modal-save {
+      flex: 1;
+      background: #3b82f6;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      padding: 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-title">Mis Setlists</div>
+    <button class="new-btn" onclick="abrirModal()">
+      <i class="ti ti-plus"></i> Nueva
+    </button>
+  </header>
+
+  <div id="contenido">
+    <div class="section-label">Cargando...</div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a class="nav-item" href="/library.html">
+      <i class="ti ti-music"></i>
+      <span>Canciones</span>
+    </a>
+    <a class="nav-item active" href="/setlist.html">
+      <i class="ti ti-list-check"></i>
+      <span>Setlist</span>
+    </a>
+    <a class="nav-item" href="/more.html">
+      <i class="ti ti-dots-circle-horizontal"></i>
+      <span>Más</span>
+    </a>
+  </nav>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h3>Nueva Setlist</h3>
+      <input class="modal-input" type="text" id="setlist-name" placeholder="Nombre (ej: Domingo 22 Jun)">
+      <input class="modal-input" type="date" id="setlist-date">
+      <div class="modal-btns">
+        <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
+        <button class="modal-save" onclick="crearSetlist()">Crear</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const _supabase = supabase.createClient(
+      'https://kzqnsbztfyhyyageuboz.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+    )
+
+    let userId = null
+
+    async function init() {
+      const { data: { session } } = await _supabase.auth.getSession()
+      if (!session) { window.location.href = '/login.html'; return }
+      userId = session.user.id
+      cargarSetlists()
+    }
+
+    async function cargarSetlists() {
+      const { data: setlists, error } = await _supabase
+        .from('setlist')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+
+      const contenido = document.getElementById('contenido')
+
+      if (error || !setlists || setlists.length === 0) {
+        contenido.innerHTML = `
+          <div class="empty">
+            <i class="ti ti-list-check"></i>
+            <p>Aún no tienes setlists.<br>Crea uno para tu próximo show.</p>
+            <button class="empty-btn" onclick="abrirModal()">+ Crear Setlist</button>
+          </div>`
+        return
+      }
+
+      let html = `<div class="section-label">${setlists.length} setlist${setlists.length !== 1 ? 's' : ''}</div>`
+
+      for (const s of setlists) {
+        const { data: songs } = await _supabase
+          .from('setlist_songs')
+          .select('order, song_id')
+          .eq('setlist_id', s.id)
+          .order('order')
+
+        const songIds = songs ? songs.map(x => x.song_id) : []
+        let songDetails = []
+
+        if (songIds.length > 0) {
+          const { data: details } = await _supabase
+            .from('Songs')
+            .select('id, title, "original key"')
+            .in('id', songIds)
+          songDetails = details || []
+        }
+
+        const songsOrdered = songs ? songs.map(s => songDetails.find(d => d.id === s.song_id)).filter(Boolean) : []
+        const fecha = s.date ? new Date(s.date).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }) : ''
+
+        html += `
+          <div class="setlist-card" onclick="window.location.href='/setlist-view.html?id=${s.id}'">
+            <div class="setlist-header">
+              <div>
+                <div class="setlist-name">${s.name}</div>
+                ${fecha ? `<div class="setlist-date">${fecha}</div>` : ''}
+              </div>
+              <div class="setlist-count">${songsOrdered.length} canciones</div>
+            </div>
+            ${songsOrdered.length > 0 ? `
+              <div class="setlist-songs">
+                ${songsOrdered.slice(0, 4).map((song, i) => `
+                  <div class="setlist-song-item">
+                    <div class="song-num">${i + 1}</div>
+                    <div class="song-name">${song.title}</div>
+                    <div class="song-key-tag">${song['original key'] || '?'}</div>
+                  </div>
+                `).join('')}
+                ${songsOrdered.length > 4 ? `<div style="font-size:0.75rem;color:#4a5568;padding:0.4rem 0">+${songsOrdered.length - 4} más...</div>` : ''}
+              </div>` : ''}
+          </div>`
+      }
+
+      contenido.innerHTML = html
+    }
+
+    function abrirModal() {
+      document.getElementById('modal').classList.add('show')
+      document.getElementById('setlist-date').value = new Date().toISOString().split('T')[0]
+    }
+
+    function cerrarModal() {
+      document.getElementById('modal').classList.remove('show')
+      document.getElementById('setlist-name').value = ''
+    }
+
+    async function crearSetlist() {
+      const name = document.getElementById('setlist-name').value.trim()
+      const date = document.getElementById('setlist-date').value
+
+      if (!name) {
+        alert('Por favor ponle un nombre al setlist.')
+        return
+      }
+
+      const { error } = await _supabase
+        .from('setlist')
+        .insert({ name, date, user_id: userId })
+
+      if (error) {
+        alert('Error creando setlist: ' + error.message)
+        return
+      }
+
+      cerrarModal()
+      cargarSetlists()
+    }
+
+    init()
+  </script>
+</body>
+</html>
