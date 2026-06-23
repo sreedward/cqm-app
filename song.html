@@ -337,7 +337,13 @@
     const setlistId = params.get('setlist')
     const setlistIndex = parseInt(params.get('index') || '0')
     const setlistSongs = params.get('songs') ? params.get('songs').split(',') : []
-
+function goBack() {
+      if (setlistId) {
+        window.location.href = `/setlist-view.html?id=${setlistId}`
+      } else {
+        window.location.href = '/library.html'
+      }
+    }
     async function init() {
       const { data: { session } } = await _supabase.auth.getSession()
       if (!session) { window.location.href = '/login.html'; return }
