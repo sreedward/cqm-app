@@ -39,6 +39,19 @@
     .header-info { flex: 1; }
     .setlist-title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; }
     .setlist-date { font-size: 0.75rem; color: #4a5568; }
+    .start-btn {
+      background: #3b82f6;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
     .section-label {
       font-size: 0.7rem;
       color: #4a5568;
@@ -53,10 +66,8 @@
       gap: 12px;
       padding: 0.75rem 0;
       border-bottom: 1px solid #0d1626;
-      cursor: pointer;
     }
     .song-card:last-child { border-bottom: none; }
-    .song-card:active { opacity: 0.7; }
     .song-num {
       width: 28px;
       height: 28px;
@@ -70,7 +81,11 @@
       font-weight: 700;
       flex-shrink: 0;
     }
-    .song-info { flex: 1; }
+    .song-num.active-song {
+      background: #3b82f6;
+      color: #fff;
+    }
+    .song-info { flex: 1; cursor: pointer; }
     .song-title { font-size: 0.9rem; font-weight: 500; color: #e2e8f0; margin-bottom: 2px; }
     .song-artist { font-size: 0.75rem; color: #4a5568; }
     .song-key {
@@ -149,6 +164,31 @@
       white-space: nowrap;
     }
     .loading { text-align: center; color: #4a5568; padding: 3rem; }
+    .show-banner {
+      background: #0d1a2d;
+      border: 1px solid #1e2d45;
+      border-radius: 12px;
+      margin: 0.75rem 1.25rem;
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .show-banner-text { font-size: 0.8rem; color: #4a5568; }
+    .show-banner-text span { color: #3b82f6; font-weight: 600; }
+    .play-btn {
+      background: #3b82f6;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
   </style>
 </head>
 <body>
@@ -162,8 +202,7 @@
     </div>
   </header>
 
-  <div class="section-label" id="count-label"></div>
-  <div class="songs-list" id="lista">
+  <div id="contenido">
     <div class="loading">Cargando...</div>
   </div>
 
@@ -192,6 +231,7 @@
 
     const params = new URLSearchParams(window.location.search)
     const setlistId = params.get('id')
+    let songsOrdered = []
 
     async function init() {
       const { data: { session } } = await _supabase.auth.getSession()
@@ -206,10 +246,7 @@
         .eq('id', setlistId)
         .single()
 
-      if (!setlist) {
-        window.location.href = '/setlist.html'
-        return
-      }
+      if (!setlist) { window.location.href = '/setlist.html'; return }
 
       document.getElementById('setlist-title').textContent = setlist.name
       document.title = setlist.name
@@ -228,8 +265,7 @@
         .order('order')
 
       if (!setlistSongs || setlistSongs.length === 0) {
-        document.getElementById('count-label').textContent = '0 canciones'
-        document.getElementById('lista').innerHTML = `
+        document.getElementById('contenido').innerHTML = `
           <div class="empty">
             <i class="ti ti-music-off"></i>
             <p>Este setlist está vacío.<br>Agrega canciones desde la biblioteca.</p>
@@ -247,29 +283,57 @@
       const songsMap = {}
       songs.forEach(s => songsMap[s.id] = s)
 
-      document.getElementById('count-label').textContent = `${setlistSongs.length} canción${setlistSongs.length !== 1 ? 'es' : ''}`
+      songsOrdered = setlistSongs.map(s => ({
+        itemId: s.id,
+        order: s.order,
+        ...songsMap[s.song_id]
+      })).filter(s => s.id)
 
-      document.getElementById('lista').innerHTML = setlistSongs.map((item, idx) => {
-        const song = songsMap[item.song_id]
-        if (!song) return ''
-        return `
+      renderLista()
+    }
+
+    function renderLista() {
+      const songIds = songsOrdered.map(s => s.id).join(',')
+
+      let html = `
+        <div class="show-banner">
+          <div class="show-banner-text">
+            <span>${songsOrdered.length} canciones</span> en este setlist
+          </div>
+          <button class="play-btn" onclick="iniciarShow(0)">
+            <i class="ti ti-player-play"></i> Iniciar show
+          </button>
+        </div>
+        <div class="section-label">Canciones</div>
+        <div class="songs-list">`
+
+      songsOrdered.forEach((song, idx) => {
+        html += `
           <div class="song-card">
             <div class="song-num">${idx + 1}</div>
-            <div class="song-info" onclick="window.location.href='/song.html?id=${song.id}'">
+            <div class="song-info" onclick="iniciarShow(${idx})">
               <div class="song-title">${song.title}</div>
               <div class="song-artist">${song.artist || 'Artista desconocido'}</div>
             </div>
             <div class="song-key">${song['original key'] || '?'}</div>
-            <button class="remove-btn" onclick="eliminarCancion(${item.id}, '${song.title}')">
+            <button class="remove-btn" onclick="eliminarCancion(${song.itemId}, '${song.title}')">
               <i class="ti ti-trash"></i>
             </button>
           </div>`
-      }).join('')
+      })
+
+      html += `</div>`
+      document.getElementById('contenido').innerHTML = html
+    }
+
+    function iniciarShow(index) {
+      const songIds = songsOrdered.map(s => s.id).join(',')
+      const songId = songsOrdered[index].id
+      window.location.href = `/song.html?id=${songId}&setlist=${setlistId}&index=${index}&songs=${songIds}`
     }
 
     async function eliminarCancion(itemId, titulo) {
       if (!confirm(`¿Quitar "${titulo}" del setlist?`)) return
-
       const { error } = await _supabase
         .from('setlist_songs')
         .delete()
