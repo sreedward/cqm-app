@@ -97,6 +97,7 @@
       padding: 2px 7px;
       font-family: monospace;
     }
+        .key-override { background: #1e3a1e; color: #4ade80; }
     .remove-btn {
       background: none;
       border: none;
@@ -268,7 +269,7 @@ async function eliminarSetlist() {
 
       const { data: setlistSongs } = await _supabase
         .from('setlist_songs')
-        .select('id, order, song_id')
+                .select('id, order, song_id, key_override')
         .eq('setlist_id', setlistId)
         .order('order')
 
@@ -294,6 +295,7 @@ async function eliminarSetlist() {
       songsOrdered = setlistSongs.map(s => ({
         itemId: s.id,
         order: s.order,
+                keyOverride: s.key_override,
         ...songsMap[s.song_id]
       })).filter(s => s.id)
 
@@ -323,7 +325,7 @@ async function eliminarSetlist() {
               <div class="song-title">${song.title}</div>
               <div class="song-artist">${song.artist || 'Artista desconocido'}</div>
             </div>
-            <div class="song-key">${song['original key'] || '?'}</div>
+                        <div class="song-key${song.keyOverride ? ' key-override' : ''}">${song.keyOverride || song['original key'] || '?'}</div>
             <button class="remove-btn" onclick="eliminarCancion(${song.itemId}, '${song.title}')">
               <i class="ti ti-trash"></i>
             </button>
@@ -337,7 +339,7 @@ async function eliminarSetlist() {
     function iniciarShow(index) {
       const songIds = songsOrdered.map(s => s.id).join(',')
       const songId = songsOrdered[index].id
-      window.location.href = `/song.html?id=${songId}&setlist=${setlistId}&index=${index}&songs=${songIds}`
+            window.location.href = `/song.html?id=${songId}&setlist=${setlistId}&index=${index}&songs=${songIds}&key=${encodeURIComponent(songsOrdered[index].keyOverride || '')}`
     }
 
     async function eliminarCancion(itemId, titulo) {
