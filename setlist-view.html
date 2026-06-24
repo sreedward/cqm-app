@@ -306,7 +306,7 @@ async function eliminarSetlist() {
       let html = `
         <div class="show-banner">
           <div class="show-banner-text">
-            <span>${songsOrdered.length} canciones</span> en este setlist
+<span>${songsOrdered.length} ${songsOrdered.length === 1 ? 'canción' : 'canciones'}</span> en este setlist
           </div>
           <button class="play-btn" onclick="iniciarShow(0)">
             <i class="ti ti-player-play"></i> Iniciar show
