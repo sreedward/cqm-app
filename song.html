@@ -90,7 +90,7 @@
       <div class="song-artist" id="song-artist"></div>
     </div>
     <button class="add-setlist-btn" onclick="abrirModalSetlist()"><i class="ti ti-plus"></i> Setlist</button>
-          <button class="add-setlist-btn" id="save-key-btn" onclick="guardarTonalidad()" style="display:none"><i class="ti ti-device-floppy"></i>i> Guardar tono</button>button>
+      <button class="add-setlist-btn" id="save-key-btn" onclick="guardarTonalidad()" style="display:none"><i class="ti ti-device-floppy"></i> Guardar tono</button>
   </header>
 
   <div class="transpose-bar">
@@ -151,7 +151,8 @@
     const setlistId = params.get('setlist')
     const setlistIndex = parseInt(params.get('index') || '0')
     const setlistSongs = params.get('songs') ? params.get('songs').split(',') : []
-        const keyParam = params.get('key') || ''
+    let keyParam = params.get('key') || ''
+    let keysParam = params.get('keys') || ''
 
 function goBack() {
         history.back()
@@ -161,7 +162,9 @@ function goBack() {
       const newIndex = setlistIndex + direction
       if (newIndex < 0 || newIndex >= setlistSongs.length) return
       const newSongId = setlistSongs[newIndex]
-      window.location.href = `/song.html?id=${newSongId}&setlist=${setlistId}&index=${newIndex}&songs=${setlistSongs.join(',')}`
+      const keysArr = keysParam ? keysParam.split(',') : []
+      const newKey = keysArr[newIndex] || ''
+      window.location.href = '/song.html?id=' + newSongId + '&setlist=' + setlistId + '&index=' + newIndex + '&songs=' + setlistSongs.join(',') + '&keys=' + encodeURIComponent(keysParam) + '&key=' + encodeURIComponent(newKey)
     }
 
     function traducirAcorde(acorde) {
@@ -319,13 +322,25 @@ function goBack() {
       if (error) { mostrarToast('Error al agregar') } else { mostrarToast(`✓ Agregado a "${setlistName}"`); cerrarModalSetlist() }
     }
 
-        async function guardarTonalidad() {
-                if (!setlistId || !songId) return
-                const rootIdx = NOTAS.indexOf(originalKey)
-                const currentKey = NOTAS[(rootIdx + semitones + 12) % 12]
-                const { error } = await _supabase.from('setlist_songs').update({ key_override: currentKey }).eq('setlist_id', setlistId).eq('song_id', parseInt(songId))
-                if (error) { mostrarToast('Error al guardar') } else { mostrarToast(`✓ Tonalidad ${currentKey} guardada en setlist`) }
-        }
+    async function guardarTonalidad() {
+      if (!setlistId || !songId) return
+      const rootIdx = NOTAS.indexOf(originalKey)
+      const currentKey = NOTAS[(rootIdx + semitones + 12) % 12]
+      const { error } = await _supabase.from('setlist_songs').update({ key_override: currentKey }).eq('setlist_id', setlistId).eq('song_id', parseInt(songId))
+      if (error) {
+        mostrarToast('Error al guardar')
+      } else {
+        mostrarToast('Tonalidad ' + currentKey + ' guardada')
+        // Update keysParam in memory so irACancion passes correct keys
+        const keysArr = keysParam ? keysParam.split(',') : setlistSongs.map(() => '')
+        keysArr[setlistIndex] = currentKey
+        const newKeys = keysArr.join(',')
+        keysParam = newKeys
+        keyParam = currentKey
+        const newUrl = '/song.html?id=' + songId + '&setlist=' + setlistId + '&index=' + setlistIndex + '&songs=' + setlistSongs.join(',') + '&keys=' + encodeURIComponent(newKeys) + '&key=' + encodeURIComponent(currentKey)
+        history.replaceState(null, '', newUrl)
+      }
+    }
 
     function mostrarToast(msg) {
       const toast = document.getElementById('toast')
