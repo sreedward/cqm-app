@@ -333,22 +333,48 @@ function goBack() {
       const rootIdx    = NOTAS.indexOf(originalKey)
       const currentKey = NOTAS[(rootIdx + semitones + 12) % 12]
 
-      // Usar setlistItemId (id directo del registro) si está disponible,
-      // si no, caer en el filtro por setlist_id + song_id como fallback
-      let updateQuery = _supabase.from('setlist_songs').update({ key_override: currentKey })
-      if (setlistItemId) {
-        updateQuery = updateQuery.eq('id', parseInt(setlistItemId))
+      // UPDATE bloqueado por RLS — usar DELETE + INSERT
+      // Primero leer el registro actual para obtener setlist_id, song_id, order
+      let setlistIdNum = parseInt(setlistId)
+      let songIdNum    = parseInt(songId)
+      let currentItemId = setlistItemId ? parseInt(setlistItemId) : null
+
+      let currentRecord = null
+      if (currentItemId) {
+        const { data: rec } = await _supabase.from('setlist_songs').select('*').eq('id', currentItemId).single()
+        currentRecord = rec
       } else {
-        updateQuery = updateQuery.eq('setlist_id', parseInt(setlistId)).eq('song_id', parseInt(songId))
+        const { data: rec } = await _supabase.from('setlist_songs').select('*').eq('setlist_id', setlistIdNum).eq('song_id', songIdNum).single()
+        currentRecord = rec
       }
 
-      const { error, data } = await updateQuery.select()
+      if (!currentRecord) {
+        mostrarToast('Error: registro no encontrado')
+        return
+      }
+
+      // DELETE el registro actual
+      await _supabase.from('setlist_songs').delete().eq('id', currentRecord.id)
+
+      // INSERT nuevo registro con key_override
+      const { data: inserted, error } = await _supabase.from('setlist_songs').insert({
+        setlist_id:   currentRecord.setlist_id,
+        song_id:      currentRecord.song_id,
+        order:        currentRecord.order,
+        key_override: currentKey
+      }).select().single()
 
       if (error) {
-        mostrarToast('Error: ' + error.message)
+        mostrarToast('Error al guardar: ' + error.message)
       } else {
         mostrarToast('Tonalidad ' + currentKey + ' guardada')
-        setlistItemId = setlistItemId  // ya lo tenemos
+        // Actualizar setlistItemId con el nuevo id del registro insertado
+        setlistItemId = String(inserted.id)
+        // Actualizar itemIdsParam con el nuevo id
+        const itemsArr = itemIdsParam ? itemIdsParam.split(',') : setlistSongs.map(() => '')
+        itemsArr[setlistIndex] = String(inserted.id)
+        itemIdsParam = itemsArr.join(',')
+        // Actualizar keys en memoria
         const keysArr = keysParam ? keysParam.split(',') : setlistSongs.map(() => '')
         keysArr[setlistIndex] = currentKey
         const newKeys = keysArr.join(',')
