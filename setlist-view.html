@@ -339,7 +339,9 @@ async function eliminarSetlist() {
     function iniciarShow(index) {
       const songIds = songsOrdered.map(s => s.id).join(',')
       const songId = songsOrdered[index].id
-            window.location.href = `/song.html?id=${songId}&setlist=${setlistId}&index=${index}&songs=${songIds}&key=${encodeURIComponent(songsOrdered[index].keyOverride || '')}`
+      const allKeys = songsOrdered.map(s => s.keyOverride || '').join(',')
+      const keyForSong = songsOrdered[index].keyOverride || ''
+      window.location.href = '/song.html?id=' + songId + '&setlist=' + setlistId + '&index=' + index + '&songs=' + songIds + '&keys=' + encodeURIComponent(allKeys) + '&key=' + encodeURIComponent(keyForSong)
     }
 
     async function eliminarCancion(itemId, titulo) {
