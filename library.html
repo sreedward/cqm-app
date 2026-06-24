@@ -136,6 +136,58 @@
     .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
     .nav-item.active i { color: #3b82f6; }
     .nav-item.active span { color: #3b82f6; }
+  
+    /* ── Onboarding Modal ── */
+    #onboarding-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    #onboarding-overlay.visible { display: flex; }
+    #onboarding-modal {
+      background: #0d1626;
+      border: 1px solid #1e2d45;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      padding: 2rem 1.5rem 1.5rem;
+      text-align: center;
+      position: relative;
+    }
+    .ob-step { display: none; }
+    .ob-step.active { display: block; }
+    .ob-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .ob-title { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+    .ob-desc { font-size: 0.88rem; color: #8a9bb0; line-height: 1.5; margin-bottom: 1.5rem; }
+    .ob-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 1.25rem; }
+    .ob-dot { width: 8px; height: 8px; border-radius: 50%; background: #1e2d45; transition: background 0.2s; }
+    .ob-dot.active { background: #3b82f6; }
+    .ob-btn {
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.65rem 2rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+    .ob-btn:hover { background: #2563eb; }
+    .ob-skip {
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: #4a5568;
+      cursor: pointer;
+      background: none;
+      border: none;
+      width: 100%;
+    }
+    .ob-skip:hover { color: #8a9bb0; }
   </style>
 </head>
 <body>
@@ -189,6 +241,54 @@
       const { data: { session } } = await _supabase.auth.getSession()
       if (!session) { window.location.href = '/login.html'; return }
       cargarCanciones()
+      verificarOnboarding(session.user.id)
+    }
+
+    async function verificarOnboarding(userId) {
+      const { data: profile } = await _supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', userId)
+        .single()
+      if (profile && profile.onboarding_completed === false) {
+        mostrarOnboarding(userId)
+      }
+    }
+
+    function mostrarOnboarding(userId) {
+      const overlay = document.getElementById('onboarding-overlay')
+      overlay.classList.add('visible')
+      let paso = 0
+      const steps = document.querySelectorAll('.ob-step')
+      const dots = document.querySelectorAll('.ob-dot')
+      const btnNext = document.getElementById('ob-next-btn')
+      const btnSkip = document.getElementById('ob-skip-btn')
+
+      function irAPaso(n) {
+        steps.forEach(s => s.classList.remove('active'))
+        dots.forEach(d => d.classList.remove('active'))
+        steps[n].classList.add('active')
+        dots[n].classList.add('active')
+        btnNext.textContent = n === steps.length - 1 ? '\u00a1Empezar! \uD83D\uDE80' : 'Siguiente \u2192'
+      }
+
+      async function cerrar() {
+        overlay.classList.remove('visible')
+        await _supabase.from('profiles').update({ onboarding_completed: true }).eq('id', userId)
+      }
+
+      btnNext.addEventListener('click', async () => {
+        if (paso < steps.length - 1) {
+          paso++
+          irAPaso(paso)
+        } else {
+          await cerrar()
+        }
+      })
+
+      btnSkip.addEventListener('click', async () => {
+        await cerrar()
+      })
     }
 
     async function cargarCanciones() {
@@ -243,5 +343,50 @@
 
     init()
   </script>
+
+  <!-- Onboarding Modal -->
+  <div id="onboarding-overlay">
+    <div id="onboarding-modal">
+
+      <!-- Step 1 -->
+      <div class="ob-step active" data-step="0">
+        <div class="ob-icon">👋</div>
+        <div class="ob-title">¡Bienvenido a CQM!</div>
+        <div class="ob-desc">Tu app para gestionar canciones y setlists de forma rápida y sencilla. Te explicamos cómo empezar en 3 pasos.</div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="ob-step" data-step="1">
+        <div class="ob-icon">🎵</div>
+        <div class="ob-title">Explora la biblioteca</div>
+        <div class="ob-desc">Aquí encuentras todas las canciones disponibles con sus acordes. Toca cualquier canción para verla y agregarla a un setlist.</div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="ob-step" data-step="2">
+        <div class="ob-icon">📋</div>
+        <div class="ob-title">Crea tu setlist</div>
+        <div class="ob-desc">Organiza tus canciones por servicio o evento. Ve a la sección Setlist y crea uno nuevo con las canciones que necesitas.</div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="ob-step" data-step="3">
+        <div class="ob-icon">🎸</div>
+        <div class="ob-title">Transpón al tono ideal</div>
+        <div class="ob-desc">Dentro de cada canción puedes cambiar el tono y guardarlo. Así siempre abrirá en el tono que asignaste para ese setlist.</div>
+      </div>
+
+      <!-- Dots -->
+      <div class="ob-dots">
+        <div class="ob-dot active"></div>
+        <div class="ob-dot"></div>
+        <div class="ob-dot"></div>
+        <div class="ob-dot"></div>
+      </div>
+
+      <button class="ob-btn" id="ob-next-btn">Siguiente →</button>
+      <button class="ob-skip" id="ob-skip-btn">Omitir introducción</button>
+    </div>
+  </div>
 </body>
 </html>
