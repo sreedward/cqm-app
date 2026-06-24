@@ -90,6 +90,7 @@
       <div class="song-artist" id="song-artist"></div>
     </div>
     <button class="add-setlist-btn" onclick="abrirModalSetlist()"><i class="ti ti-plus"></i> Setlist</button>
+          <button class="add-setlist-btn" id="save-key-btn" onclick="guardarTonalidad()" style="display:none"><i class="ti ti-device-floppy"></i>i> Guardar tono</button>button>
   </header>
 
   <div class="transpose-bar">
@@ -150,6 +151,7 @@
     const setlistId = params.get('setlist')
     const setlistIndex = parseInt(params.get('index') || '0')
     const setlistSongs = params.get('songs') ? params.get('songs').split(',') : []
+        const keyParam = params.get('key') || ''
 
 function goBack() {
         history.back()
@@ -238,6 +240,7 @@ function goBack() {
       const newIdx = (rootIdx + semitones) % 12
       document.getElementById('key-display').textContent = NOTAS[newIdx]
       renderAll()
+            if (setlistId) { const btn = document.getElementById('save-key-btn'); if (btn) btn.style.display = 'flex' }
     }
 
     function setCifrado(tipo) {
@@ -271,6 +274,12 @@ function goBack() {
       const rawKey = song['original key'] || 'C'
       originalKey = BEMOLES[rawKey] || rawKey
       document.getElementById('key-display').textContent = rawKey
+            if (keyParam && NOTAS.includes(keyParam)) {
+                      const targetIdx = NOTAS.indexOf(keyParam)
+                      const originIdx = NOTAS.indexOf(originalKey)
+                      semitones = (targetIdx - originIdx + 12) % 12
+                      document.getElementById('key-display').textContent = keyParam
+            }
       const { data: secs } = await _supabase.from('sections').select('*').eq('song_id', songId).order('order')
       sections = secs || []
       renderAll()
@@ -309,6 +318,14 @@ function goBack() {
       const { error } = await _supabase.from('setlist_songs').insert({ setlist_id: setlistId, song_id: parseInt(songId), order: nextOrder })
       if (error) { mostrarToast('Error al agregar') } else { mostrarToast(`✓ Agregado a "${setlistName}"`); cerrarModalSetlist() }
     }
+
+        async function guardarTonalidad() {
+                if (!setlistId || !songId) return
+                const rootIdx = NOTAS.indexOf(originalKey)
+                const currentKey = NOTAS[(rootIdx + semitones + 12) % 12]
+                const { error } = await _supabase.from('setlist_songs').update({ key_override: currentKey }).eq('setlist_id', setlistId).eq('song_id', parseInt(songId))
+                if (error) { mostrarToast('Error al guardar') } else { mostrarToast(`✓ Tonalidad ${currentKey} guardada en setlist`) }
+        }
 
     function mostrarToast(msg) {
       const toast = document.getElementById('toast')
