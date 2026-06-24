@@ -153,18 +153,22 @@
     const setlistSongs = params.get('songs') ? params.get('songs').split(',') : []
     let keyParam = params.get('key') || ''
     let keysParam = params.get('keys') || ''
+    let setlistItemId = params.get('itemid') || ''
+    let itemIdsParam = params.get('itemids') || ''
 
 function goBack() {
         history.back()
 }
 
     function irACancion(direction) {
-      const newIndex = setlistIndex + direction
+      const newIndex  = setlistIndex + direction
       if (newIndex < 0 || newIndex >= setlistSongs.length) return
       const newSongId = setlistSongs[newIndex]
-      const keysArr = keysParam ? keysParam.split(',') : []
-      const newKey = keysArr[newIndex] || ''
-      window.location.href = '/song.html?id=' + newSongId + '&setlist=' + setlistId + '&index=' + newIndex + '&songs=' + setlistSongs.join(',') + '&keys=' + encodeURIComponent(keysParam) + '&key=' + encodeURIComponent(newKey)
+      const keysArr   = keysParam ? keysParam.split(',') : []
+      const newKey    = keysArr[newIndex] || ''
+      const itemsArr  = itemIdsParam ? itemIdsParam.split(',') : []
+      const newItemId = itemsArr[newIndex] || ''
+      window.location.href = '/song.html?id=' + newSongId + '&setlist=' + setlistId + '&index=' + newIndex + '&songs=' + setlistSongs.join(',') + '&itemids=' + encodeURIComponent(itemIdsParam) + '&itemid=' + encodeURIComponent(newItemId) + '&keys=' + encodeURIComponent(keysParam) + '&key=' + encodeURIComponent(newKey)
     }
 
     function traducirAcorde(acorde) {
@@ -283,6 +287,8 @@ function goBack() {
                       semitones = (targetIdx - originIdx + 12) % 12
                       document.getElementById('key-display').textContent = keyParam
             }
+      // Si ya tiene tono guardado, mostrar botón para poder cambiarlo
+      if (setlistId && keyParam) { const btn = document.getElementById('save-key-btn'); if (btn) btn.style.display = 'flex' }
       const { data: secs } = await _supabase.from('sections').select('*').eq('song_id', songId).order('order')
       sections = secs || []
       renderAll()
@@ -324,20 +330,31 @@ function goBack() {
 
     async function guardarTonalidad() {
       if (!setlistId || !songId) return
-      const rootIdx = NOTAS.indexOf(originalKey)
+      const rootIdx    = NOTAS.indexOf(originalKey)
       const currentKey = NOTAS[(rootIdx + semitones + 12) % 12]
-      const { error } = await _supabase.from('setlist_songs').update({ key_override: currentKey }).eq('setlist_id', setlistId).eq('song_id', parseInt(songId))
+
+      // Usar setlistItemId (id directo del registro) si está disponible,
+      // si no, caer en el filtro por setlist_id + song_id como fallback
+      let updateQuery = _supabase.from('setlist_songs').update({ key_override: currentKey })
+      if (setlistItemId) {
+        updateQuery = updateQuery.eq('id', parseInt(setlistItemId))
+      } else {
+        updateQuery = updateQuery.eq('setlist_id', parseInt(setlistId)).eq('song_id', parseInt(songId))
+      }
+
+      const { error, data } = await updateQuery.select()
+
       if (error) {
-        mostrarToast('Error al guardar')
+        mostrarToast('Error: ' + error.message)
       } else {
         mostrarToast('Tonalidad ' + currentKey + ' guardada')
-        // Update keysParam in memory so irACancion passes correct keys
+        setlistItemId = setlistItemId  // ya lo tenemos
         const keysArr = keysParam ? keysParam.split(',') : setlistSongs.map(() => '')
         keysArr[setlistIndex] = currentKey
         const newKeys = keysArr.join(',')
         keysParam = newKeys
-        keyParam = currentKey
-        const newUrl = '/song.html?id=' + songId + '&setlist=' + setlistId + '&index=' + setlistIndex + '&songs=' + setlistSongs.join(',') + '&keys=' + encodeURIComponent(newKeys) + '&key=' + encodeURIComponent(currentKey)
+        keyParam  = currentKey
+        const newUrl = '/song.html?id=' + songId + '&setlist=' + setlistId + '&index=' + setlistIndex + '&songs=' + setlistSongs.join(',') + '&itemids=' + encodeURIComponent(itemIdsParam) + '&itemid=' + encodeURIComponent(setlistItemId) + '&keys=' + encodeURIComponent(newKeys) + '&key=' + encodeURIComponent(currentKey)
         history.replaceState(null, '', newUrl)
       }
     }
