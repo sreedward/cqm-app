@@ -265,7 +265,10 @@
       const { data: { session } } = await _supabase.auth.getSession()
       if (!session) { window.location.href = '/login.html'; return }
       const { data: song } = await _supabase.from('Songs').select('*').eq('id', songId).single()
-      if (!song) return
+      if (!song) {
+        document.getElementById('song-title').textContent = 'No se pudo cargar la canción'
+        return
+      }
       document.getElementById('song-title').textContent = song.title
       document.getElementById('song-artist').textContent = song.artist || ''
       document.title = song.title
