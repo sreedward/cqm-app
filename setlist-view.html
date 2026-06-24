@@ -337,11 +337,13 @@ async function eliminarSetlist() {
     }
 
     function iniciarShow(index) {
-      const songIds = songsOrdered.map(s => s.id).join(',')
-      const songId = songsOrdered[index].id
-      const allKeys = songsOrdered.map(s => s.keyOverride || '').join(',')
+      const songIds    = songsOrdered.map(s => s.id).join(',')
+      const itemIds    = songsOrdered.map(s => s.itemId).join(',')
+      const songId     = songsOrdered[index].id
+      const itemId     = songsOrdered[index].itemId
+      const allKeys    = songsOrdered.map(s => s.keyOverride || '').join(',')
       const keyForSong = songsOrdered[index].keyOverride || ''
-      window.location.href = '/song.html?id=' + songId + '&setlist=' + setlistId + '&index=' + index + '&songs=' + songIds + '&keys=' + encodeURIComponent(allKeys) + '&key=' + encodeURIComponent(keyForSong)
+      window.location.href = '/song.html?id=' + songId + '&setlist=' + setlistId + '&index=' + index + '&songs=' + songIds + '&itemids=' + itemIds + '&itemid=' + itemId + '&keys=' + encodeURIComponent(allKeys) + '&key=' + encodeURIComponent(keyForSong)
     }
 
     async function eliminarCancion(itemId, titulo) {
