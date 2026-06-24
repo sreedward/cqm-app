@@ -241,7 +241,7 @@
     </a>
     <a class="nav-item" href="/more.html">
       <i class="ti ti-dots-circle-horizontal"></i>
-      <span>MÃ¡s</span>
+      <span>MÃÂ¡s</span>
     </a>
   </nav>
 
@@ -253,7 +253,7 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
     )
 async function eliminarSetlist() {
-      if (!confirm('Â¿Eliminar este setlist completo?')) return
+      if (!confirm('ÃÂ¿Eliminar este setlist completo?')) return
       await _supabase.from('setlist_songs').delete().eq('setlist_id', setlistId)
       await _supabase.from('setlist').delete().eq('id', setlistId)
       window.location.href = '/setlist.html'
@@ -297,7 +297,7 @@ async function eliminarSetlist() {
         document.getElementById('contenido').innerHTML = `
           <div class="empty">
             <i class="ti ti-music-off"></i>
-            <p>Este setlist estÃ¡ vacÃ­o.<br>Agrega canciones desde la biblioteca.</p>
+            <p>Este setlist estÃÂ¡ vacÃÂ­o.<br>Agrega canciones desde la biblioteca.</p>
             <button class="empty-btn" onclick="window.location.href='/library.html'">Ir a Biblioteca</button>
           </div>`
         return
@@ -328,7 +328,7 @@ async function eliminarSetlist() {
       let html = `
         <div class="show-banner">
           <div class="show-banner-text">
-<span>${songsOrdered.length} ${songsOrdered.length === 1 ? 'canciÃ³n' : 'canciones'}</span> en este setlist
+<span>${songsOrdered.length} ${songsOrdered.length === 1 ? 'canciÃÂ³n' : 'canciones'}</span> en este setlist
           </div>
           <button class="play-btn" onclick="iniciarShow(0)">
             <i class="ti ti-player-play"></i> Iniciar show
@@ -369,7 +369,7 @@ async function eliminarSetlist() {
     }
 
     async function eliminarCancion(itemId, titulo) {
-      if (!confirm(`Â¿Quitar "${titulo}" del setlist?`)) return
+      if (!confirm(`ÃÂ¿Quitar "${titulo}" del setlist?`)) return
       const { error } = await _supabase
         .from('setlist_songs')
         .delete()
@@ -378,7 +378,7 @@ async function eliminarSetlist() {
       if (error) {
         mostrarToast('Error al eliminar')
       } else {
-        mostrarToast(`â "${titulo}" eliminado`)
+        mostrarToast(`Ã¢ÂÂ "${titulo}" eliminado`)
         cargarSetlist()
       }
     }
@@ -438,7 +438,7 @@ async function eliminarSetlist() {
         guardarOrden()
       })
 
-      // ── Touch support for mobile ──────────────────────────────────
+      // ââ Touch support for mobile ââââââââââââââââââââââââââââââââââ
       let touchCard = null, touchClone = null, touchStartY = 0
 
       lista.addEventListener('touchstart', e => {
@@ -492,10 +492,21 @@ async function eliminarSetlist() {
     }
 
     async function guardarOrden() {
-      const updates = songsOrdered.map((song, idx) =>
-        _supabase.from('setlist_songs').update({ order: idx + 1 }).eq('id', song.itemId)
-      )
-      await Promise.all(updates)
+      // UPDATE bloqueado por RLS — usar DELETE + INSERT para cada canción
+      for (let idx = 0; idx < songsOrdered.length; idx++) {
+        const song = songsOrdered[idx]
+        const { data: current } = await _supabase
+          .from('setlist_songs').select('*').eq('id', song.itemId).single()
+        if (!current) continue
+        await _supabase.from('setlist_songs').delete().eq('id', song.itemId)
+        const { data: inserted } = await _supabase.from('setlist_songs').insert({
+          setlist_id:   current.setlist_id,
+          song_id:      current.song_id,
+          key_override: current.key_override,
+          order:        idx + 1
+        }).select().single()
+        if (inserted) songsOrdered[idx].itemId = inserted.id
+      }
       mostrarToast('Orden guardado')
     }
 
