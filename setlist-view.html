@@ -190,6 +190,26 @@
       align-items: center;
       gap: 4px;
     }
+  
+    .drag-handle {
+      color: #2a3a50;
+      cursor: grab;
+      padding: 4px 6px 4px 0;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      touch-action: none;
+      user-select: none;
+    }
+    .drag-handle:active { cursor: grabbing; }
+    .song-card { transition: opacity 0.15s; }
+    .song-card.dragging {
+      opacity: 0.35;
+      background: #111c2e;
+      border-radius: 8px;
+    }
+    .song-card.drag-over {
+      border-top: 2px solid #3b82f6;
+    }
   </style>
 </head>
 <body>
@@ -221,7 +241,7 @@
     </a>
     <a class="nav-item" href="/more.html">
       <i class="ti ti-dots-circle-horizontal"></i>
-      <span>Más</span>
+      <span>MÃ¡s</span>
     </a>
   </nav>
 
@@ -233,7 +253,7 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
     )
 async function eliminarSetlist() {
-      if (!confirm('¿Eliminar este setlist completo?')) return
+      if (!confirm('Â¿Eliminar este setlist completo?')) return
       await _supabase.from('setlist_songs').delete().eq('setlist_id', setlistId)
       await _supabase.from('setlist').delete().eq('id', setlistId)
       window.location.href = '/setlist.html'
@@ -277,7 +297,7 @@ async function eliminarSetlist() {
         document.getElementById('contenido').innerHTML = `
           <div class="empty">
             <i class="ti ti-music-off"></i>
-            <p>Este setlist está vacío.<br>Agrega canciones desde la biblioteca.</p>
+            <p>Este setlist estÃ¡ vacÃ­o.<br>Agrega canciones desde la biblioteca.</p>
             <button class="empty-btn" onclick="window.location.href='/library.html'">Ir a Biblioteca</button>
           </div>`
         return
@@ -308,7 +328,7 @@ async function eliminarSetlist() {
       let html = `
         <div class="show-banner">
           <div class="show-banner-text">
-<span>${songsOrdered.length} ${songsOrdered.length === 1 ? 'canción' : 'canciones'}</span> en este setlist
+<span>${songsOrdered.length} ${songsOrdered.length === 1 ? 'canciÃ³n' : 'canciones'}</span> en este setlist
           </div>
           <button class="play-btn" onclick="iniciarShow(0)">
             <i class="ti ti-player-play"></i> Iniciar show
@@ -319,13 +339,14 @@ async function eliminarSetlist() {
 
       songsOrdered.forEach((song, idx) => {
         html += `
-          <div class="song-card">
+          <div class="song-card" draggable="true" data-item-id="${song.itemId}" data-index="${idx}">
+            <div class="drag-handle" title="Arrastrar para reordenar">&#9776;</div>
             <div class="song-num">${idx + 1}</div>
             <div class="song-info" onclick="iniciarShow(${idx})">
               <div class="song-title">${song.title}</div>
               <div class="song-artist">${song.artist || 'Artista desconocido'}</div>
             </div>
-                        <div class="song-key${song.keyOverride ? ' key-override' : ''}">${song.keyOverride || song['original key'] || '?'}</div>
+            <div class="song-key${song.keyOverride ? ' key-override' : ''}">${song.keyOverride || song['original key'] || '?'}</div>
             <button class="remove-btn" onclick="eliminarCancion(${song.itemId}, '${song.title}')">
               <i class="ti ti-trash"></i>
             </button>
@@ -334,6 +355,7 @@ async function eliminarSetlist() {
 
       html += `</div>`
       document.getElementById('contenido').innerHTML = html
+      initDragDrop()
     }
 
     function iniciarShow(index) {
@@ -347,7 +369,7 @@ async function eliminarSetlist() {
     }
 
     async function eliminarCancion(itemId, titulo) {
-      if (!confirm(`¿Quitar "${titulo}" del setlist?`)) return
+      if (!confirm(`Â¿Quitar "${titulo}" del setlist?`)) return
       const { error } = await _supabase
         .from('setlist_songs')
         .delete()
@@ -356,7 +378,7 @@ async function eliminarSetlist() {
       if (error) {
         mostrarToast('Error al eliminar')
       } else {
-        mostrarToast(`✓ "${titulo}" eliminado`)
+        mostrarToast(`â "${titulo}" eliminado`)
         cargarSetlist()
       }
     }
@@ -366,6 +388,115 @@ async function eliminarSetlist() {
       toast.textContent = msg
       toast.style.display = 'block'
       setTimeout(() => { toast.style.display = 'none' }, 2500)
+    }
+
+    function initDragDrop() {
+      const lista = document.querySelector('.songs-list')
+      if (!lista) return
+      let dragSrc = null
+
+      lista.addEventListener('dragstart', e => {
+        const card = e.target.closest('.song-card')
+        if (!card) return
+        dragSrc = card
+        card.classList.add('dragging')
+        e.dataTransfer.effectAllowed = 'move'
+        e.dataTransfer.setData('text/plain', card.dataset.index)
+      })
+
+      lista.addEventListener('dragend', e => {
+        const card = e.target.closest('.song-card')
+        if (card) card.classList.remove('dragging')
+        lista.querySelectorAll('.song-card').forEach(c => c.classList.remove('drag-over'))
+      })
+
+      lista.addEventListener('dragover', e => {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = 'move'
+        const card = e.target.closest('.song-card')
+        lista.querySelectorAll('.song-card').forEach(c => c.classList.remove('drag-over'))
+        if (card && card !== dragSrc) card.classList.add('drag-over')
+      })
+
+      lista.addEventListener('drop', e => {
+        e.preventDefault()
+        const card = e.target.closest('.song-card')
+        if (!card || card === dragSrc) return
+        lista.querySelectorAll('.song-card').forEach(c => c.classList.remove('drag-over'))
+
+        const cards = [...lista.querySelectorAll('.song-card')]
+        const srcIdx = cards.indexOf(dragSrc)
+        const tgtIdx = cards.indexOf(card)
+
+        // Reorder songsOrdered array
+        const moved = songsOrdered.splice(srcIdx, 1)[0]
+        songsOrdered.splice(tgtIdx, 0, moved)
+
+        // Re-render and save
+        renderLista()
+        initDragDrop()
+        guardarOrden()
+      })
+
+      // ── Touch support for mobile ──────────────────────────────────
+      let touchCard = null, touchClone = null, touchStartY = 0
+
+      lista.addEventListener('touchstart', e => {
+        const handle = e.target.closest('.drag-handle')
+        if (!handle) return
+        touchCard = handle.closest('.song-card')
+        if (!touchCard) return
+        touchStartY = e.touches[0].clientY
+        touchCard.classList.add('dragging')
+
+        touchClone = touchCard.cloneNode(true)
+        touchClone.style.cssText = 'position:fixed;left:0;right:0;z-index:9999;opacity:0.85;background:#111c2e;border-radius:8px;pointer-events:none;'
+        touchClone.style.top = touchCard.getBoundingClientRect().top + 'px'
+        document.body.appendChild(touchClone)
+        e.preventDefault()
+      }, { passive: false })
+
+      lista.addEventListener('touchmove', e => {
+        if (!touchCard) return
+        const dy = e.touches[0].clientY - touchStartY
+        touchClone.style.top = (touchCard.getBoundingClientRect().top + dy) + 'px'
+
+        const el = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY)
+        const over = el?.closest('.song-card')
+        lista.querySelectorAll('.song-card').forEach(c => c.classList.remove('drag-over'))
+        if (over && over !== touchCard) over.classList.add('drag-over')
+        e.preventDefault()
+      }, { passive: false })
+
+      lista.addEventListener('touchend', e => {
+        if (!touchCard) return
+        if (touchClone) { touchClone.remove(); touchClone = null }
+        touchCard.classList.remove('dragging')
+
+        const el = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
+        const target = el?.closest('.song-card')
+        lista.querySelectorAll('.song-card').forEach(c => c.classList.remove('drag-over'))
+
+        if (target && target !== touchCard) {
+          const cards = [...lista.querySelectorAll('.song-card')]
+          const srcIdx = cards.indexOf(touchCard)
+          const tgtIdx = cards.indexOf(target)
+          const moved = songsOrdered.splice(srcIdx, 1)[0]
+          songsOrdered.splice(tgtIdx, 0, moved)
+          renderLista()
+          initDragDrop()
+          guardarOrden()
+        }
+        touchCard = null
+      })
+    }
+
+    async function guardarOrden() {
+      const updates = songsOrdered.map((song, idx) =>
+        _supabase.from('setlist_songs').update({ order: idx + 1 }).eq('id', song.itemId)
+      )
+      await Promise.all(updates)
+      mostrarToast('Orden guardado')
     }
 
     init()
