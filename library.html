@@ -256,9 +256,59 @@
       const { data: { session } } = await _supabase.auth.getSession()
       if (!session) { window.location.href = '/login.html'; return }
       cargarCanciones()
-      verificarOnboarding(session.user.id)
+      // verificarOnboarding(session.user.id) // Onboarding v1 desactivado
+      verificarInstalacionPWA(session.user.id)
     }
 
+    // ── PWA Install Prompt (reemplaza onboarding v1) ──
+    let _deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      _deferredInstallPrompt = e;
+    });
+
+    async function verificarInstalacionPWA(userId) {
+      const { data: profile } = await _supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', userId)
+        .single();
+      if (profile && profile.onboarding_completed === false) {
+        mostrarModalInstalacion(userId);
+      }
+    }
+
+    async function mostrarModalInstalacion(userId) {
+      const overlay = document.getElementById('onboarding-overlay');
+      overlay.classList.add('visible');
+
+      async function cerrarModal() {
+        overlay.classList.remove('visible');
+        await _supabase.from('profiles').update({ onboarding_completed: true }).eq('id', userId);
+      }
+
+      document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+        if (_deferredInstallPrompt) {
+          _deferredInstallPrompt.prompt();
+          const { outcome } = await _deferredInstallPrompt.userChoice;
+          _deferredInstallPrompt = null;
+          await cerrarModal();
+        } else {
+          document.getElementById('pwa-main-content').style.display = 'none';
+          document.getElementById('pwa-ios-instructions').style.display = 'block';
+        }
+      });
+
+      document.getElementById('pwa-later-btn').addEventListener('click', async () => {
+        await cerrarModal();
+      });
+
+      document.getElementById('pwa-ios-ok-btn').addEventListener('click', async () => {
+        await cerrarModal();
+      });
+    }
+
+    // ── Onboarding v1 (desactivado, conservado para referencia futura) ──
     async function verificarOnboarding(userId) {
       const { data: profile } = await _supabase
         .from('profiles')
@@ -363,44 +413,23 @@
   <div id="onboarding-overlay">
     <div id="onboarding-modal">
 
-      <!-- Step 1 -->
-      <div class="ob-step active" data-step="0">
-        <div class="ob-icon">👋</div>
-        <div class="ob-title">¡Bienvenido a CQM!</div>
-        <div class="ob-desc">Tu app para gestionar canciones y setlists de forma rápida y sencilla. Te explicamos cómo empezar en 3 pasos.</div>
+      <!-- ── Modal de instalación PWA ── -->
+      <div id="pwa-main-content">
+        <div class="ob-icon">📱</div>
+        <div class="ob-title">Instala CQM</div>
+        <div class="ob-desc">Agrega CQM a la pantalla principal de tu teléfono para acceder rápidamente a tus canciones y setlists durante ensayos y servicios.</div>
+        <button class="ob-btn" id="pwa-install-btn">Instalar CQM</button>
+        <button class="ob-skip" id="pwa-later-btn">Más tarde</button>
       </div>
 
-      <!-- Step 2 -->
-      <div class="ob-step" data-step="1">
-        <div class="ob-icon">🎵</div>
-        <div class="ob-title">Explora la biblioteca</div>
-        <div class="ob-desc">Aquí encuentras todas las canciones disponibles con sus acordes. Toca cualquier canción para verla y agregarla a un setlist.</div>
-      </div>
-
-      <!-- Step 3 -->
-      <div class="ob-step" data-step="2">
+      <!-- ── Instrucciones para iPhone/iPad ── -->
+      <div id="pwa-ios-instructions" style="display:none">
         <div class="ob-icon">📋</div>
-        <div class="ob-title">Crea tu setlist</div>
-        <div class="ob-desc">Organiza tus canciones por servicio o evento. Ve a la sección Setlist y crea uno nuevo con las canciones que necesitas.</div>
+        <div class="ob-title">Cómo instalar en iPhone</div>
+        <div class="ob-desc">1. Toca el botón <strong>Compartir</strong> (□↑) en Safari<br><br>2. Desliza hacia abajo y toca <strong>"Agregar a pantalla de inicio"</strong><br><br>3. Toca <strong>Agregar</strong></div>
+        <button class="ob-btn" id="pwa-ios-ok-btn">Entendido ✓</button>
       </div>
 
-      <!-- Step 4 -->
-      <div class="ob-step" data-step="3">
-        <div class="ob-icon">🎸</div>
-        <div class="ob-title">Transpón al tono ideal</div>
-        <div class="ob-desc">Dentro de cada canción puedes cambiar el tono y guardarlo. Así siempre abrirá en el tono que asignaste para ese setlist.</div>
-      </div>
-
-      <!-- Dots -->
-      <div class="ob-dots">
-        <div class="ob-dot active"></div>
-        <div class="ob-dot"></div>
-        <div class="ob-dot"></div>
-        <div class="ob-dot"></div>
-      </div>
-
-      <button class="ob-btn" id="ob-next-btn">Siguiente →</button>
-      <button class="ob-skip" id="ob-skip-btn">Omitir introducción</button>
     </div>
   </div>
 </body>
