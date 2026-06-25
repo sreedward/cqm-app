@@ -1,0 +1,27 @@
+{
+    "name": "ChartQuick by Musishens",
+    "short_name": "CQM",
+    "description": "Gestiona tus acordes y setlists para tus presentaciones musicales",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#080c14",
+    "theme_color": "#080c14",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "es",
+    "icons": [
+          {
+                  "src": "/icons/icon-192.png",
+                  "sizes": "192x192",
+                  "type": "image/png",
+                  "purpose": "any maskable"
+          },
+          {
+                  "src": "/icons/icon-512.png",
+                  "sizes": "512x512",
+                  "type": "image/png",
+                  "purpose": "any maskable"
+          }
+    ],
+    "categories": ["music", "entertainment"]
+}
