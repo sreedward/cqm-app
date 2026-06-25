@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#080c14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CQM">
+  <link rel="apple-touch-icon" href="/icons/icon.svg">
   <title>CQM - Iniciar Sesión</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
@@ -89,6 +96,14 @@
     .divider hr { flex: 1; border: none; border-top: 1px solid #1e2d45; }
     .divider span { font-size: 0.7rem; color: #4a5568; }
   </style>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(e => console.error('[SW]', e));
+      });
+    }
+  </script>
 </head>
 <body>
   <div class="logo-wrap">
