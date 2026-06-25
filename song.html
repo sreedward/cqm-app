@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#080c14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CQM">
+  <link rel="apple-touch-icon" href="/icons/icon.svg">
   <title>CQM - Canción</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
@@ -81,6 +88,14 @@
     .opcion-add { color: #3b82f6; font-size: 1.2rem; }
     .toast { position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%); background: #1e2d45; border: 1px solid #3b82f6; color: #e2e8f0; border-radius: 8px; padding: 0.6rem 1.25rem; font-size: 0.85rem; z-index: 60; display: none; white-space: nowrap; }
   </style>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(e => console.error('[SW]', e));
+      });
+    }
+  </script>
 </head>
 <body>
   <header>
