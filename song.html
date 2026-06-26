@@ -172,8 +172,12 @@
     let itemIdsParam = params.get('itemids') || ''
 
 function goBack() {
-        history.back()
-}
+        if (setlistId) {
+          window.location.href = '/setlist-view.html?id=' + setlistId
+        } else {
+          window.location.href = '/library.html'
+        }
+      }
 
     function irACancion(direction) {
       const newIndex  = setlistIndex + direction
