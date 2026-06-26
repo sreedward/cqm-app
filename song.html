@@ -173,9 +173,9 @@
 
 function goBack() {
         if (setlistId) {
-          window.location.href = '/setlist-view.html?id=' + setlistId
+          window.location.replace('/setlist-view.html?id=' + setlistId)
         } else {
-          window.location.href = '/library.html'
+          window.location.replace('/library.html')
         }
       }
 
