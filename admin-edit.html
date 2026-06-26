@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CQM - Editar CanciÃ³n</title>
+  <title>CQM - Editar CanciÃÂ³n</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <style>
@@ -49,7 +49,7 @@
     <a href="/library.html" style="background:none;border:none;color:#4a5568;font-size:1.1rem;padding:4px;display:flex;align-items:center;text-decoration:none;">
       <i class="ti ti-home"></i>
     </a>
-    <div class="header-title" id="header-title">Editar canciÃ³n</div>
+    <div class="header-title" id="header-title">Editar canciÃÂ³n</div>
   </header>
 
   <div class="container">
@@ -65,7 +65,7 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
     )
 
-    const TIPOS = ['intro','verso','pre-coro','coro','bridge','instrumental','outro']
+    const TIPOS = ['intro','verso','pre-coro','coro','bridge','instrumental','outro','tag']
   const NUMEROS = [
       '1','1m','17','1maj7','19','1maj9','1sus2','1sus4','1add2','1add4',
       '2','2m','27','2maj7','29','2maj9','2sus2','2sus4','2add2','2add4',
@@ -100,7 +100,7 @@
       document.getElementById('form-content').innerHTML = `
         <div class="form-row">
           <div class="form-group">
-            <label>TÃ­tulo *</label>
+            <label>TÃÂ­tulo *</label>
             <input type="text" id="title" value="${song.title}">
           </div>
           <div class="form-group">
@@ -122,17 +122,11 @@
             <input type="text" id="slug" value="${song.slug || ''}">
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Tags</label>
-            <input type="text" id="tags" value="${song.tags || ''}" placeholder="p.ej. adoración, lento, 4/4">
-          </div>
-        </div>
-        <div class="section-label">Secciones</div>
+                <div class="section-label">Secciones</div>
         <div id="sections-container"></div>
-        <button class="add-section-btn" onclick="addSection()">+ Agregar secciÃ³n</button>
-        <button class="save-btn" onclick="guardarCambios()">ð¾ Guardar cambios</button>
-        <button class="delete-song-btn" onclick="eliminarCancion()">ð Eliminar canciÃ³n</button>
+        <button class="add-section-btn" onclick="addSection()">+ Agregar secciÃÂ³n</button>
+        <button class="save-btn" onclick="guardarCambios()">Ã°ÂÂÂ¾ Guardar cambios</button>
+        <button class="delete-song-btn" onclick="eliminarCancion()">Ã°ÂÂÂ Eliminar canciÃÂ³n</button>
       `
 
       existingSections.forEach(sec => addSection(sec))
@@ -151,7 +145,7 @@
           <select class="tipo-select">
             ${TIPOS.map(t => `<option value="${t}" ${sec && sec.type === t ? 'selected' : ''}>${t}</option>`).join('')}
           </select>
-          <button class="del-btn" onclick="document.getElementById('${id}').remove()">ð</button>
+          <button class="del-btn" onclick="document.getElementById('${id}').remove()">Ã°ÂÂÂ</button>
         </div>
         <div class="pad">
           ${NUMEROS.map(n => `<button class="pad-btn" onclick="insertarAcorde('${id}','${n}')">[${n}]</button>`).join('')}
@@ -190,7 +184,6 @@
       const artist = document.getElementById('artist').value.trim()
       const key = document.getElementById('key').value
       const slug = document.getElementById('slug').value.trim()
-      const tags = document.getElementById('tags').value.trim()
       const errorEl = document.getElementById('error')
       const successEl = document.getElementById('success')
 
@@ -198,14 +191,14 @@
       successEl.style.display = 'none'
 
       if (!title) {
-        errorEl.textContent = 'El tÃ­tulo es obligatorio.'
+        errorEl.textContent = 'El tÃÂ­tulo es obligatorio.'
         errorEl.style.display = 'block'
         return
       }
 
       const { error: songError } = await _supabase
         .from('Songs')
-        .update({ title, artist, 'original key': key, slug, tags })
+        .update({ title, artist, 'original key': key, slug })
         .eq('id', songId)
 
       if (songError) {
@@ -233,13 +226,13 @@
         }
       }
 
-      successEl.textContent = 'â CanciÃ³n actualizada exitosamente!'
+      successEl.textContent = 'Ã¢ÂÂ CanciÃÂ³n actualizada exitosamente!'
       successEl.style.display = 'block'
       setTimeout(() => { window.location.href = '/admin.html' }, 1500)
     }
 
     async function eliminarCancion() {
-      if (!confirm('Â¿Eliminar esta canciÃ³n permanentemente?')) return
+      if (!confirm('ÃÂ¿Eliminar esta canciÃÂ³n permanentemente?')) return
       await _supabase.from('sections').delete().eq('song_id', songId)
       await _supabase.from('Songs').delete().eq('id', songId)
       window.location.href = '/admin.html'
