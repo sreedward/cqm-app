@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/icons/icon.svg">
   <title>CQM - Setlist</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-ebfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -452,7 +452,7 @@ async function eliminarSetlist() {
         guardarOrden()
       })
 
-      //    Touch support for mobile                                   
+      //  Touch support for mobile 
       let touchCard = null, touchClone = null, touchStartY = 0
 
       lista.addEventListener('touchstart', e => {
