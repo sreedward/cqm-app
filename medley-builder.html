@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#080c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CQM">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
+<title>CQM - Medley Builder</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #080c14; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 80px; }
+header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; position: sticky; top: 0; z-index: 10; }
+.back-btn { background: none; border: none; color: #3b82f6; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
+.header-info { flex: 1; }
+.page-title { font-size: 0.95rem; font-weight: 700; color: #e2e8f0; }
+.page-sub { font-size: 0.72rem; color: #4a5568; }
+.save-btn { background: #3b82f6; border: none; border-radius: 8px; color: #fff; font-size: 0.8rem; font-weight: 600; padding: 7px 14px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+.save-btn:disabled { background: #1e2d45; color: #4a5568; cursor: not-allowed; }
+
+/* Name input */
+.name-row { padding: 1rem 1.25rem 0.5rem; }
+.name-input { width: 100%; background: #0d1626; border: 1px solid #1e2d45; border-radius: 10px; padding: 0.75rem 1rem; color: #e2e8f0; font-size: 1rem; font-weight: 600; outline: none; }
+.name-input:focus { border-color: #3b82f6; }
+.name-input::placeholder { color: #4a5568; font-weight: 400; }
+
+/* Medley track */
+.section-label { font-size: 0.7rem; color: #4a5568; letter-spacing: 1.5px; text-transform: uppercase; padding: 0.75rem 1.25rem 0.25rem; }
+.track-empty { text-align: center; color: #4a5568; padding: 2rem 1.25rem; font-size: 0.85rem; background: #0d1626; border: 1px dashed #1e2d45; border-radius: 10px; margin: 0 1.25rem 0.5rem; }
+.track-list { padding: 0 1.25rem 0.5rem; }
+.track-item { display: flex; align-items: center; gap: 10px; background: #0d1626; border: 1px solid #1e2d45; border-radius: 10px; padding: 0.6rem 0.75rem; margin-bottom: 0.5rem; }
+.track-handle { color: #2a3a50; cursor: grab; font-size: 1rem; flex-shrink: 0; touch-action: none; }
+.track-color { width: 4px; height: 36px; border-radius: 2px; flex-shrink: 0; }
+.track-info { flex: 1; }
+.track-sec-type { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 1px; }
+.track-song-name { font-size: 0.8rem; color: #8a9bb0; }
+.track-del { background: none; border: none; color: #4a5568; font-size: 0.95rem; cursor: pointer; padding: 4px; }
+.track-del:hover { color: #ef4444; }
+
+/* Song search */
+.search-wrap { padding: 0.5rem 1.25rem; position: sticky; top: 57px; background: #080c14; z-index: 9; }
+.search-box { display: flex; align-items: center; gap: 8px; background: #0d1626; border: 1px solid #1e2d45; border-radius: 10px; padding: 0.6rem 1rem; }
+.search-box i { color: #4a5568; }
+.search-box input { background: none; border: none; outline: none; color: #e2e8f0; font-size: 0.9rem; flex: 1; }
+.search-box input::placeholder { color: #4a5568; }
+
+/* Song cards */
+.songs-area { padding: 0 1.25rem 1rem; }
+.song-row { background: #0d1626; border: 1px solid #1e2d45; border-radius: 10px; margin-bottom: 0.6rem; overflow: hidden; }
+.song-row-header { display: flex; align-items: center; gap: 10px; padding: 0.65rem 0.85rem; cursor: pointer; }
+.song-row-header:active { opacity: 0.7; }
+.song-initials { width: 36px; height: 36px; border-radius: 8px; background: #1e2d45; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #3b82f6; font-weight: 700; font-family: monospace; flex-shrink: 0; }
+.song-row-info { flex: 1; }
+.song-row-title { font-size: 0.88rem; font-weight: 500; color: #e2e8f0; }
+.song-row-artist { font-size: 0.72rem; color: #4a5568; }
+.song-row-key { font-size: 0.7rem; color: #3b82f6; font-weight: 700; background: #1e2d45; border-radius: 4px; padding: 2px 7px; font-family: monospace; }
+.expand-icon { color: #4a5568; font-size: 0.85rem; transition: transform 0.2s; }
+.expand-icon.open { transform: rotate(180deg); }
+.sections-grid { display: none; border-top: 1px solid #1e2d45; padding: 0.5rem 0.75rem 0.65rem; display: none; flex-wrap: wrap; gap: 0.4rem; }
+.sections-grid.open { display: flex; }
+.sec-chip { background: #080c14; border: 1px solid #1e2d45; border-radius: 6px; padding: 5px 10px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: border-color 0.15s; }
+.sec-chip:hover { border-color: #3b82f6; }
+.sec-chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.sec-chip span { color: #cbd5e1; }
+.no-secs { font-size: 0.8rem; color: #4a5568; padding: 0.25rem 0; }
+
+/* Section colors */
+.c-intro { background: #22c55e; }
+.c-verso { background: #3b82f6; }
+.c-pre-coro { background: #f97316; }
+.c-coro { background: #a855f7; }
+.c-bridge { background: #f59e0b; }
+.c-instrumental { background: #555; }
+.c-outro { background: #ef4444; }
+.c-tag { background: #ec4899; }
+.c-default { background: #64748b; }
+
+/* nav */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1626; border-top: 1px solid #1e2d45; display: flex; padding: 8px 0 12px; z-index: 20; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 0; text-decoration: none; }
+.nav-item i { font-size: 1.2rem; color: #4a5568; }
+.nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
+.nav-item.active i, .nav-item.active span { color: #3b82f6; }
+.toast { position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%); background: #1e2d45; border: 1px solid #3b82f6; color: #e2e8f0; border-radius: 8px; padding: 0.6rem 1.25rem; font-size: 0.85rem; z-index: 60; display: none; white-space: nowrap; }
+.loading { text-align: center; color: #4a5568; padding: 2rem; }
+</style>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(e => console.error('[SW]', e));
+  });
+}
+</script>
+</head>
+<body>
+<header>
+  <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i></button>
+  <div class="header-info">
+    <div class="page-title">Medley Builder</div>
+    <div class="page-sub">Combina secciones de canciones</div>
+  </div>
+  <button class="save-btn" id="save-btn" onclick="guardarMedley()" disabled>
+    <i class="ti ti-device-floppy"></i> Guardar
+  </button>
+</header>
+
+<div class="name-row">
+  <input class="name-input" id="medley-name" placeholder="Nombre del medley..." oninput="checkSaveBtn()">
+</div>
+
+<div class="section-label">Medley (<span id="track-count">0</span> secciones)</div>
+<div id="track-area">
+  <div class="track-empty" id="track-empty">
+    <i class="ti ti-music-off" style="font-size:2rem;display:block;margin-bottom:0.5rem;color:#1e2d45"></i>
+    Agrega secciones desde las canciones de abajo
+  </div>
+  <div class="track-list" id="track-list"></div>
+</div>
+
+<div class="search-wrap">
+  <div class="search-box">
+    <i class="ti ti-search"></i>
+    <input type="text" id="search" placeholder="Buscar canción..." oninput="filtrar()">
+  </div>
+</div>
+
+<div class="section-label">Catálogo</div>
+<div class="songs-area" id="songs-area">
+  <div class="loading">Cargando canciones...</div>
+</div>
+
+<nav class="bottom-nav">
+  <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
+  <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
+  <a class="nav-item active" href="/medley-builder.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
+  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const _sb = supabase.createClient(
+  'https://kzqnsbztfyhyyageuboz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+);
+
+const SEC_COLORS = {
+  intro: 'c-intro', verso: 'c-verso', 'pre-coro': 'c-pre-coro',
+  coro: 'c-coro', bridge: 'c-bridge', instrumental: 'c-instrumental',
+  outro: 'c-outro', tag: 'c-tag'
+};
+function secColor(type) { return SEC_COLORS[(type||'').toLowerCase()] || 'c-default'; }
+
+let allSongs = [];
+let sectionsMap = {};
+let track = [];
+let userId = null;
+
+async function init() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) { window.location.href = '/login.html'; return; }
+  userId = session.user.id;
+  const { data: songs } = await _sb.from('Songs').select('id, title, artist, "original key"').order('title');
+  allSongs = songs || [];
+  renderSongs(allSongs);
+}
+
+function getInitials(t) { return t.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
+
+function renderSongs(list) {
+  const area = document.getElementById('songs-area');
+  if (!list.length) { area.innerHTML = '<div class="loading">No se encontraron canciones.</div>'; return; }
+  area.innerHTML = list.map(s => `
+    <div class="song-row" id="row-${s.id}">
+      <div class="song-row-header" onclick="toggleSong(${s.id})">
+        <div class="song-initials">${getInitials(s.title)}</div>
+        <div class="song-row-info">
+          <div class="song-row-title">${s.title}</div>
+          <div class="song-row-artist">${s.artist || 'Artista desconocido'}</div>
+        </div>
+        <div class="song-row-key">${s['original key'] || '?'}</div>
+        <i class="ti ti-chevron-down expand-icon" id="icon-${s.id}"></i>
+      </div>
+      <div class="sections-grid" id="secs-${s.id}"></div>
+    </div>
+  `).join('');
+}
+
+async function toggleSong(songId) {
+  const grid = document.getElementById('secs-' + songId);
+  const icon = document.getElementById('icon-' + songId);
+  const isOpen = grid.classList.contains('open');
+  if (isOpen) { grid.classList.remove('open'); icon.classList.remove('open'); return; }
+  icon.classList.add('open');
+  grid.classList.add('open');
+  if (sectionsMap[songId]) { renderSections(songId); return; }
+  grid.innerHTML = '<div class="no-secs" style="padding:0.5rem 0">Cargando...</div>';
+  const { data: secs } = await _sb.from('sections').select('id, type, order').eq('song_id', songId).order('order');
+  sectionsMap[songId] = secs || [];
+  renderSections(songId);
+}
+
+function renderSections(songId) {
+  const grid = document.getElementById('secs-' + songId);
+  const secs = sectionsMap[songId];
+  const song = allSongs.find(s => s.id === songId);
+  if (!secs.length) { grid.innerHTML = '<div class="no-secs">Sin secciones cargadas</div>'; return; }
+  grid.innerHTML = secs.map(sec => `
+    <div class="sec-chip" onclick="addToTrack(${songId}, ${sec.id}, '${sec.type}', '${song.title}')">
+      <div class="sec-chip-dot ${secColor(sec.type)}"></div>
+      <span>${sec.type}</span>
+    </div>
+  `).join('');
+}
+
+function addToTrack(songId, secId, secType, songTitle) {
+  track.push({ songId, secId, secType, songTitle });
+  renderTrack();
+  checkSaveBtn();
+  mostrarToast('+ ' + secType + ' de ' + songTitle);
+}
+
+function removeFromTrack(idx) {
+  track.splice(idx, 1);
+  renderTrack();
+  checkSaveBtn();
+}
+
+function renderTrack() {
+  const list = document.getElementById('track-list');
+  const empty = document.getElementById('track-empty');
+  const countEl = document.getElementById('track-count');
+  countEl.textContent = track.length;
+  empty.style.display = track.length ? 'none' : 'block';
+  list.innerHTML = track.map((item, idx) => `
+    <div class="track-item" draggable="true" data-idx="${idx}">
+      <i class="ti ti-grip-vertical track-handle"></i>
+      <div class="track-color ${secColor(item.secType)}"></div>
+      <div class="track-info">
+        <div class="track-sec-type" style="color: var(--sec-c)">${item.secType}</div>
+        <div class="track-song-name">${item.songTitle}</div>
+      </div>
+      <button class="track-del" onclick="removeFromTrack(${idx})"><i class="ti ti-trash"></i></button>
+    </div>
+  `).join('');
+  initTrackDrag();
+}
+
+function initTrackDrag() {
+  const list = document.getElementById('track-list');
+  let dragIdx = null;
+  list.querySelectorAll('.track-item').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      dragIdx = parseInt(item.dataset.idx);
+      item.style.opacity = '0.4';
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', () => { item.style.opacity = '1'; });
+    item.addEventListener('dragover', e => { e.preventDefault(); });
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      const targetIdx = parseInt(item.dataset.idx);
+      if (dragIdx === null || dragIdx === targetIdx) return;
+      const moved = track.splice(dragIdx, 1)[0];
+      track.splice(targetIdx, 0, moved);
+      renderTrack();
+    });
+  });
+}
+
+function checkSaveBtn() {
+  const name = document.getElementById('medley-name').value.trim();
+  document.getElementById('save-btn').disabled = !(name && track.length > 0);
+}
+
+async function guardarMedley() {
+  const name = document.getElementById('medley-name').value.trim();
+  if (!name || !track.length) return;
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  const { data: medley, error: mErr } = await _sb.from('medleys').insert({ name, user_id: userId }).select().single();
+  if (mErr) { mostrarToast('Error al guardar'); btn.disabled = false; return; }
+  const rows = track.map((item, idx) => ({
+    medley_id: medley.id, song_id: item.songId, section_id: item.secId, order: idx + 1
+  }));
+  const { error: sErr } = await _sb.from('medley_sections').insert(rows);
+  if (sErr) { mostrarToast('Error en secciones'); btn.disabled = false; return; }
+  mostrarToast('Medley guardado!');
+  setTimeout(() => { window.location.href = '/medley-view.html?id=' + medley.id; }, 1200);
+}
+
+function filtrar() {
+  const q = document.getElementById('search').value.toLowerCase();
+  renderSongs(allSongs.filter(s => s.title.toLowerCase().includes(q) || (s.artist||'').toLowerCase().includes(q)));
+}
+
+function mostrarToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 2000);
+}
+
+init();
+</script>
+</body>
+</html>
