@@ -84,7 +84,6 @@ if ('serviceWorker' in navigator) {
     <div class="medley-sub" id="medley-sub"></div>
   </div>
 </header>
-
 <div class="transpose-bar">
   <div class="transpose-row">
     <span class="t-label">Semit.:</span>
@@ -118,32 +117,26 @@ if ('serviceWorker' in navigator) {
     </div>
   </div>
 </div>
-
 <div class="content" id="content">
   <div class="loading">Cargando medley...</div>
 </div>
-
 <nav class="bottom-nav">
   <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
   <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
   <a class="nav-item active" href="/medley-builder.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
-  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Mas</span></a>
+  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
 </nav>
-
 <script>
 const _sb = supabase.createClient(
   'https://kzqnsbztfyhyyageuboz.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
 );
-
 const NOTAS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const BEMOLES = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'};
-
 let semitones = 0;
 let cifrado   = 'americano';
 let baseKey   = 'C';
 let allSections = [];
-
 const params   = new URLSearchParams(window.location.search);
 const medleyId = params.get('id');
 
@@ -154,19 +147,19 @@ function noteToIdx(note) {
 
 function transposeChord(chord, shift) {
   if (!chord || !chord.trim()) return chord;
-  const re = /^([A-G][#b]?)(.*?)(/[A-G][#b]?)?$/;
-  const m  = chord.trim().match(re);
+  var re = new RegExp('^([A-G][#b]?)(.*?)(/[A-G][#b]?)?$');
+  var m  = chord.trim().match(re);
   if (!m) return chord;
-  const root    = m[1];
-  const quality = m[2] || '';
-  const slash   = m[3] || '';
-  const rootIdx = noteToIdx(root);
+  var root    = m[1];
+  var quality = m[2] || '';
+  var slash   = m[3] || '';
+  var rootIdx = noteToIdx(root);
   if (rootIdx === -1) return chord;
-  const newRoot = NOTAS[(rootIdx + shift + 120) % 12];
-  let result = newRoot + quality;
+  var newRoot = NOTAS[(rootIdx + shift + 120) % 12];
+  var result  = newRoot + quality;
   if (slash) {
-    const bassNote = slash.slice(1);
-    const bassIdx  = noteToIdx(bassNote);
+    var bassNote = slash.slice(1);
+    var bassIdx  = noteToIdx(bassNote);
     result += (bassIdx !== -1) ? '/' + NOTAS[(bassIdx + shift + 120) % 12] : slash;
   }
   return result;
@@ -184,45 +177,48 @@ function escHtml(s) {
 
 function procesarLinea(line) {
   if (!line || !line.trim()) return '';
-  if (!line.includes('[')) {
+  if (line.indexOf('[') === -1) {
     return '<div class="line"><div class="lyrics">' + escHtml(line) + '</div></div>';
   }
-  const parts = line.split(/([[^]]*])/);
-  let cells = [];
-  let pendingChord = null;
-  for (const tok of parts) {
-    if (tok.startsWith('[') && tok.endsWith(']')) {
+  var bracketRe = new RegExp('(\\[[^\\]]*\\])', 'g');
+  var parts2 = line.split(bracketRe);
+  var cells = [];
+  var pendingChord = null;
+  for (var pi = 0; pi < parts2.length; pi++) {
+    var tok = parts2[pi];
+    if (tok.charAt(0) === '[' && tok.charAt(tok.length-1) === ']') {
       pendingChord = procesarToken(tok.slice(1, -1).trim());
     } else {
-      const words = tok.split(' ');
-      for (let i = 0; i < words.length; i++) {
-        if (i === 0 && pendingChord !== null) {
-          cells.push({ chord: pendingChord, lyric: words[i] });
+      var words = tok.split(' ');
+      for (var wi = 0; wi < words.length; wi++) {
+        if (wi === 0 && pendingChord !== null) {
+          cells.push({ chord: pendingChord, lyric: words[wi] });
           pendingChord = null;
         } else {
-          cells.push({ chord: '', lyric: words[i] });
+          cells.push({ chord: '', lyric: words[wi] });
         }
       }
     }
   }
-  const hasLyrics = cells.some(c => c.lyric.trim() !== '');
+  var hasLyrics = cells.some(function(c) { return c.lyric.trim() !== ''; });
   if (!hasLyrics) {
-    const chordLine = cells.map(c => c.chord).filter(Boolean).join('  ');
+    var chordLine = cells.filter(function(c){return c.chord;}).map(function(c){return c.chord;}).join('  ');
     return '<div class="line"><div class="chords">' + escHtml(chordLine) + '</div></div>';
   }
-  const html = cells.map(c =>
-    '<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:4px">' +
-    '<span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre">' + (c.chord ? escHtml(c.chord) + ' ' : ' ') + '</span>' +
-    '<span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre">' + escHtml(c.lyric || ' ') + '</span></span>'
-  ).join('');
+  var html = cells.map(function(c) {
+    return '<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:4px">' +
+      '<span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre">' + (c.chord ? escHtml(c.chord) + ' ' : ' ') + '</span>' +
+      '<span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre">' + escHtml(c.lyric || ' ') + '</span></span>';
+  }).join('');
   return '<div class="line" style="line-height:1;margin-bottom:0.75rem;overflow-x:auto">' + html + '</div>';
 }
 
 function renderSeccion(sec) {
-  const lines     = (sec.content || '').split('\n');
-  const linesHTML = lines.map(procesarLinea).filter(Boolean).join('');
-  const tipo      = (sec.type || 'default').toLowerCase().replace(/\s+/g, '-');
-  const cssClass  = ['intro','verso','pre-coro','coro','bridge','instrumental','outro','tag'].includes(tipo) ? tipo : 'default';
+  var lines     = (sec.content || '').split('\n');
+  var linesHTML = lines.map(procesarLinea).filter(Boolean).join('');
+  var tipo      = (sec.type || 'default').toLowerCase().split(' ').join('-');
+  var valid     = ['intro','verso','pre-coro','coro','bridge','instrumental','outro','tag'];
+  var cssClass  = valid.indexOf(tipo) !== -1 ? tipo : 'default';
   return '<div class="sec-block ' + cssClass + '">' +
     '<div class="sec-song-label">' + escHtml(sec.songTitle) + '</div>' +
     '<div class="sec-type-label">' + escHtml(sec.type) + '</div>' +
@@ -234,11 +230,11 @@ function getCurrentKey() {
 }
 
 function renderAll() {
-  const el = document.getElementById('content');
+  var el = document.getElementById('content');
   if (!allSections.length) { el.innerHTML = '<div class="loading">Sin secciones.</div>'; return; }
-  let html = '';
-  let prevSong = null;
-  allSections.forEach((sec, idx) => {
+  var html = '';
+  var prevSong = null;
+  allSections.forEach(function(sec, idx) {
     if (sec.songTitle !== prevSong) {
       if (idx > 0) html += '<div class="divider"><div class="divider-line"></div></div>';
       prevSong = sec.songTitle;
@@ -255,10 +251,10 @@ function transposeRel(n) {
 }
 
 function applyTargetKey() {
-  const sel = document.getElementById('target-key').value;
+  var sel = document.getElementById('target-key').value;
   if (!sel) return;
-  const targetIdx = noteToIdx(sel);
-  const baseIdx   = noteToIdx(baseKey);
+  var targetIdx = noteToIdx(sel);
+  var baseIdx   = noteToIdx(baseKey);
   if (targetIdx === -1 || baseIdx === -1) return;
   semitones = (targetIdx - baseIdx + 12) % 12;
   renderAll();
@@ -275,49 +271,38 @@ async function init() {
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) { window.location.href = '/login.html'; return; }
   if (!medleyId) { window.location.href = '/medley-builder.html'; return; }
-
   const { data: medley, error: mErr } = await _sb.from('medleys').select('*').eq('id', medleyId).single();
   if (mErr || !medley) { window.location.href = '/medley-builder.html'; return; }
   document.getElementById('medley-title').textContent = medley.name;
   document.title = 'CQM - ' + medley.name;
-
   const { data: mSecs, error: msErr } = await _sb.from('medley_sections')
     .select('id, section_id, song_id, order').eq('medley_id', medleyId).order('order');
-
   if (msErr || !mSecs || !mSecs.length) {
-    document.getElementById('content').innerHTML = '<div class="loading">Este medley esta vacio.</div>';
+    document.getElementById('content').innerHTML = '<div class="loading">Este medley está vacío.</div>';
     return;
   }
-
   const secIds  = mSecs.map(s => s.section_id);
   const songIds = [...new Set(mSecs.map(s => s.song_id))];
-
   const [{ data: sections }, { data: songs }] = await Promise.all([
     _sb.from('sections').select('id, type, content, song_id').in('id', secIds),
     _sb.from('Songs').select('id, title, "original key"').in('id', songIds)
   ]);
-
   const secsMap  = {};  (sections || []).forEach(s => secsMap[s.id]  = s);
   const songsMap = {};  (songs    || []).forEach(s => songsMap[s.id] = s);
-
   const firstSongId = mSecs[0].song_id;
   if (songsMap[firstSongId]) {
     const rawKey = songsMap[firstSongId]['original key'] || 'C';
     baseKey = BEMOLES[rawKey] || rawKey;
   }
-
   allSections = mSecs.map(ms => {
     const sec  = secsMap[ms.section_id]  || {};
     const song = songsMap[ms.song_id]    || {};
-    return { ...sec, songTitle: song.title || 'Cancion', songKey: song['original key'] || 'C' };
+    return Object.assign({}, sec, { songTitle: song.title || 'Canción', songKey: song['original key'] || 'C' });
   });
-
   const totalSongs = new Set(allSections.map(s => s.songTitle)).size;
   document.getElementById('medley-sub').textContent = allSections.length + ' secciones · ' + totalSongs + ' canciones';
-
   renderAll();
 }
-
 init();
 </script>
 </body>
