@@ -279,19 +279,28 @@ function checkSaveBtn() {
 }
 
 async function guardarMedley() {
-  const name = document.getElementById('medley-name').value.trim();
-  if (!name || !track.length) return;
-  const btn = document.getElementById('save-btn');
-  btn.disabled = true;
-  const { data: medley, error: mErr } = await _sb.from('medleys').insert({ name, user_id: userId }).select().single();
-  if (mErr) { mostrarToast('Error al guardar'); btn.disabled = false; return; }
+const name = document.getElementById('medley-name').value.trim();
+if (!name || !track.length) return;
+const btn = document.getElementById('save-btn');
+btn.disabled = true;
+btn.innerHTML = '<i class="ti ti-loader-2"></i> Guardando...';
+try {
+  const { data: medley, error: mErr } = await _sb.from('medleys')
+    .insert({ name, user_id: userId }).select('id').single();
+  if (mErr || !medley || !medley.id) throw new Error((mErr && mErr.message) || 'Sin ID de medley');
   const rows = track.map((item, idx) => ({
     medley_id: medley.id, song_id: item.songId, section_id: item.secId, order: idx + 1
   }));
   const { error: sErr } = await _sb.from('medley_sections').insert(rows);
-  if (sErr) { mostrarToast('Error en secciones'); btn.disabled = false; return; }
+  if (sErr) throw new Error(sErr.message);
   mostrarToast('Medley guardado!');
-  setTimeout(() => { window.location.href = '/medley-view.html?id=' + medley.id; }, 1200);
+  setTimeout(() => { window.location.href = '/medley-view.html?id=' + medley.id; }, 900);
+} catch(e) {
+  console.error('guardarMedley error:', e);
+  mostrarToast('Error: ' + e.message);
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-device-floppy"></i> Guardar';
+}
 }
 
 function filtrar() {
