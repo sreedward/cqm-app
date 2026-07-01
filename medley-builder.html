@@ -22,6 +22,8 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.
 .page-sub { font-size: 0.72rem; color: #4a5568; }
 .save-btn { background: #3b82f6; border: none; border-radius: 8px; color: #fff; font-size: 0.8rem; font-weight: 600; padding: 7px 14px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 .save-btn:disabled { background: #1e2d45; color: #4a5568; cursor: not-allowed; }
+.list-btn { background: #1e2d45; border: none; border-radius: 8px; color: #3b82f6; font-size: 1.1rem; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; text-decoration: none; }
+.list-btn:hover { background: #2a3a50; }
 
 /* Name input */
 .name-row { padding: 1rem 1.25rem 0.5rem; }
@@ -104,7 +106,8 @@ if ('serviceWorker' in navigator) {
     <div class="page-title">Medley Builder</div>
     <div class="page-sub">Combina secciones de canciones</div>
   </div>
-  <button class="save-btn" id="save-btn" onclick="guardarMedley()" disabled>
+  <a class="list-btn" href="/medleys.html"><i class="ti ti-layout-list"></i></a>
+<button class="save-btn" id="save-btn" onclick="guardarMedley()" disabled>
     <i class="ti ti-device-floppy"></i> Guardar
   </button>
 </header>
@@ -137,7 +140,7 @@ if ('serviceWorker' in navigator) {
 <nav class="bottom-nav">
   <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
   <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
-  <a class="nav-item active" href="/medley-builder.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
+  <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
   <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
 </nav>
 
