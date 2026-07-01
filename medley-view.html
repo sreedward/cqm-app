@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#080c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CQM">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
+<title>CQM - Medley</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #080c14; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 80px; }
+header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.85rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; position: sticky; top: 0; z-index: 10; }
+.back-btn { background: none; border: none; color: #3b82f6; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
+.header-info { flex: 1; }
+.medley-title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; }
+.medley-sub { font-size: 0.72rem; color: #4a5568; }
+.transpose-bar { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; position: sticky; top: 57px; z-index: 9; }
+.t-label { font-size: 0.75rem; color: #4a5568; }
+.t-btn { background: #1e2d45; border: none; color: #e2e8f0; border-radius: 6px; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.t-btn:hover { background: #3b82f6; }
+.key-display { background: #1e2d45; color: #3b82f6; border-radius: 6px; padding: 3px 10px; font-size: 0.85rem; font-weight: 700; font-family: monospace; min-width: 36px; text-align: center; }
+.cifrado-toggle { margin-left: auto; display: flex; background: #1e2d45; border-radius: 6px; overflow: hidden; }
+.cifrado-btn { background: none; border: none; color: #4a5568; padding: 4px 10px; font-size: 0.72rem; cursor: pointer; font-weight: 700; }
+.cifrado-btn.active { background: #3b82f6; color: #fff; }
+.content { padding: 1rem 1.25rem 2rem; }
+.sec-block { border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1rem; }
+.sec-block.intro { background: #0a1f12; border-left: 3px solid #22c55e; }
+.sec-block.verso { background: #0a1226; border-left: 3px solid #3b82f6; }
+.sec-block.pre-coro { background: #1f120a; border-left: 3px solid #f97316; }
+.sec-block.coro { background: #130a26; border-left: 3px solid #a855f7; }
+.sec-block.bridge { background: #1f1a0a; border-left: 3px solid #f59e0b; }
+.sec-block.instrumental { background: #141414; border-left: 3px solid #555; }
+.sec-block.outro { background: #1f0a0a; border-left: 3px solid #ef4444; }
+.sec-block.tag { background: #1f0a18; border-left: 3px solid #ec4899; }
+.sec-block.default { background: #0d1626; border-left: 3px solid #64748b; }
+.sec-song-label { font-size: 0.62rem; color: #4a5568; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+.sec-type-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.75rem; }
+.sec-block.intro .sec-type-label { color: #22c55e; }
+.sec-block.verso .sec-type-label { color: #3b82f6; }
+.sec-block.pre-coro .sec-type-label { color: #f97316; }
+.sec-block.coro .sec-type-label { color: #a855f7; }
+.sec-block.bridge .sec-type-label { color: #f59e0b; }
+.sec-block.instrumental .sec-type-label { color: #888; }
+.sec-block.outro .sec-type-label { color: #ef4444; }
+.sec-block.tag .sec-type-label { color: #ec4899; }
+.sec-block.default .sec-type-label { color: #64748b; }
+.line { margin-bottom: 0.75rem; overflow-x: auto; }
+.chords { font-size: 1rem; font-weight: 700; color: #facc15; letter-spacing: 2px; margin-bottom: 3px; font-family: monospace; }
+.lyrics { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
+.loading { text-align: center; color: #4a5568; padding: 3rem; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1626; border-top: 1px solid #1e2d45; display: flex; padding: 8px 0 12px; z-index: 20; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 0; text-decoration: none; }
+.nav-item i { font-size: 1.2rem; color: #4a5568; }
+.nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
+.nav-item.active i, .nav-item.active span { color: #3b82f6; }
+.divider { display: flex; align-items: center; gap: 8px; margin: 0.5rem 0 1rem; }
+.divider-line { flex: 1; height: 1px; background: #1e2d45; }
+.divider-label { font-size: 0.65rem; color: #4a5568; letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap; }
+</style>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(e => console.error('[SW]', e));
+  });
+}
+</script>
+</head>
+<body>
+<header>
+  <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i></button>
+  <div class="header-info">
+    <div class="medley-title" id="medley-title">Cargando...</div>
+    <div class="medley-sub" id="medley-sub"></div>
+  </div>
+</header>
+
+<div class="transpose-bar">
+  <span class="t-label">Tono:</span>
+  <button class="t-btn" onclick="transposeAll(-1)"><i class="ti ti-minus"></i></button>
+  <div class="key-display" id="key-display">-</div>
+  <button class="t-btn" onclick="transposeAll(1)"><i class="ti ti-plus"></i></button>
+  <div class="cifrado-toggle">
+    <button class="cifrado-btn active" id="btn-am" onclick="setCifrado('americano')">Am</button>
+    <button class="cifrado-btn" id="btn-nns" onclick="setCifrado('nashville')">NNS</button>
+  </div>
+</div>
+
+<div class="content" id="content">
+  <div class="loading">Cargando medley...</div>
+</div>
+
+<nav class="bottom-nav">
+  <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
+  <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
+  <a class="nav-item active" href="/medley-builder.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
+  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
+</nav>
+
+<script>
+const _sb = supabase.createClient(
+  'https://kzqnsbztfyhyyageuboz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+);
+
+const NOTAS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const BEMOLES = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'};
+const INTERVALOS = [0,2,4,5,7,9,11];
+const CALIDAD = ['','m','m','','','m','dim'];
+
+let semitones = 0;
+let cifrado = 'americano';
+let baseKey = 'C';
+let allSections = [];
+
+const params = new URLSearchParams(window.location.search);
+const medleyId = params.get('id');
+
+function traducirAcorde(acorde) {
+  const match = acorde.match(/^(#?)(d)(m?)(susd*|addd*|majd*|dim|aug|d*)?(/.+)?$/);
+  if (!match) return acorde;
+  if (cifrado === 'nashville') return acorde;
+  const sharp = match[1]; const grado = parseInt(match[2]);
+  const menor = match[3]; const extra = (match[4]||'')+(match[5]||'');
+  let intervalo = INTERVALOS[grado-1]||0;
+  if (sharp) intervalo += 1;
+  const rootIdx = NOTAS.indexOf(baseKey);
+  const idx = (rootIdx + intervalo + semitones + 120) % 12;
+  const nota = NOTAS[idx];
+  const calidad = menor ? 'm' : (CALIDAD[grado-1]||'');
+  return nota + calidad + extra;
+}
+
+function procesarLinea(line) {
+  if (!line.includes('[')) return `<div class="line"><div class="lyrics">${line}</div></div>`;
+  if (line.match(/^[[^]]+]$/)) {
+    const acordes = line.slice(1,-1).split(/s+/).map(traducirAcorde).join(' ');
+    return `<div class="line"><div class="chords">${acordes}</div></div>`;
+  }
+  const parts = line.split(/([[^]]+])/);
+  let cells = []; let pendingChord = null;
+  parts.forEach(part => {
+    if (part.startsWith('[') && part.endsWith(']')) {
+      pendingChord = traducirAcorde(part.slice(1,-1).trim());
+    } else {
+      part.split(/(s+)/).forEach((w, i) => {
+        if (i === 0 && pendingChord !== null) { cells.push({chord: pendingChord, lyric: w}); pendingChord = null; }
+        else { cells.push({chord: '', lyric: w}); }
+      });
+    }
+  });
+  const html = cells.map(c =>
+    `<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:0px">` +
+    `<span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre">${c.chord ? c.chord+' ' : ' '.repeat((c.lyric||'').length||1)}</span>` +
+    `<span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre">${c.lyric}</span></span>`
+  ).join('');
+  return `<div class="line" style="line-height:1;margin-bottom:0.75rem">${html}</div>`;
+}
+
+function renderSeccion(sec) {
+  const lines = (sec.content||'').split('\n').filter(l=>l.trim());
+  const linesHTML = lines.map(procesarLinea).join('');
+  const tipo = (sec.type||'default').toLowerCase().replace(' ','-');
+  const cssClass = ['intro','verso','pre-coro','coro','bridge','instrumental','outro','tag'].includes(tipo) ? tipo : 'default';
+  return `
+    <div class="sec-block ${cssClass}">
+      <div class="sec-song-label">${sec.songTitle}</div>
+      <div class="sec-type-label">${sec.type}</div>
+      ${linesHTML}
+    </div>
+  `;
+}
+
+function renderAll() {
+  const el = document.getElementById('content');
+  if (!allSections.length) { el.innerHTML = '<div class="loading">Sin secciones.</div>'; return; }
+  let html = '';
+  let prevSong = null;
+  allSections.forEach((sec, idx) => {
+    if (sec.songTitle !== prevSong) {
+      if (idx > 0) html += '<div class="divider"><div class="divider-line"></div></div>';
+      prevSong = sec.songTitle;
+    }
+    html += renderSeccion(sec);
+  });
+  el.innerHTML = html;
+  // Update key display
+  const rootIdx = NOTAS.indexOf(baseKey);
+  document.getElementById('key-display').textContent = NOTAS[(rootIdx + semitones + 12) % 12];
+}
+
+function transposeAll(n) {
+  semitones = (semitones + n + 12) % 12;
+  renderAll();
+}
+
+function setCifrado(tipo) {
+  cifrado = tipo;
+  document.getElementById('btn-am').classList.toggle('active', tipo === 'americano');
+  document.getElementById('btn-nns').classList.toggle('active', tipo === 'nashville');
+  renderAll();
+}
+
+async function init() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) { window.location.href = '/login.html'; return; }
+  if (!medleyId) { window.location.href = '/medley-builder.html'; return; }
+
+  const { data: medley } = await _sb.from('medleys').select('*').eq('id', medleyId).single();
+  if (!medley) { window.location.href = '/medley-builder.html'; return; }
+  document.getElementById('medley-title').textContent = medley.name;
+  document.title = medley.name;
+
+  const { data: mSecs } = await _sb.from('medley_sections')
+    .select('id, section_id, song_id, order').eq('medley_id', medleyId).order('order');
+  if (!mSecs || !mSecs.length) {
+    document.getElementById('content').innerHTML = '<div class="loading">Este medley está vacío.</div>';
+    return;
+  }
+
+  const secIds = mSecs.map(s => s.section_id);
+  const songIds = [...new Set(mSecs.map(s => s.song_id))];
+
+  const { data: sections } = await _sb.from('sections').select('id, type, content, song_id').in('id', secIds);
+  const { data: songs } = await _sb.from('Songs').select('id, title, "original key"').in('id', songIds);
+
+  const secsMap = {}; (sections||[]).forEach(s => secsMap[s.id] = s);
+  const songsMap = {}; (songs||[]).forEach(s => songsMap[s.id] = s);
+
+  // Usar clave original del primer song como referencia
+  const firstSongId = mSecs[0].song_id;
+  if (songsMap[firstSongId]) {
+    const rawKey = songsMap[firstSongId]['original key'] || 'C';
+    baseKey = BEMOLES[rawKey] || rawKey;
+    document.getElementById('key-display').textContent = rawKey;
+  }
+
+  allSections = mSecs.map(ms => {
+    const sec = secsMap[ms.section_id] || {};
+    const song = songsMap[ms.song_id] || {};
+    return { ...sec, songTitle: song.title || 'Canción', songKey: song['original key'] || 'C' };
+  });
+
+  const totalSongs = new Set(allSections.map(s => s.songTitle)).size;
+  document.getElementById('medley-sub').textContent = allSections.length + ' secciones · ' + totalSongs + ' canciones';
+  renderAll();
+}
+
+init();
+</script>
+</body>
+</html>
