@@ -29,8 +29,9 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.
 .empty-title { color: #4a5568; font-size: 0.95rem; margin-bottom: 0.5rem; }
 .empty-sub { color: #2a3a50; font-size: 0.8rem; margin-bottom: 1.5rem; }
 .empty-cta { background: #3b82f6; border: none; border-radius: 10px; color: #fff; font-size: 0.85rem; font-weight: 600; padding: 10px 20px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
-.empty-cta:hover { background: #2563eb; }
-.medley-card { background: #0d1626; border: 1px solid #1e2d45; border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.85rem; cursor: pointer; text-decoration: none; transition: border-color 0.15s; }
+.section-label { font-size: 0.7rem; color: #4a5568; letter-spacing: 1.5px; text-transform: uppercase; padding: 0.75rem 0 0.4rem; }
+.medley-card { background: #0d1626; border: 1px solid #1e2d45; border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.85rem; }
+.medley-card-link { flex: 1; display: flex; align-items: center; gap: 0.85rem; cursor: pointer; text-decoration: none; min-width: 0; }
 .medley-card:hover { border-color: #3b82f6; }
 .medley-icon { width: 42px; height: 42px; background: #1e2d45; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .medley-icon i { font-size: 1.2rem; color: #3b82f6; }
@@ -39,13 +40,10 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.
 .medley-meta { font-size: 0.72rem; color: #4a5568; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
 .meta-chip { display: flex; align-items: center; gap: 3px; }
 .meta-chip i { font-size: 0.75rem; }
-.medley-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.action-btn { background: none; border: none; color: #4a5568; font-size: 1rem; cursor: pointer; padding: 6px; border-radius: 6px; display: flex; align-items: center; transition: color 0.15s, background 0.15s; }
+.medley-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.action-btn { background: none; border: none; color: #4a5568; font-size: 1rem; cursor: pointer; padding: 7px; border-radius: 6px; display: flex; align-items: center; }
 .action-btn:hover { background: #1e2d45; }
 .action-btn.del:hover { color: #ef4444; }
-.action-btn.edit { color: #3b82f6; }
-.chevron { color: #2a3a50; font-size: 1rem; }
-.section-label { font-size: 0.7rem; color: #4a5568; letter-spacing: 1.5px; text-transform: uppercase; padding: 0.75rem 0 0.4rem; }
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1626; border-top: 1px solid #1e2d45; display: flex; padding: 8px 0 12px; z-index: 20; }
 .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 0; text-decoration: none; }
 .nav-item i { font-size: 1.2rem; color: #4a5568; }
@@ -64,8 +62,8 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.
 </style>
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(e => console.error('[SW]', e));
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function(e) { console.error('[SW]', e); });
   });
 }
 </script>
@@ -100,12 +98,15 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
 <script>
-const _sb = supabase.createClient(
+var _sb = supabase.createClient(
   'https://kzqnsbztfyhyyageuboz.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
 );
-let allMedleys = [];
-let pendingDeleteId = null;
+var allMedleys = [];
+
+function escHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
 
 function formatDate(iso) {
   if (!iso) return '';
@@ -118,38 +119,44 @@ function renderMedleys(list) {
   var sub = document.getElementById('page-sub');
   sub.textContent = list.length + ' medley' + (list.length !== 1 ? 's' : '') + ' guardados';
   if (!list.length) {
-    el.innerHTML = '<div class="empty-state">' +
-      '<i class="ti ti-layers-intersect empty-icon"></i>' +
-      '<div class="empty-title">Aún no tienes medleys</div>' +
-      '<div class="empty-sub">Crea tu primer medley combinando secciones de diferentes canciones.</div>' +
-      '<a class="empty-cta" href="/medley-builder.html"><i class="ti ti-plus"></i> Crear medley</a>' +
-      '</div>';
+    el.innerHTML = '<div class="empty-state"><i class="ti ti-layers-intersect empty-icon"></i><div class="empty-title">Aún no tienes medleys</div><div class="empty-sub">Crea tu primer medley combinando secciones de canciones.</div><a class="empty-cta" href="/medley-builder.html"><i class="ti ti-plus"></i> Crear medley</a></div>';
     return;
   }
-  var html = '<div class="section-label">Tus medleys</div>';
+  el.innerHTML = '<div class="section-label">Tus medleys</div>';
   list.forEach(function(m) {
+    var card = document.createElement('div');
+    card.className = 'medley-card';
+    card.dataset.id = m.id;
     var secCount = m.sec_count || 0;
-    html += '<div class="medley-card" onclick="window.location.href=\"/medley-view.html?id=' + m.id + \"">' +
-      '<div class="medley-icon"><i class="ti ti-layers-intersect"></i></div>' +
-      '<div class="medley-info">' +
-        '<div class="medley-name">' + escHtml(m.name) + '</div>' +
-        '<div class="medley-meta">' +
-          '<span class="meta-chip"><i class="ti ti-list"></i> ' + secCount + ' sección' + (secCount !== 1 ? 'es' : '') + '</span>' +
-          '<span class="meta-chip"><i class="ti ti-calendar"></i> ' + formatDate(m.created_at) + '</span>' +
+    card.innerHTML =
+      '<a class="medley-card-link" href="/medley-view.html?id=' + m.id + '">' +
+        '<div class="medley-icon"><i class="ti ti-layers-intersect"></i></div>' +
+        '<div class="medley-info">' +
+          '<div class="medley-name">' + escHtml(m.name) + '</div>' +
+          '<div class="medley-meta">' +
+            '<span class="meta-chip"><i class="ti ti-list"></i>&nbsp;' + secCount + ' sección' + (secCount !== 1 ? 'es' : '') + '</span>' +
+            '<span class="meta-chip"><i class="ti ti-calendar"></i>&nbsp;' + formatDate(m.created_at) + '</span>' +
+          '</div>' +
         '</div>' +
-      '</div>' +
+      '</a>' +
       '<div class="medley-actions">' +
-        '<button class="action-btn edit" title="Editar" onclick="event.stopPropagation();editMedley(' + m.id + ')"><i class="ti ti-pencil"></i></button>' +
-        '<button class="action-btn del" title="Eliminar" onclick="event.stopPropagation();confirmDelete(' + m.id + ',\'' + escHtml(m.name).replace(/\'/g,'&#39;') + '\')"><i class="ti ti-trash"></i></button>' +
-      '</div>' +
-    '</div>';
+        '<button class="action-btn del" data-action="delete" data-id="' + m.id + '" data-name="' + escHtml(m.name) + '" title="Eliminar"><i class="ti ti-trash"></i></button>' +
+      '</div>';
+    el.appendChild(card);
   });
-  el.innerHTML = html;
 }
 
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+// Event delegation for delete buttons
+document.getElementById('content').addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-action="delete"]');
+  if (btn) {
+    e.preventDefault();
+    e.stopPropagation();
+    confirmDelete(parseInt(btn.dataset.id), btn.dataset.name);
+  }
+});
+
+var pendingDeleteId = null;
 
 function confirmDelete(id, name) {
   pendingDeleteId = id;
@@ -165,65 +172,52 @@ function closeConfirm() {
 
 async function doDelete(id) {
   closeConfirm();
-  // Delete sections first, then medley (CASCADE should handle it, but be safe)
   await _sb.from('medley_sections').delete().eq('medley_id', id);
-  var { error } = await _sb.from('medleys').delete().eq('id', id);
-  if (error) { mostrarToast('✕ Error al eliminar'); return; }
+  var res = await _sb.from('medleys').delete().eq('id', id);
+  if (res.error) { mostrarToast('✕ Error al eliminar'); return; }
   allMedleys = allMedleys.filter(function(m) { return m.id !== id; });
   renderMedleys(allMedleys);
   mostrarToast('✓ Medley eliminado');
 }
 
-function editMedley(id) {
-  window.location.href = '/medley-builder.html?edit=' + id;
-}
-
 function mostrarToast(msg) {
   var t = document.getElementById('toast');
-  t.textContent = msg; t.style.display = 'block';
+  t.textContent = msg;
+  t.style.display = 'block';
   setTimeout(function() { t.style.display = 'none'; }, 2500);
 }
 
+document.getElementById('confirm-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeConfirm();
+});
+
 async function init() {
-  var res = await _sb.auth.getSession();
-  var session = res.data.session;
+  var authRes = await _sb.auth.getSession();
+  var session = authRes.data.session;
   if (!session) { window.location.href = '/login.html'; return; }
   var userId = session.user.id;
-  // Fetch medleys with section count
-  var { data: medleys, error } = await _sb
+  var medRes = await _sb
     .from('medleys')
     .select('id, name, created_at')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
-  if (error) {
+  if (medRes.error) {
     document.getElementById('content').innerHTML = '<div class="loading">❌ Error cargando medleys</div>';
     return;
   }
-  if (!medleys || !medleys.length) {
-    allMedleys = [];
-    renderMedleys([]);
-    return;
-  }
-  // Get section counts for each medley
+  var medleys = medRes.data || [];
+  if (!medleys.length) { allMedleys = []; renderMedleys([]); return; }
   var ids = medleys.map(function(m) { return m.id; });
-  var { data: secCounts } = await _sb
-    .from('medley_sections')
-    .select('medley_id')
-    .in('medley_id', ids);
+  var secRes = await _sb.from('medley_sections').select('medley_id').in('medley_id', ids);
   var countMap = {};
-  (secCounts || []).forEach(function(r) {
+  (secRes.data || []).forEach(function(r) {
     countMap[r.medley_id] = (countMap[r.medley_id] || 0) + 1;
   });
   allMedleys = medleys.map(function(m) {
-    return Object.assign({}, m, { sec_count: countMap[m.id] || 0 });
+    return { id: m.id, name: m.name, created_at: m.created_at, sec_count: countMap[m.id] || 0 };
   });
   renderMedleys(allMedleys);
 }
-
-// Close confirm overlay when clicking outside
-document.getElementById('confirm-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeConfirm();
-});
 
 init();
 </script>
