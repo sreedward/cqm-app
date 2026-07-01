@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#080c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CQM">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
+<title>CQM - Mis Medleys</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #080c14; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 90px; }
+header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; position: sticky; top: 0; z-index: 10; }
+.back-btn { background: none; border: none; color: #3b82f6; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
+.header-info { flex: 1; }
+.page-title { font-size: 0.95rem; font-weight: 700; color: #e2e8f0; }
+.page-sub { font-size: 0.72rem; color: #4a5568; }
+.new-btn { background: #3b82f6; border: none; border-radius: 8px; color: #fff; font-size: 0.8rem; font-weight: 600; padding: 7px 14px; cursor: pointer; display: flex; align-items: center; gap: 5px; text-decoration: none; white-space: nowrap; }
+.new-btn:hover { background: #2563eb; }
+.content { padding: 1rem 1.25rem; }
+.loading { text-align: center; color: #4a5568; padding: 3rem 1rem; font-size: 0.9rem; }
+.empty-state { text-align: center; padding: 3rem 1.5rem; }
+.empty-icon { font-size: 3rem; color: #1e2d45; margin-bottom: 1rem; display: block; }
+.empty-title { color: #4a5568; font-size: 0.95rem; margin-bottom: 0.5rem; }
+.empty-sub { color: #2a3a50; font-size: 0.8rem; margin-bottom: 1.5rem; }
+.empty-cta { background: #3b82f6; border: none; border-radius: 10px; color: #fff; font-size: 0.85rem; font-weight: 600; padding: 10px 20px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.empty-cta:hover { background: #2563eb; }
+.medley-card { background: #0d1626; border: 1px solid #1e2d45; border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.85rem; cursor: pointer; text-decoration: none; transition: border-color 0.15s; }
+.medley-card:hover { border-color: #3b82f6; }
+.medley-icon { width: 42px; height: 42px; background: #1e2d45; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.medley-icon i { font-size: 1.2rem; color: #3b82f6; }
+.medley-info { flex: 1; min-width: 0; }
+.medley-name { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+.medley-meta { font-size: 0.72rem; color: #4a5568; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.meta-chip { display: flex; align-items: center; gap: 3px; }
+.meta-chip i { font-size: 0.75rem; }
+.medley-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.action-btn { background: none; border: none; color: #4a5568; font-size: 1rem; cursor: pointer; padding: 6px; border-radius: 6px; display: flex; align-items: center; transition: color 0.15s, background 0.15s; }
+.action-btn:hover { background: #1e2d45; }
+.action-btn.del:hover { color: #ef4444; }
+.action-btn.edit { color: #3b82f6; }
+.chevron { color: #2a3a50; font-size: 1rem; }
+.section-label { font-size: 0.7rem; color: #4a5568; letter-spacing: 1.5px; text-transform: uppercase; padding: 0.75rem 0 0.4rem; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1626; border-top: 1px solid #1e2d45; display: flex; padding: 8px 0 12px; z-index: 20; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 0; text-decoration: none; }
+.nav-item i { font-size: 1.2rem; color: #4a5568; }
+.nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
+.nav-item.active i, .nav-item.active span { color: #3b82f6; }
+.toast { position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%); background: #1e2d45; border: 1px solid #3b82f6; color: #e2e8f0; border-radius: 8px; padding: 0.6rem 1.25rem; font-size: 0.85rem; z-index: 60; display: none; white-space: nowrap; }
+.confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(8,12,20,0.85); z-index: 50; align-items: flex-end; justify-content: center; }
+.confirm-overlay.open { display: flex; }
+.confirm-sheet { background: #0d1626; border: 1px solid #1e2d45; border-radius: 16px 16px 0 0; padding: 1.5rem 1.25rem 2rem; width: 100%; max-width: 480px; }
+.confirm-title { font-size: 1rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.35rem; }
+.confirm-sub { font-size: 0.82rem; color: #4a5568; margin-bottom: 1.25rem; }
+.confirm-btns { display: flex; gap: 0.75rem; }
+.confirm-btns button { flex: 1; border: none; border-radius: 10px; padding: 0.75rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+.btn-cancel { background: #1e2d45; color: #e2e8f0; }
+.btn-delete { background: #ef4444; color: #fff; }
+</style>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(e => console.error('[SW]', e));
+  });
+}
+</script>
+</head>
+<body>
+<header>
+  <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i></button>
+  <div class="header-info">
+    <div class="page-title">Mis Medleys</div>
+    <div class="page-sub" id="page-sub">Cargando...</div>
+  </div>
+  <a class="new-btn" href="/medley-builder.html"><i class="ti ti-plus"></i> Nuevo</a>
+</header>
+<div class="content" id="content">
+  <div class="loading"><i class="ti ti-loader-2" style="font-size:1.5rem;display:block;margin-bottom:0.5rem"></i>Cargando medleys...</div>
+</div>
+<nav class="bottom-nav">
+  <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
+  <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
+  <a class="nav-item active" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
+  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
+</nav>
+<div class="toast" id="toast"></div>
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-sheet">
+    <div class="confirm-title">Eliminar medley</div>
+    <div class="confirm-sub" id="confirm-sub">Esta acción no se puede deshacer.</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn-delete" id="btn-confirm-del">Eliminar</button>
+    </div>
+  </div>
+</div>
+<script>
+const _sb = supabase.createClient(
+  'https://kzqnsbztfyhyyageuboz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+);
+let allMedleys = [];
+let pendingDeleteId = null;
+
+function formatDate(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  return d.toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function renderMedleys(list) {
+  var el = document.getElementById('content');
+  var sub = document.getElementById('page-sub');
+  sub.textContent = list.length + ' medley' + (list.length !== 1 ? 's' : '') + ' guardados';
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state">' +
+      '<i class="ti ti-layers-intersect empty-icon"></i>' +
+      '<div class="empty-title">Aún no tienes medleys</div>' +
+      '<div class="empty-sub">Crea tu primer medley combinando secciones de diferentes canciones.</div>' +
+      '<a class="empty-cta" href="/medley-builder.html"><i class="ti ti-plus"></i> Crear medley</a>' +
+      '</div>';
+    return;
+  }
+  var html = '<div class="section-label">Tus medleys</div>';
+  list.forEach(function(m) {
+    var secCount = m.sec_count || 0;
+    html += '<div class="medley-card" onclick="window.location.href=\"/medley-view.html?id=' + m.id + \"">' +
+      '<div class="medley-icon"><i class="ti ti-layers-intersect"></i></div>' +
+      '<div class="medley-info">' +
+        '<div class="medley-name">' + escHtml(m.name) + '</div>' +
+        '<div class="medley-meta">' +
+          '<span class="meta-chip"><i class="ti ti-list"></i> ' + secCount + ' sección' + (secCount !== 1 ? 'es' : '') + '</span>' +
+          '<span class="meta-chip"><i class="ti ti-calendar"></i> ' + formatDate(m.created_at) + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="medley-actions">' +
+        '<button class="action-btn edit" title="Editar" onclick="event.stopPropagation();editMedley(' + m.id + ')"><i class="ti ti-pencil"></i></button>' +
+        '<button class="action-btn del" title="Eliminar" onclick="event.stopPropagation();confirmDelete(' + m.id + ',\'' + escHtml(m.name).replace(/\'/g,'&#39;') + '\')"><i class="ti ti-trash"></i></button>' +
+      '</div>' +
+    '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function confirmDelete(id, name) {
+  pendingDeleteId = id;
+  document.getElementById('confirm-sub').textContent = '¿Eliminar "' + name + '"? Esta acción no se puede deshacer.';
+  document.getElementById('confirm-overlay').classList.add('open');
+  document.getElementById('btn-confirm-del').onclick = function() { doDelete(id); };
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('open');
+  pendingDeleteId = null;
+}
+
+async function doDelete(id) {
+  closeConfirm();
+  // Delete sections first, then medley (CASCADE should handle it, but be safe)
+  await _sb.from('medley_sections').delete().eq('medley_id', id);
+  var { error } = await _sb.from('medleys').delete().eq('id', id);
+  if (error) { mostrarToast('✕ Error al eliminar'); return; }
+  allMedleys = allMedleys.filter(function(m) { return m.id !== id; });
+  renderMedleys(allMedleys);
+  mostrarToast('✓ Medley eliminado');
+}
+
+function editMedley(id) {
+  window.location.href = '/medley-builder.html?edit=' + id;
+}
+
+function mostrarToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(function() { t.style.display = 'none'; }, 2500);
+}
+
+async function init() {
+  var res = await _sb.auth.getSession();
+  var session = res.data.session;
+  if (!session) { window.location.href = '/login.html'; return; }
+  var userId = session.user.id;
+  // Fetch medleys with section count
+  var { data: medleys, error } = await _sb
+    .from('medleys')
+    .select('id, name, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) {
+    document.getElementById('content').innerHTML = '<div class="loading">❌ Error cargando medleys</div>';
+    return;
+  }
+  if (!medleys || !medleys.length) {
+    allMedleys = [];
+    renderMedleys([]);
+    return;
+  }
+  // Get section counts for each medley
+  var ids = medleys.map(function(m) { return m.id; });
+  var { data: secCounts } = await _sb
+    .from('medley_sections')
+    .select('medley_id')
+    .in('medley_id', ids);
+  var countMap = {};
+  (secCounts || []).forEach(function(r) {
+    countMap[r.medley_id] = (countMap[r.medley_id] || 0) + 1;
+  });
+  allMedleys = medleys.map(function(m) {
+    return Object.assign({}, m, { sec_count: countMap[m.id] || 0 });
+  });
+  renderMedleys(allMedleys);
+}
+
+// Close confirm overlay when clicking outside
+document.getElementById('confirm-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeConfirm();
+});
+
+init();
+</script>
+</body>
+</html>
