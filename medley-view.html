@@ -58,6 +58,8 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.85rem
 .sec-block.default .sec-type-label { color: #64748b; }
 .line { margin-bottom: 0.75rem; overflow-x: auto; }
 .chords { font-size: 1rem; font-weight: 700; color: #facc15; letter-spacing: 2px; margin-bottom: 3px; font-family: monospace; }
+.chord-root { display: inline-block; position: relative; white-space: nowrap; }
+.chord-qual { font-size: 0.55em; font-weight: 700; position: absolute; top: 0; left: 100%; line-height: 1; letter-spacing: 0; }
 .lyrics { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
 .loading { text-align: center; color: #4a5568; padding: 3rem; }
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1626; border-top: 1px solid #1e2d45; display: flex; padding: 8px 0 12px; z-index: 20; }
@@ -165,6 +167,20 @@ function transposeChord(chord, shift) {
   return result;
 }
 
+function styledChord(chord) {
+  if (!chord) return '';
+  var m = chord.match(/^([b#]?[1-7])(.*)$/);
+  if (!m) {
+    var am = chord.match(/^([A-G][#b]?)(.*)$/);
+    if (!am) return '<span>' + chord + '</span>';
+    var root = am[1], qual = am[2] || '';
+    if (!qual) return '<span>' + root + '</span>';
+    return '<span class="chord-root">' + root + '<span class="chord-qual">' + qual + '</span></span>';
+  }
+  var root = m[1], qual = m[2] || '';
+  if (!qual) return '<span>' + root + '</span>';
+  return '<span class="chord-root">' + root + '<span class="chord-qual">' + qual + '</span></span>';
+}
 function procesarToken(token) {
   if (!token.trim()) return token;
   if (cifrado === 'nashville') return token;
@@ -203,11 +219,11 @@ function procesarLinea(line) {
   var hasLyrics = cells.some(function(c) { return c.lyric.trim() !== ''; });
   if (!hasLyrics) {
     var chordLine = cells.filter(function(c){return c.chord;}).map(function(c){return c.chord;}).join('  ');
-    return '<div class="line"><div class="chords">' + escHtml(chordLine) + '</div></div>';
+    return '<div class="line"><div class="chords">' + chordLine + '</div></div>';
   }
   var html = cells.map(function(c) {
     return '<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:4px">' +
-      '<span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre">' + (c.chord ? escHtml(c.chord) + ' ' : ' ') + '</span>' +
+      '<span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre">' + (c.chord ? styledChord(c.chord) + ' ' : ' ') + '</span>' +
       '<span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre">' + escHtml(c.lyric || ' ') + '</span></span>';
   }).join('');
   return '<div class="line" style="line-height:1;margin-bottom:0.75rem;overflow-x:auto">' + html + '</div>';
