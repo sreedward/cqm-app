@@ -20,11 +20,9 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.85rem
 .header-info { flex: 1; }
 .medley-title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; }
 .medley-sub { font-size: 0.72rem; color: #4a5568; }
-.transpose-bar { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.5rem 1.25rem; display: flex; flex-direction: column; gap: 0.45rem; position: sticky; top: 57px; z-index: 9; }
+.transpose-bar { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.5rem 1.25rem; position: sticky; top: 57px; z-index: 9; }
 .transpose-row { display: flex; align-items: center; gap: 0.65rem; }
 .t-label { font-size: 0.72rem; color: #4a5568; white-space: nowrap; }
-.t-btn { background: #1e2d45; border: none; color: #e2e8f0; border-radius: 6px; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.t-btn:hover { background: #3b82f6; }
 .key-display { background: #1e2d45; color: #3b82f6; border-radius: 6px; padding: 3px 10px; font-size: 0.85rem; font-weight: 700; font-family: monospace; min-width: 36px; text-align: center; }
 .key-select-wrap { display: flex; align-items: center; gap: 0.5rem; flex: 1; }
 .key-select { background: #1e2d45; border: 1px solid #2a3a50; color: #e2e8f0; border-radius: 6px; padding: 4px 8px; font-size: 0.82rem; font-family: monospace; font-weight: 700; cursor: pointer; flex: 1; max-width: 130px; }
@@ -88,27 +86,18 @@ if ('serviceWorker' in navigator) {
 </header>
 <div class="transpose-bar">
   <div class="transpose-row">
-    <span class="t-label">Semit.:</span>
-    <button class="t-btn" onclick="transposeRel(-1)"><i class="ti ti-minus"></i></button>
+    <span class="t-label">Tonalidad:</span>
     <div class="key-display" id="key-display">-</div>
-    <button class="t-btn" onclick="transposeRel(1)"><i class="ti ti-plus"></i></button>
-    <div class="cifrado-toggle">
-      <button class="cifrado-btn active" id="btn-am" onclick="setCifrado('americano')">Am</button>
-      <button class="cifrado-btn" id="btn-nns" onclick="setCifrado('nashville')">NNS</button>
-    </div>
-  </div>
-  <div class="transpose-row">
-    <span class="t-label">Nota:</span>
     <div class="key-select-wrap">
       <select class="key-select" id="target-key">
-        <option value="">-- Elegir nota --</option>
+        <option value="">Cambiar...</option>
         <option value="C">C</option>
         <option value="C#">C#</option>
         <option value="D">D</option>
         <option value="D#">D# / Eb</option>
         <option value="E">E</option>
         <option value="F">F</option>
-        <option value="F#">F# / Gb</option>
+        <option value="F#">F#</option>
         <option value="G">G</option>
         <option value="G#">G# / Ab</option>
         <option value="A">A</option>
@@ -116,6 +105,10 @@ if ('serviceWorker' in navigator) {
         <option value="B">B</option>
       </select>
       <button class="apply-key-btn" onclick="applyTargetKey()"><i class="ti ti-arrow-right" style="font-size:0.8rem"></i> Aplicar</button>
+    </div>
+    <div class="cifrado-toggle">
+      <button class="cifrado-btn active" id="btn-am" onclick="setCifrado('americano')">Am</button>
+      <button class="cifrado-btn" id="btn-nns" onclick="setCifrado('nashville')">NNS</button>
     </div>
   </div>
 </div>
@@ -261,10 +254,7 @@ function renderAll() {
   document.getElementById('key-display').textContent = getCurrentKey();
 }
 
-function transposeRel(n) {
-  semitones = (semitones + n + 12) % 12;
-  renderAll();
-}
+
 
 function applyTargetKey() {
   var sel = document.getElementById('target-key').value;
