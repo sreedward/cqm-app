@@ -256,7 +256,7 @@ function procesarLinea(line) {
         }
       })
       const html = cells.map(c =>
-        `<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:0px">` +
+        `<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:0.4em">` +
         `<span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre">${c.chord ? styledChord(c.chord) + ' ' : ' '.repeat((c.lyric||'').length || 1)}</span>` +
         `<span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre">${c.lyric}</span>` +
         `</span>`
