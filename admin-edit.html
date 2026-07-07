@@ -26,6 +26,8 @@
     .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; }
     .section-header select { flex: 1; }
     .del-btn { background: #1a0808; border: 1px solid #7f1d1d; color: #ef4444; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.8rem; }
+    .move-btn { background: #1e2d45; border: none; color: #3b82f6; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 0.7rem; }
+    .move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .pad { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.75rem; }
     .pad-btn { background: #1e2d45; border: none; color: #3b82f6; border-radius: 6px; padding: 5px 8px; font-size: 0.8rem; font-family: monospace; font-weight: 700; cursor: pointer; }
     .pad-btn:hover { background: #3b82f6; color: #fff; }
@@ -141,11 +143,13 @@
       div.dataset.secId = sec ? sec.id : ''
       div.innerHTML = `
         <div class="section-header">
-          <span style="font-size:0.8rem;color:#4a5568">#${sectionCount}</span>
+          <span class="sec-num" style="font-size:0.8rem;color:#4a5568">#${sectionCount}</span>
           <select class="tipo-select">
             ${TIPOS.map(t => `<option value="${t}" ${sec && sec.type === t ? 'selected' : ''}>${t}</option>`).join('')}
           </select>
-          <button class="del-btn" onclick="document.getElementById('${id}').remove()">🗑</button>
+          <button class="move-btn" onclick="moveSection('${id}', -1)" title="Mover arriba">&#9650;</button>
+          <button class="move-btn" onclick="moveSection('${id}', 1)" title="Mover abajo">&#9660;</button>
+          <button class="del-btn" onclick="document.getElementById('${id}').remove(); renumerarSecciones()">🗑</button>
         </div>
         <div class="pad">
           ${NUMEROS.map(n => `<button class="pad-btn" onclick="insertarAcorde('${id}','${n}')">[${n}]</button>`).join('')}
@@ -157,6 +161,28 @@
         <textarea id="content-${id}">${sec ? sec.content : ''}</textarea>
       `
       document.getElementById('sections-container').appendChild(div)
+      renumerarSecciones()
+    }
+
+    function moveSection(id, dir) {
+      const container = document.getElementById('sections-container')
+      const el = document.getElementById(id)
+      if (!el) return
+      if (dir === -1) {
+        const prev = el.previousElementSibling
+        if (prev) container.insertBefore(el, prev)
+      } else {
+        const next = el.nextElementSibling
+        if (next) container.insertBefore(next, el)
+      }
+      renumerarSecciones()
+    }
+
+    function renumerarSecciones() {
+      document.querySelectorAll('#sections-container .section-block').forEach((sec, idx) => {
+        const numEl = sec.querySelector('.sec-num')
+        if (numEl) numEl.textContent = `#${idx + 1}`
+      })
     }
 
     function insertarAcorde(secId, acorde) {
