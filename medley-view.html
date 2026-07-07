@@ -56,8 +56,8 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.85rem
 .sec-block.default .sec-type-label { color: #64748b; }
 .line { margin-bottom: 0.75rem; overflow-x: auto; }
 .chords { font-size: 1rem; font-weight: 700; color: #facc15; letter-spacing: 2px; margin-bottom: 3px; font-family: monospace; }
-.chord-root { display: inline-block; position: relative; white-space: nowrap; padding-right: 0.1em; }
-.chord-qual { font-size: 0.83em; font-weight: 700; position: absolute; top: -0.1em; left: 100%; line-height: 1; letter-spacing: 0; white-space: nowrap; }
+.chord-root { display: inline-block; white-space: nowrap; }
+.chord-qual { font-size: 0.83em; font-weight: 700; position: relative; top: -0.35em; line-height: 1; letter-spacing: 0; white-space: nowrap; margin-left: 0.05em; }
 .lyrics { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
 .loading { text-align: center; color: #4a5568; padding: 3rem; }
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1626; border-top: 1px solid #1e2d45; display: flex; padding: 8px 0 12px; z-index: 20; }
@@ -215,7 +215,7 @@ function procesarLinea(line) {
     return '<div class="line"><div class="chords">' + chordLine + '</div></div>';
   }
   var html = cells.map(function(c) {
-    return '<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:0.6em">' +
+    return '<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:0.25em">' +
       '<span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre">' + (c.chord ? styledChord(c.chord) + ' ' : ' ') + '</span>' +
       '<span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre">' + escHtml(c.lyric || ' ') + '</span></span>';
   }).join('');
