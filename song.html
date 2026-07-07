@@ -193,7 +193,7 @@ function goBack() {
     }
 
     function traducirAcorde(acorde) {
-      const match = acorde.match(/^(#?)(\d)(m?)(sus\d*|add\d*|maj\d*|dim|aug|\d*)?(\/.+)?$/)
+      const match = acorde.match(/^(#?)(\d)(m?)(sus\d*|add\d*|maj\d*|dim|dis|aug|\d*)?(\/.+)?$/)
       if (!match) return acorde
       const sharp = match[1]
       const grado = parseInt(match[2])
