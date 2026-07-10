@@ -35,10 +35,6 @@
     .pad { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.75rem; }
     .pad-btn { background: #1e2d45; border: none; color: #3b82f6; border-radius: 6px; padding: 5px 8px; font-size: 0.8rem; font-family: monospace; font-weight: 700; cursor: pointer; }
     .pad-btn:hover { background: #3b82f6; color: #fff; }
-    .manual-acorde-row { display: flex; gap: 6px; margin-top: 6px; }
-    .manual-acorde-input { flex: 1; background: #1e2d45; border: none; color: #e5e7eb; border-radius: 6px; padding: 6px 8px; font-size: 0.85rem; font-family: monospace; }
-    .manual-acorde-btn { background: #3b82f6; border: none; color: #fff; border-radius: 6px; padding: 6px 10px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
-    .manual-acorde-btn:hover { background: #2563eb; }
     .add-section-btn { width: 100%; background: none; border: 1px dashed #1e2d45; border-radius: 10px; color: #4a5568; padding: 0.75rem; cursor: pointer; font-size: 0.85rem; margin-bottom: 1rem; }
     .add-section-btn:hover { border-color: #3b82f6; color: #3b82f6; }
     .save-btn { width: 100%; background: #3b82f6; border: none; border-radius: 8px; color: #fff; padding: 0.85rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
@@ -120,13 +116,13 @@
 
     const TIPOS = ['intro','verso','pre-coro','coro','bridge','instrumental','outro']
   const NUMEROS = [
-      '1','1m','17','1maj7','19','1maj9','1sus2','1sus4','1add2','1add4','1aug','1dis','1bm',
-      '2','2m','27','2maj7','29','2maj9','2sus2','2sus4','2add2','2add4','2aug','2dis','2bm',
-      '3','3m','37','3maj7','39','3maj9','3sus2','3sus4','3add2','3add4','3aug','3dis','3bm',
-      '4','4m','47','4maj7','49','4maj9','4sus2','4sus4','4add2','4add4','4aug','4dis','4bm',
-      '5','5m','57','5maj7','59','5maj9','5sus2','5sus4','5add2','5add4','5aug','5dis','5bm',
-      '6','6m','67','6maj7','69','6maj9','6sus2','6sus4','6add2','6add4','6aug','6dis','6bm',
-      '7','7m','77','7maj7','79','7maj9','7sus2','7sus4','7add2','7add4','7aug','7dis','7bm'
+      '1','1m','1maj7','17','1sus2','1sus4','1maj9','19','1bm7','1aug','1dism',
+      '2','2m','2maj7','27','2sus2','2sus4','2maj9','29','2bm7','2aug','2dism',
+      '3','3m','3maj7','37','3sus2','3sus4','3maj9','39','3bm7','3aug','3dism',
+      '4','4m','4maj7','47','4sus2','4sus4','4maj9','49','4bm7','4aug','4dism',
+      '5','5m','5maj7','57','5sus2','5sus4','5maj9','59','5bm7','5aug','5dism',
+      '6','6m','6maj7','67','6sus2','6sus4','6maj9','69','6bm7','6aug','6dism',
+      '7','7m','7maj7','77','7sus2','7sus4','7maj9','79','7bm7','7aug','7dism'
     ]
     let sectionCount = 0
 
@@ -162,10 +158,6 @@
         <div class="pad">
           ${NUMEROS.map(n => `<button class="pad-btn" onclick="insertarAcorde('${id}','${n}')">[${n}]</button>`).join('')}
         </div>
-        <div class="manual-acorde-row">
-          <input type="text" id="manual-input-${id}" class="manual-acorde-input" placeholder="Ej: 3bm, 5aug, 1sus2" onkeydown="if(event.key==='Enter'){insertarAcordeManual('${id}');event.preventDefault()}" />
-          <button type="button" class="manual-acorde-btn" onclick="insertarAcordeManual('${id}')">+ Insertar</button>
-        </div>
         <textarea id="content-${id}" placeholder="Escribe la letra. Usa los botones para insertar acordes donde está el cursor."></textarea>
       `
       document.getElementById('sections-container').appendChild(div)
@@ -177,15 +169,6 @@
       ta.value = ta.value.slice(0, s) + `[${acorde}]` + ta.value.slice(e)
       ta.selectionStart = ta.selectionEnd = s + acorde.length + 2
       ta.focus()
-    }
-
-    function insertarAcordeManual(secId) {
-      const input = document.getElementById(`manual-input-${secId}`)
-      const val = input.value.trim()
-      if (!val) return
-      insertarAcorde(secId, val)
-      input.value = ''
-      input.focus()
     }
 
     document.addEventListener('DOMContentLoaded', () => {
