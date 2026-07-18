@@ -260,10 +260,12 @@ function procesarLinea(line) {
     function renderAll() {
       const page1 = document.getElementById('page-1')
       const page2 = document.getElementById('page-2')
-      const secs1 = sections.filter(s => PAGE1_TYPES.includes(s.type.toLowerCase()))
-      const secs2 = sections.filter(s => !PAGE1_TYPES.includes(s.type.toLowerCase()))
-      page1.innerHTML = secs1.length ? secs1.map(renderSeccion).join('') : '<div class="loading">Sin secciones.</div>'
-      page2.innerHTML = secs2.length ? secs2.map(renderSeccion).join('') : '<div class="loading">Sin secciones.</div>'
+const hasVerso = sections.some(s => s.type.toLowerCase() === 'verso')
+    const enPagina1 = s => PAGE1_TYPES.includes(s.type.toLowerCase()) || (!hasVerso && s.type.toLowerCase() === 'coro')
+    const secs1 = sections.filter(enPagina1)
+    const secs2 = sections.filter(s => !enPagina1(s))
+    page1.innerHTML = secs1.length ? secs1.map(renderSeccion).join('') : '<div class="loading">Sin secciones.</div>'
+    page2.innerHTML = secs2.length ? secs2.map(renderSeccion).join('') : '<div class="loading">Sin secciones.</div>'
     }
 
     function transpose(n) {
