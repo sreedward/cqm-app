@@ -214,21 +214,38 @@ function goBack() {
   // American: plain note no suffix
   return '<span>' + t + '</span>';
 }
-function procesarLinea(line) {
+function esNota(texto) {
+  return /\s/.test(texto.trim())
+}
+
+    function renderNota(texto) {
+      return '<span style="display:block;text-align:right;font-style:italic;font-size:0.95rem;color:#8b9cb5;font-weight:400;margin-bottom:0.35rem">\uD83D\uDCDD ' + texto.trim() + '</span>'
+    }
+
+    function procesarLinea(line) {
       if (!line.includes('[')) {
         return `<div class="line"><div class="lyrics">${line}</div></div>`
       }
       if (line.match(/^\[[^\]]+\]$/)) {
         const inner = line.slice(1, -1)
-        const acordes = inner.split(/\s+/).map(traducirAcorde).map(styledChord).join('   ')
+        if (esNota(inner)) {
+          return `<div class="line">${renderNota(inner)}</div>`
+        }
+        const acordes = inner.split(/\s+/).map(traducirAcorde).map(styledChord).join(' ')
         return `<div class="line"><div class="chords">${acordes}</div></div>`
       }
       const parts = line.split(/(\[[^\]]+\])/)
       let cells = []
+      let notas = []
       let pendingChord = null
       parts.forEach(part => {
         if (part.startsWith('[') && part.endsWith(']')) {
-          pendingChord = traducirAcorde(part.slice(1,-1).trim())
+          const inner = part.slice(1,-1).trim()
+          if (esNota(inner)) {
+            notas.push(inner)
+          } else {
+            pendingChord = traducirAcorde(inner)
+          }
         } else {
           const words = part.split(/(\s+)/)
           words.forEach((word, i) => {
@@ -246,10 +263,11 @@ function procesarLinea(line) {
         `<span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre">${c.chord ? styledChord(c.chord) + ' ' : ' '.repeat((c.lyric||'').length || 1)}</span>` +
         `<span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre">${c.lyric}</span>` +
         `</span>`
-      ).join('')
-      return `<div class="line" style="line-height:1;margin-bottom:0.75rem">${html}</div>`
+        ).join('')
+      const notasHTML = notas.length ? notas.map(renderNota).join('') : ''
+      return `<div class="line" style="line-height:1;margin-bottom:0.75rem">${html}</div>${notasHTML}`
     }
-
+    
     function renderSeccion(sec) {
       const lines = (sec.content || '').split('\n').filter(l => l.trim())
       const linesHTML = lines.map(procesarLinea).join('')
