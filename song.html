@@ -287,7 +287,7 @@ const hasVerso = sections.some(s => s.type.toLowerCase() === 'verso')
     page2.innerHTML = secs2.length ? secs2.map(renderSeccion).join('') : '<div class="loading">Sin secciones.</div>'
         renderNotasUI()
     }
-let 
+let  notesCache = {};
 
     async function cargarNotasUsuario() {
       if (!currentUserId) return
