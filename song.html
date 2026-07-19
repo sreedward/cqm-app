@@ -162,6 +162,7 @@
     let originalKey = 'C'
     let sections = []
     let currentPage = 1
+    let data-sid = null
 
     const params = new URLSearchParams(window.location.search)
     const songId = params.get('id')
@@ -272,7 +273,7 @@ function esNota(texto) {
       const lines = (sec.content || '').split('\n').filter(l => l.trim())
       const linesHTML = lines.map(procesarLinea).join('')
       const tipo = sec.type.toLowerCase().replace(' ', '-')
-      return `<div class="section ${tipo}"><div class="section-label">${sec.type}</div>${linesHTML}</div>`
+            return `<div class="section ${tipo}" data-sid="${sec.id}"><div class="section-label">${sec.type}</div>${linesHTML}</div>`
     }
 
     function renderAll() {
@@ -284,8 +285,91 @@ const hasVerso = sections.some(s => s.type.toLowerCase() === 'verso')
     const secs2 = sections.filter(s => !enPagina1(s))
     page1.innerHTML = secs1.length ? secs1.map(renderSeccion).join('') : '<div class="loading">Sin secciones.</div>'
     page2.innerHTML = secs2.length ? secs2.map(renderSeccion).join('') : '<div class="loading">Sin secciones.</div>'
+        renderNotasUI()
+    }
+let notesCache = {}
+
+    async function cargarNotasUsuario() {
+      if (!currentUserId) return
+      const { data } = await _supabase.from('song_notes').select('section_id, content').eq('user_id', currentUserId)
+      notesCache = {}
+      (data || []).forEach(n => { notesCache[n.section_id] = n.content })
     }
 
+    function inyectarEstiloNotas() {
+      if (document.getElementById('mynote-style')) return
+      const style = document.createElement('style')
+      style.id = 'mynote-style'
+      style.textContent = `
+      .section-label { display:flex; align-items:center; justify-content:space-between; }
+      .mynote-btn { background:none; border:1px solid #2a3b57; color:#8b9cb5; border-radius:12px; font-size:0.7rem; padding:2px 9px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; font-family:inherit; letter-spacing:0.02em; opacity:0.85; }
+      .mynote-btn:hover { opacity:1; border-color:#3b82f6; color:#3b82f6; }
+      .mynote-dot { width:6px; height:6px; border-radius:50%; background:#3b82f6; display:none; }
+      .mynote-dot.show { display:inline-block; }
+      .mynote-box { margin-top:0.5rem; margin-bottom:0.5rem; padding:0.6rem 0.75rem; background:rgba(59,130,246,0.06); border:1px dashed #2a3b57; border-radius:8px; display:none; }
+      .mynote-box.open { display:block; }
+      .mynote-box textarea { width:100%; background:transparent; border:none; color:#cdd6e3; font-size:0.85rem; font-family:inherit; resize:none; outline:none; min-height:40px; }
+      .mynote-hint { font-size:0.68rem; color:#5b6b85; margin-top:0.25rem; }
+      .mynote-status { font-size:0.68rem; color:#4ade80; opacity:0; transition:opacity 0.4s ease; margin-top:0.25rem; }
+      .mynote-status.show { opacity:1; }
+      .mynote-status.saving { color:#8b9cb5; }
+      `
+      document.head.appendChild(style)
+    }
+
+    function renderNotasUI() {
+      if (!currentUserId) return
+      inyectarEstiloNotas()
+      document.querySelectorAll('.section[data-sid]').forEach(secEl => {
+        const sid = secEl.getAttribute('data-sid')
+        const label = secEl.querySelector('.section-label')
+        if (!label || label.querySelector('.mynote-btn')) return
+        const existing = notesCache[sid] || ''
+
+        const btn = document.createElement('button')
+        btn.className = 'mynote-btn'
+        btn.innerHTML = '\u270F\uFE0F Mi nota <span class="mynote-dot"></span>'
+        if (existing.trim()) btn.querySelector('.mynote-dot').classList.add('show')
+
+        const box = document.createElement('div')
+        box.className = 'mynote-box'
+        const ta = document.createElement('textarea')
+        ta.placeholder = 'Escribe tu nota personal aqui... (solo tu la ves)'
+        ta.value = existing
+        const hint = document.createElement('div')
+        hint.className = 'mynote-hint'
+        hint.textContent = 'Privada \u00b7 solo visible para ti'
+        const status = document.createElement('div')
+        status.className = 'mynote-status'
+        box.appendChild(ta)
+        box.appendChild(hint)
+        box.appendChild(status)
+
+        btn.addEventListener('click', () => box.classList.toggle('open'))
+
+        let saveTimer = null
+        ta.addEventListener('input', () => {
+          clearTimeout(saveTimer)
+          status.textContent = 'Guardando...'
+          status.classList.add('show', 'saving')
+          saveTimer = setTimeout(() => guardarNota(sid, ta.value, status, btn), 700)
+        })
+
+        label.appendChild(btn)
+        secEl.insertBefore(box, label.nextSibling)
+      })
+    }
+
+    async function guardarNota(sectionId, content, status, btn) {
+      notesCache[sectionId] = content
+      await _supabase.from('song_notes').upsert({ user_id: currentUserId, section_id: parseInt(sectionId, 10), content, updated_at: new Date().toISOString() }, { onConflict: 'user_id,section_id' })
+      status.textContent = 'Guardado \u2713'
+      status.classList.remove('saving')
+      const dot = btn.querySelector('.mynote-dot')
+      if (dot) dot.classList.toggle('show', content.trim().length > 0)
+      setTimeout(() => status.classList.remove('show'), 1600)
+    }
+    
     function transpose(n) {
       semitones = (semitones + n + 12) % 12
       const rootIdx = NOTAS.indexOf(originalKey)
@@ -315,6 +399,7 @@ const hasVerso = sections.some(s => s.type.toLowerCase() === 'verso')
     async function init() {
       const { data: { session } } = await _supabase.auth.getSession()
       if (!session) { window.location.href = '/login.html'; return }
+      currentUserId = session.user.id
       const { data: song } = await _supabase.from('Songs').select('*').eq('id', songId).single()
       if (!song) {
         document.getElementById('song-title').textContent = 'No se pudo cargar la canción'
@@ -336,6 +421,7 @@ const hasVerso = sections.some(s => s.type.toLowerCase() === 'verso')
       if (setlistId && keyParam) { const btn = document.getElementById('save-key-btn'); if (btn) btn.style.display = 'flex' }
       const { data: secs } = await _supabase.from('sections').select('*').eq('song_id', songId).order('order')
       sections = secs || []
+      await cargarNotasUsuario()
       renderAll()
       if (setlistSongs.length > 0) {
         document.getElementById('setlist-nav').classList.add('show')
