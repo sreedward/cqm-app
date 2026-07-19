@@ -287,12 +287,12 @@ const hasVerso = sections.some(s => s.type.toLowerCase() === 'verso')
     page2.innerHTML = secs2.length ? secs2.map(renderSeccion).join('') : '<div class="loading">Sin secciones.</div>'
         renderNotasUI()
     }
-let notesCache = {}
+let 
 
     async function cargarNotasUsuario() {
       if (!currentUserId) return
       const { data } = await _supabase.from('song_notes').select('section_id, content').eq('user_id', currentUserId)
-      notesCache = {}
+      notesCache = {};
       (data || []).forEach(n => { notesCache[n.section_id] = n.content })
     }
 
