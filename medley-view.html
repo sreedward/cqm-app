@@ -243,7 +243,7 @@ function renderSeccion(sec) {
   var lines     = (sec.content || '').split('\n');
   var linesHTML = lines.map(procesarLinea).filter(Boolean).join('');
   var tipo      = (sec.type || 'default').toLowerCase().split(' ').join('-');
-  var valid     = ['intro','verso','pre-coro','coro,'vamp'','bridge','instrumental','outro','tag'];
+  var valid     = ['intro','verso','pre-coro','coro','vamp','bridge','instrumental','outro','tag'];
   var cssClass  = valid.indexOf(tipo) !== -1 ? tipo : 'default';
   return '<div class="sec-block ' + cssClass + '" data-sid="' + sec.id + '">' +
     '<div class="sec-song-label">' + escHtml(sec.songTitle) + '</div>' +
