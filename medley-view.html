@@ -38,6 +38,7 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.85rem
 .sec-block.verso { background: #0a1226; border-left: 3px solid #3b82f6; }
 .sec-block.pre-coro { background: #1f120a; border-left: 3px solid #f97316; }
 .sec-block.coro { background: #130a26; border-left: 3px solid #a855f7; }
+  .sec-block.vamp { background: #0a1a1f; border-left: 3px solid #06b6d4; }
 .sec-block.bridge { background: #1f1a0a; border-left: 3px solid #f59e0b; }
 .sec-block.instrumental { background: #141414; border-left: 3px solid #555; }
 .sec-block.outro { background: #1f0a0a; border-left: 3px solid #ef4444; }
@@ -49,6 +50,7 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.85rem
 .sec-block.verso .sec-type-label { color: #3b82f6; }
 .sec-block.pre-coro .sec-type-label { color: #f97316; }
 .sec-block.coro .sec-type-label { color: #a855f7; }
+  .sec-block.vamp .sec-type-label { color: #06b6d4; }
 .sec-block.bridge .sec-type-label { color: #f59e0b; }
 .sec-block.instrumental .sec-type-label { color: #888; }
 .sec-block.outro .sec-type-label { color: #ef4444; }
@@ -65,6 +67,19 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.85rem
 .nav-item i { font-size: 1.2rem; color: #4a5568; }
 .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
 .nav-item.active i, .nav-item.active span { color: #3b82f6; }
+  .mynote-wrap { margin-top: 0.5rem; }
+  .mynote-view { display: flex; align-items: flex-start; justify-content: flex-end; gap: 6px; font-style: italic; font-size: 0.9rem; color: #8b9cb5; text-align: right; }
+  .mynote-view .mynote-txt { white-space: pre-wrap; }
+  .mynote-actions { display: inline-flex; gap: 6px; margin-left: 4px; flex-shrink: 0; }
+  .mynote-icon-btn { background: none; border: none; cursor: pointer; font-size: 0.8rem; opacity: 0.6; padding: 0; line-height: 1; }
+  .mynote-icon-btn:active { opacity: 1; }
+  .mynote-add-btn { background: none; border: 1px dashed #2a3b57; color: #8b9cb5; border-radius: 12px; font-size: 0.68rem; padding: 3px 10px; cursor: pointer; display: flex; align-items: center; gap: 5px; margin-top: 0.4rem; margin-left: auto; font-family: inherit; }
+  .mynote-editbox { margin-top: 0.4rem; display: flex; flex-direction: column; gap: 6px; }
+  .mynote-editbox textarea { background: #0f1a2e; border: 1px solid #2a3b57; border-radius: 8px; padding: 8px; color: #cdd6e3; font-size: 0.85rem; font-family: inherit; resize: vertical; min-height: 50px; outline: none; }
+  .mynote-editbox-actions { display: flex; justify-content: flex-end; gap: 6px; }
+  .mynote-save-btn, .mynote-cancel-btn { font-size: 0.7rem; padding: 3px 10px; border-radius: 8px; cursor: pointer; border: 1px solid #2a3b57; background: none; font-family: inherit; }
+  .mynote-save-btn { color: #4ade80; border-color: #4ade80; }
+  .mynote-cancel-btn { color: #8b9cb5; }
 .divider { display: flex; align-items: center; gap: 8px; margin: 0.5rem 0 1rem; }
 .divider-line { flex: 1; height: 1px; background: #1e2d45; }
 </style>
@@ -132,6 +147,8 @@ let semitones = 0;
 let cifrado   = 'americano';
 let baseKey   = 'C';
 let allSections = [];
+  let currentUserId = null;
+  let notesCache = {};
 const params   = new URLSearchParams(window.location.search);
 const medleyId = params.get('id');
 
@@ -226,9 +243,9 @@ function renderSeccion(sec) {
   var lines     = (sec.content || '').split('\n');
   var linesHTML = lines.map(procesarLinea).filter(Boolean).join('');
   var tipo      = (sec.type || 'default').toLowerCase().split(' ').join('-');
-  var valid     = ['intro','verso','pre-coro','coro','bridge','instrumental','outro','tag'];
+  var valid     = ['intro','verso','pre-coro','coro,'vamp'','bridge','instrumental','outro','tag'];
   var cssClass  = valid.indexOf(tipo) !== -1 ? tipo : 'default';
-  return '<div class="sec-block ' + cssClass + '">' +
+  return '<div class="sec-block ' + cssClass + '" data-sid="' + sec.id + '">' +
     '<div class="sec-song-label">' + escHtml(sec.songTitle) + '</div>' +
     '<div class="sec-type-label">' + escHtml(sec.type) + '</div>' +
     linesHTML + '</div>';
@@ -252,7 +269,110 @@ function renderAll() {
   });
   el.innerHTML = html;
   document.getElementById('key-display').textContent = getCurrentKey();
+  renderNotasUI();
 }
+
+  function cargarNotasUsuario() {
+    if (!currentUserId) return Promise.resolve();
+    return _sb.from('song_notes').select('section_id, content').eq('user_id', currentUserId).then(function(res) {
+      var data = res.data;
+      notesCache = {};
+      (data || []).forEach(function(n) { notesCache[n.section_id] = n.content; });
+    });
+  }
+
+  function renderNotasUI() {
+    if (!currentUserId) return;
+    var blocks = document.querySelectorAll('.sec-block[data-sid]');
+    blocks.forEach(function(secEl) {
+      var sid = secEl.getAttribute('data-sid');
+      if (secEl.querySelector('.mynote-wrap')) return;
+      var wrap = document.createElement('div');
+      wrap.className = 'mynote-wrap';
+      secEl.appendChild(wrap);
+      pintarNota(sid, wrap);
+    });
+  }
+
+  function pintarNota(sid, wrap) {
+    var existing = notesCache[sid] || '';
+    wrap.innerHTML = '';
+    if (existing.trim()) {
+      var view = document.createElement('div');
+      view.className = 'mynote-view';
+      var txt = document.createElement('span');
+      txt.className = 'mynote-txt';
+      txt.textContent = String.fromCodePoint(128221) + ' ' + existing.trim();
+      var actions = document.createElement('span');
+      actions.className = 'mynote-actions';
+      var editBtn = document.createElement('button');
+      editBtn.className = 'mynote-icon-btn';
+      editBtn.title = 'Editar nota';
+      editBtn.textContent = String.fromCodePoint(9999, 65039);
+      editBtn.addEventListener('click', function() { mostrarEdicion(sid, wrap); });
+      var delBtn = document.createElement('button');
+      delBtn.className = 'mynote-icon-btn';
+      delBtn.title = 'Eliminar nota';
+      delBtn.textContent = String.fromCodePoint(128465);
+      delBtn.addEventListener('click', function() { eliminarNota(sid, wrap); });
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      view.appendChild(txt);
+      view.appendChild(actions);
+      wrap.appendChild(view);
+    } else {
+      var addBtn = document.createElement('button');
+      addBtn.className = 'mynote-add-btn';
+      addBtn.textContent = String.fromCodePoint(9999, 65039) + ' Agregar nota';
+      addBtn.addEventListener('click', function() { mostrarEdicion(sid, wrap); });
+      wrap.appendChild(addBtn);
+    }
+  }
+
+  function mostrarEdicion(sid, wrap) {
+    var existing = notesCache[sid] || '';
+    wrap.innerHTML = '';
+    var box = document.createElement('div');
+    box.className = 'mynote-editbox';
+    var ta = document.createElement('textarea');
+    ta.value = existing;
+    ta.placeholder = 'Escribe tu nota personal aqui (solo tu la ves)';
+    var actionsRow = document.createElement('div');
+    actionsRow.className = 'mynote-editbox-actions';
+    var cancelBtn = document.createElement('button');
+    cancelBtn.className = 'mynote-cancel-btn';
+    cancelBtn.textContent = 'Cancelar';
+    cancelBtn.addEventListener('click', function() { pintarNota(sid, wrap); });
+    var saveBtn = document.createElement('button');
+    saveBtn.className = 'mynote-save-btn';
+    saveBtn.textContent = 'Guardar';
+    saveBtn.addEventListener('click', function() {
+      guardarNota(sid, ta.value).then(function() { pintarNota(sid, wrap); });
+    });
+    actionsRow.appendChild(cancelBtn);
+    actionsRow.appendChild(saveBtn);
+    box.appendChild(ta);
+    box.appendChild(actionsRow);
+    wrap.appendChild(box);
+    ta.focus();
+  }
+
+  function guardarNota(sectionId, content) {
+    var trimmed = content.trim();
+    notesCache[sectionId] = trimmed;
+    if (!trimmed) {
+      return _sb.from('song_notes').delete().eq('user_id', currentUserId).eq('section_id', parseInt(sectionId, 10));
+    }
+    return _sb.from('song_notes').upsert({ user_id: currentUserId, section_id: parseInt(sectionId, 10), content: trimmed, updated_at: new Date().toISOString() }, { onConflict: 'user_id,section_id' });
+  }
+
+  function eliminarNota(sid, wrap) {
+    if (!confirm('Eliminar esta nota?')) return;
+    _sb.from('song_notes').delete().eq('user_id', currentUserId).eq('section_id', parseInt(sid, 10)).then(function() {
+      delete notesCache[sid];
+      pintarNota(sid, wrap);
+    });
+  }
 
 
 
@@ -276,6 +396,7 @@ function setCifrado(tipo) {
 async function init() {
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) { window.location.href = '/login.html'; return; }
+  currentUserId = session.user.id;
   if (!medleyId) { window.location.href = '/medley-builder.html'; return; }
   const { data: medley, error: mErr } = await _sb.from('medleys').select('*').eq('id', medleyId).single();
   if (mErr || !medley) { window.location.href = '/medley-builder.html'; return; }
@@ -307,6 +428,7 @@ async function init() {
   });
   const totalSongs = new Set(allSections.map(s => s.songTitle)).size;
   document.getElementById('medley-sub').textContent = allSections.length + ' secciones · ' + totalSongs + ' canciones';
+await cargarNotasUsuario();
   renderAll();
 }
 init();
