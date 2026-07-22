@@ -127,6 +127,7 @@
       <div class="input-wrap">
         <i class="ti ti-lock"></i>
         <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+        <i class="ti ti-eye" id="toggle-password" style="cursor:pointer;"></i>
       </div>
     </div>
     <button class="btn" id="btn">Entrar</button>
@@ -147,6 +148,14 @@
     )
 
     let modoRegistro = false
+
+    document.getElementById('toggle-password').addEventListener('click', function() {
+      const input = document.getElementById('password')
+      const isHidden = input.type === 'password'
+      input.type = isHidden ? 'text' : 'password'
+      this.classList.toggle('ti-eye')
+      this.classList.toggle('ti-eye-off')
+    })
 
     document.getElementById('toggle-link').addEventListener('click', function() {
       modoRegistro = !modoRegistro
