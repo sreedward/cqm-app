@@ -123,8 +123,7 @@
     </div>
   </div>
 
-  <div class="page active" id="page-1"></div>
-  <div class="page" id="page-2"></div>
+  <div id="pages-container"></div>
 
   <div class="setlist-nav" id="setlist-nav">
     <button class="nav-song-btn prev" id="prev-btn" onclick="irACancion(-1)"><i class="ti ti-arrow-left"></i> Anterior</button>
@@ -135,7 +134,7 @@
     <i class="ti ti-arrow-down" id="fab-icon"></i>
     <span id="fab-text">Siguiente</span>
   </button>
-  <div class="page-indicator" id="page-indicator">1 / 2</div>
+  <div class="page-indicator" id="page-indicator">1 / 1</div>
 
   <div class="modal-overlay" id="modal-setlist">
     <div class="modal">
@@ -164,6 +163,7 @@
     let originalKey = 'C'
     let sections = []
     let currentPage = 1
+    let totalPages = 1
     let currentUserId = null
 
     const params = new URLSearchParams(window.location.search)
@@ -279,15 +279,18 @@ function esNota(texto) {
     }
 
     function renderAll() {
-      const page1 = document.getElementById('page-1')
-      const page2 = document.getElementById('page-2')
-const hasVerso = sections.some(s => s.type.toLowerCase() === 'verso')
-    const enPagina1 = s => PAGE1_TYPES.includes(s.type.toLowerCase()) || (!hasVerso && s.type.toLowerCase() === 'coro')
-    const secs1 = sections.filter(enPagina1)
-    const secs2 = sections.filter(s => !enPagina1(s))
-    page1.innerHTML = secs1.length ? secs1.map(renderSeccion).join('') : '<div class="loading">Sin secciones.</div>'
-    page2.innerHTML = secs2.length ? secs2.map(renderSeccion).join('') : '<div class="loading">Sin secciones.</div>'
-        renderNotasUI()
+      const pagesContainer = document.getElementById('pages-container')
+      const PAGE_SIZE = 4
+      const chunks = []
+      for (let i = 0; i < sections.length; i += PAGE_SIZE) chunks.push(sections.slice(i, i + PAGE_SIZE))
+      totalPages = chunks.length || 1
+      if (currentPage > totalPages) currentPage = totalPages
+      pagesContainer.innerHTML = chunks.length
+        ? chunks.map((chunk, idx) => `<div class="page${idx === currentPage - 1 ? ' active' : ''}" id="page-${idx + 1}">${chunk.map(renderSeccion).join('')}</div>`).join('')
+        : '<div class="page active" id="page-1"><div class="loading">Sin secciones.</div></div>'
+      document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`
+      document.getElementById('fab').style.display = totalPages > 1 ? 'flex' : 'none'
+      renderNotasUI()
     }
 let  notesCache = {};
 
@@ -389,12 +392,13 @@ let  notesCache = {};
     }
 
     function togglePage() {
-      currentPage = currentPage === 1 ? 2 : 1
-      document.getElementById('page-1').classList.toggle('active', currentPage === 1)
-      document.getElementById('page-2').classList.toggle('active', currentPage === 2)
-      document.getElementById('fab-icon').className = currentPage === 1 ? 'ti ti-arrow-down' : 'ti ti-arrow-up'
-      document.getElementById('fab-text').textContent = currentPage === 1 ? 'Siguiente' : 'Anterior'
-      document.getElementById('page-indicator').textContent = `${currentPage} / 2`
+      currentPage = currentPage < totalPages ? currentPage + 1 : 1
+      document.querySelectorAll('#pages-container .page').forEach((el, idx) => {
+        el.classList.toggle('active', idx === currentPage - 1)
+      })
+      document.getElementById('fab-icon').className = currentPage < totalPages ? 'ti ti-arrow-down' : 'ti ti-arrow-up'
+      document.getElementById('fab-text').textContent = currentPage < totalPages ? 'Siguiente' : 'Anterior'
+      document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`
       window.scrollTo(0, 0)
     }
 
