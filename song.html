@@ -185,7 +185,7 @@
     let totalPages = 1
     let currentUserId = null
         let alignMode = false
-        let  = null
+        let selectedChordKey = null
         let dragState = null
         let modifiedSections = {}
         let isAdmin = false
@@ -344,24 +344,24 @@ function esNota(texto) {
     function selectChord(el, key) {
       document.querySelectorAll('.chord-row-draggable.selected').forEach(n => n.classList.remove('selected'))
       el.classList.add('selected')
-       = key
+      selectedChordKey = key
     }
 
     function deselectChord() {
       document.querySelectorAll('.chord-row-draggable.selected').forEach(n => n.classList.remove('selected'))
-       = null
+      selectedChordKey = null
     }
 
     function onChordPointerDown(e) {
       if (!alignMode) return
       const el = e.target.closest('.chord-row-draggable')
       if (!el) {
-        if () deselectChord()
+        if (selectedChordKey) deselectChord()
         return
       }
       e.preventDefault()
       const key = el.dataset.key
-      if ( !== key) {
+      if (selectedChordKey !== key) {
         selectChord(el, key)
         return
       }
