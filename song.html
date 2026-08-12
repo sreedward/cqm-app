@@ -195,8 +195,8 @@ function goBack() {
       window.location.href = '/song.html?id=' + newSongId + '&setlist=' + setlistId + '&index=' + newIndex + '&songs=' + setlistSongs.join(',') + '&itemids=' + encodeURIComponent(itemIdsParam) + '&itemid=' + encodeURIComponent(newItemId) + '&keys=' + encodeURIComponent(keysParam) + '&key=' + encodeURIComponent(newKey)
     }
 
-    function traducirAcorde(acorde) {
-      const slashIdx = acorde.indexOf('/'); const chordPart = slashIdx === -1 ? acorde : acorde.slice(0, slashIdx); const bassPart = slashIdx === -1 ? '' : acorde.slice(slashIdx + 1); const match = chordPart.match(/^([#b]?)(\d)([#b]?)(M|m)?(sus\d*|add\d*|maj\d*|dism|dim|dis|aug|\d*)?$/); if (!match) return acorde; const sharp = match[1] === '#' || match[3] === '#'; const flat = match[1] === 'b' || match[3] === 'b'; const grado = parseInt(match[2]); const calidadFlag = match[4]; const extra = match[5] || ''; if (cifrado === 'nashville') return acorde; const intervalos = [0,2,4,5,7,9,11]; const rootIdx = NOTAS.indexOf(originalKey); let intervalo = intervalos[grado - 1] || 0; if (sharp) intervalo += 1; if (flat) intervalo -= 1; const idx = (rootIdx + intervalo + semitones + 120) % 12; const nota = NOTAS[idx]; const calidad = calidadFlag === 'm' ? 'm' : calidadFlag === 'M' ? '' : (CALIDAD[grado - 1] || ''); let bass = ''; if (bassPart) { const bmatch = bassPart.match(/^([#b]?)(\d)([#b]?)$/); if (bmatch) { const bSharp = bmatch[1] === '#' || bmatch[3] === '#'; const bFlat = bmatch[1] === 'b' || bmatch[3] === 'b'; const bGrado = parseInt(bmatch[2]); let bIntervalo = intervalos[bGrado - 1] || 0; if (bSharp) bIntervalo += 1; if (bFlat) bIntervalo -= 1; const bIdx = (rootIdx + bIntervalo + semitones + 120) % 12; bass = '/' + NOTAS[bIdx] } else { bass = '/' + bassPart } } return nota + calidad + extra + bass
+    function traducirAcorde(acorde, overrideCifrado) {
+      const slashIdx = acorde.indexOf('/'); const chordPart = slashIdx === -1 ? acorde : acorde.slice(0, slashIdx); const bassPart = slashIdx === -1 ? '' : acorde.slice(slashIdx + 1); const match = chordPart.match(/^([#b]?)(\d)([#b]?)(M|m)?(sus\d*|add\d*|maj\d*|dism|dim|dis|aug|\d*)?$/); if (!match) return acorde; const sharp = match[1] === '#' || match[3] === '#'; const flat = match[1] === 'b' || match[3] === 'b'; const grado = parseInt(match[2]); const calidadFlag = match[4]; const extra = match[5] || ''; if ((overrideCifrado || cifrado) === 'nashville') return acorde; const intervalos = [0,2,4,5,7,9,11]; const rootIdx = NOTAS.indexOf(originalKey); let intervalo = intervalos[grado - 1] || 0; if (sharp) intervalo += 1; if (flat) intervalo -= 1; const idx = (rootIdx + intervalo + semitones + 120) % 12; const nota = NOTAS[idx]; const calidad = calidadFlag === 'm' ? 'm' : calidadFlag === 'M' ? '' : (CALIDAD[grado - 1] || ''); let bass = ''; if (bassPart) { const bmatch = bassPart.match(/^([#b]?)(\d)([#b]?)$/); if (bmatch) { const bSharp = bmatch[1] === '#' || bmatch[3] === '#'; const bFlat = bmatch[1] === 'b' || bmatch[3] === 'b'; const bGrado = parseInt(bmatch[2]); let bIntervalo = intervalos[bGrado - 1] || 0; if (bSharp) bIntervalo += 1; if (bFlat) bIntervalo -= 1; const bIdx = (rootIdx + bIntervalo + semitones + 120) % 12; bass = '/' + NOTAS[bIdx] } else { bass = '/' + bassPart } } return nota + calidad + extra + bass
     }
 
     function styledChord(chord) {
@@ -241,6 +241,7 @@ function esNota(texto) {
       let cells = []
       let notas = []
       let pendingChord = null
+      let pendingChordRaw = null
       parts.forEach(part => {
         if (part.startsWith('[') && part.endsWith(']')) {
           const inner = part.slice(1,-1).trim()
@@ -248,25 +249,34 @@ function esNota(texto) {
             notas.push(inner)
           } else {
             pendingChord = traducirAcorde(inner)
+            pendingChordRaw = inner
           }
         } else {
           const words = part.split(/(\s+)/)
           words.forEach((word, i) => {
             if (i === 0 && pendingChord !== null) {
-              cells.push({ chord: pendingChord, lyric: word })
+              cells.push({ chord: pendingChord, chordRaw: pendingChordRaw, lyric: word })
               pendingChord = null
+              pendingChordRaw = null
             } else {
               cells.push({ chord: '', lyric: word })
             }
           })
         }
       })
-      const html = cells.map(c =>
-        `<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:0.25em">` +
-        `<span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre">${c.chord ? styledChord(c.chord) + ' ' : ' '.repeat((c.lyric||'').length || 1)}</span>` +
-        `<span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre">${c.lyric}</span>` +
+      const html = cells.map(c => {
+        const lyricLen = (c.lyric || '').length || 1
+        let minCh = lyricLen
+        if (c.chord) {
+          const altCifrado = cifrado === 'nashville' ? 'americano' : 'nashville'
+          const altChord = c.chordRaw ? traducirAcorde(c.chordRaw, altCifrado) : c.chord
+          minCh = Math.max(minCh, c.chord.length, altChord.length)
+        }
+        return `<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:0.25em;min-width:${minCh}ch;font-family:monospace">` +
+        `<span style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre">${c.chord ? styledChord(c.chord) + ' ' : ' '.repeat(lyricLen)}</span>` +
+        `<span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">${c.lyric}</span>` +
         `</span>`
-        ).join('')
+      }).join('')
       const notasHTML = notas.length ? notas.map(renderNota).join('') : ''
       return `<div class="line" style="line-height:1;margin-bottom:0.75rem">${html}</div>${notasHTML}`
     }
