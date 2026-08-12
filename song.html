@@ -50,7 +50,7 @@
     .align-btn { background: #1e2d45; border: none; color: #4a5568; border-radius: 6px; width: 28px; height: 28px; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 6px; }
     .align-btn.active { background: #f59e0b; color: #0d1626; }
     .chord-row-draggable { border-radius: 3px; }
-    body.align-mode .chord-row-draggable { cursor: grab; outline: 1px dashed rgba(245,158,11,0.5); outline-offset: 2px; }
+    body.align-mode .chord-row-draggable { cursor: grab; outline: 1px dashed rgba(245,158,11,0.5); outline-offset: 2px; touch-action: none; }
     body.align-mode .chord-row-draggable:active { cursor: grabbing; background: rgba(245,158,11,0.15); }
     .save-align-bar { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #0d1626; border: 1px solid #f59e0b; color: #e2e8f0; border-radius: 20px; padding: 0.55rem 0.6rem 0.55rem 1.1rem; font-size: 0.8rem; z-index: 25; display: none; align-items: center; gap: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); white-space: nowrap; }
     .save-align-bar.show { display: flex; }
@@ -185,6 +185,8 @@
         let alignMode = false
         let dragState = null
         let modifiedSections = {}
+        let isAdmin = false
+        let personalOffsets = {}
 
     const params = new URLSearchParams(window.location.search)
     const songId = params.get('id')
@@ -315,10 +317,15 @@ function esNota(texto) {
       }
     }
 
+    function getBaselineOffsets(sectionId) {
+      const sec = sections.find(s => s.id === sectionId)
+      if (isAdmin) return (sec && sec.chord_offsets) || {}
+      return personalOffsets[sectionId] || (sec && sec.chord_offsets) || {}
+    }
+
     function getSectionOffsets(sectionId) {
       if (!modifiedSections[sectionId]) {
-        const sec = sections.find(s => s.id === sectionId)
-        modifiedSections[sectionId] = Object.assign({}, (sec && sec.chord_offsets) || {})
+        modifiedSections[sectionId] = Object.assign({}, getBaselineOffsets(sectionId))
       }
       return modifiedSections[sectionId]
     }
@@ -336,6 +343,17 @@ function esNota(texto) {
       el.setPointerCapture(e.pointerId)
       el.addEventListener('pointermove', onChordPointerMove)
       el.addEventListener('pointerup', onChordPointerUp)
+      el.addEventListener('pointercancel', onChordPointerCancel)
+    }
+
+    function onChordPointerCancel(e) {
+      if (!dragState || dragState.el !== e.currentTarget) return
+      dragState.el.style.transform = 'translateX(' + dragState.startOffset + 'px)'
+      dragState.el.dataset.offset = dragState.startOffset
+      dragState.el.removeEventListener('pointermove', onChordPointerMove)
+      dragState.el.removeEventListener('pointerup', onChordPointerUp)
+      dragState.el.removeEventListener('pointercancel', onChordPointerCancel)
+      dragState = null
     }
 
     function onChordPointerMove(e) {
@@ -356,8 +374,12 @@ function esNota(texto) {
       if (finalOffset) { offsets[localKey] = finalOffset } else { delete offsets[localKey] }
       dragState.el.removeEventListener('pointermove', onChordPointerMove)
       dragState.el.removeEventListener('pointerup', onChordPointerUp)
+      dragState.el.removeEventListener('pointercancel', onChordPointerCancel)
       dragState = null
-      document.getElementById('save-align-bar').classList.add('show')
+      const bar = document.getElementById('save-align-bar')
+      const barLabel = bar.querySelector('span')
+      if (barLabel) barLabel.textContent = isAdmin ? 'Ajustando acordes (para todos)' : 'Ajustando acordes (solo para ti)'
+      bar.classList.add('show')
     }
 
     document.addEventListener('pointerdown', onChordPointerDown)
@@ -366,14 +388,20 @@ function esNota(texto) {
       const ids = Object.keys(modifiedSections)
       for (const id of ids) {
         const offsets = modifiedSections[id]
-        const { error } = await _supabase.from('sections').update({ chord_offsets: offsets }).eq('id', Number(id))
-        if (error) { mostrarToast('Error al guardar: ' + error.message); return }
-        const sec = sections.find(s => s.id === Number(id))
-        if (sec) sec.chord_offsets = offsets
+        if (isAdmin) {
+          const { error } = await _supabase.from('sections').update({ chord_offsets: offsets }).eq('id', Number(id))
+          if (error) { mostrarToast('Error al guardar: ' + error.message); return }
+          const sec = sections.find(s => s.id === Number(id))
+          if (sec) sec.chord_offsets = offsets
+        } else {
+          const { error } = await _supabase.from('user_chord_offsets').upsert({ user_id: currentUserId, section_id: Number(id), offsets, updated_at: new Date().toISOString() }, { onConflict: 'user_id,section_id' })
+          if (error) { mostrarToast('Error al guardar: ' + error.message); return }
+          personalOffsets[Number(id)] = offsets
+        }
       }
       modifiedSections = {}
       document.getElementById('save-align-bar').classList.remove('show')
-      mostrarToast('Alineación guardada')
+      mostrarToast(isAdmin ? 'Alineación guardada para todos' : 'Alineación guardada (solo para ti)')
     }
 
     function descartarAlineacion() {
@@ -384,7 +412,7 @@ function esNota(texto) {
 
     function renderSeccion(sec) {
       const lines = (sec.content || '').split('\n').filter(l => l.trim())
-      const offsets = modifiedSections[sec.id] || sec.chord_offsets || {}
+      const offsets = modifiedSections[sec.id] || (isAdmin ? sec.chord_offsets : (personalOffsets[sec.id] || sec.chord_offsets)) || {}
       const linesHTML = lines.map((line, li) => procesarLinea(line, sec.id, li, offsets)).join('')
       const tipo = sec.type.toLowerCase().replace(' ', '-')
             return `<div class="section ${tipo}" data-sid="${sec.id}"><div class="section-label">${sec.type}</div>${linesHTML}</div>`
@@ -487,6 +515,13 @@ let  notesCache = {};
       setTimeout(() => status.classList.remove('show'), 1600)
     }
     
+    async function cargarOffsetsUsuario() {
+      if (!currentUserId || isAdmin) return
+      const { data } = await _supabase.from('user_chord_offsets').select('section_id, offsets').eq('user_id', currentUserId)
+      personalOffsets = {}
+      ;(data || []).forEach(r => { personalOffsets[r.section_id] = r.offsets || {} })
+    }
+    
     function transpose(n) {
       semitones = (semitones + n + 12) % 12
       const rootIdx = NOTAS.indexOf(originalKey)
@@ -518,6 +553,8 @@ let  notesCache = {};
       const { data: { session } } = await _supabase.auth.getSession()
       if (!session) { window.location.href = '/login.html'; return }
       currentUserId = session.user.id
+      const { data: profile } = await _supabase.from('profiles').select('is_admin').eq('id', currentUserId).single()
+      isAdmin = !!(profile && profile.is_admin)
       const { data: song } = await _supabase.from('Songs').select('*').eq('id', songId).single()
       if (!song) {
         document.getElementById('song-title').textContent = 'No se pudo cargar la canción'
@@ -540,6 +577,7 @@ let  notesCache = {};
       const { data: secs } = await _supabase.from('sections').select('*').eq('song_id', songId).order('order')
       sections = secs || []
       await cargarNotasUsuario()
+      await cargarOffsetsUsuario()
       renderAll()
       if (setlistSongs.length > 0) {
         document.getElementById('setlist-nav').classList.add('show')
