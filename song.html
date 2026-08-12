@@ -39,7 +39,7 @@
     .song-artist { font-size: 0.75rem; color: #4a5568; }
     .add-setlist-btn { background: none; border: 1px solid #1e2d45; border-radius: 8px; color: #4a5568; font-size: 0.72rem; padding: 5px 10px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
     .add-setlist-btn:hover { border-color: #3b82f6; color: #3b82f6; }
-    .transpose-bar { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; position: sticky; top: 57px; z-index: 9; }
+    .transpose-bar { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; row-gap: 0.5rem; position: sticky; top: 57px; z-index: 9; }
     .t-label { font-size: 0.75rem; color: #4a5568; }
     .t-btn { background: #1e2d45; border: none; color: #e2e8f0; border-radius: 6px; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .t-btn:hover { background: #3b82f6; }
@@ -47,8 +47,8 @@
     .cifrado-toggle { margin-left: auto; display: flex; background: #1e2d45; border-radius: 6px; overflow: hidden; }
     .cifrado-btn { background: none; border: none; color: #4a5568; padding: 4px 10px; font-size: 0.72rem; cursor: pointer; font-weight: 700; }
     .cifrado-btn.active { background: #3b82f6; color: #fff; }
-    .align-btn { background: #1e2d45; border: none; color: #4a5568; border-radius: 6px; width: 28px; height: 28px; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 6px; }
-    .align-btn.active { background: #f59e0b; color: #0d1626; }
+    .align-btn { background: #1e2d45; border: 1px solid #f59e0b; color: #f59e0b; border-radius: 6px; height: 30px; padding: 0 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; justify-content: center; margin-left: 6px; white-space: nowrap; }
+    .align-btn.active { background: #f59e0b; color: #0d1626; border-color: #f59e0b; }
     .chord-row-draggable { border-radius: 3px; }
     body.align-mode .chord-row-draggable { cursor: grab; outline: 1px dashed rgba(245,158,11,0.5); outline-offset: 2px; touch-action: none; }
     body.align-mode .chord-row-draggable:active { cursor: grabbing; background: rgba(245,158,11,0.15); }
@@ -131,7 +131,7 @@
       <button class="cifrado-btn" id="btn-nashville" onclick="setCifrado('nashville')">NNS</button>
     </div>
     <button class="align-btn" id="align-btn" onclick="toggleAlignMode()" title="Ajustar posición de acordes">
-      <i class="ti ti-arrows-horizontal"></i>
+      <i class="ti ti-arrows-horizontal"></i><span>Ajustar acordes</span>
     </button>
   </div>
 
