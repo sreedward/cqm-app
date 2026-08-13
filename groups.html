@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#080c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CQM">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
+<title>CQM - Mis Grupos</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #080c14;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  padding-bottom: 90px;
+}
+header {
+  background: #0d1626;
+  border-bottom: 1px solid #1e2d45;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.back-btn { background: none; border: none; color: #3b82f6; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
+.header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; flex: 1; }
+.new-btn {
+  background: #3b82f6;
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.content { padding: 1.25rem; }
+.hint {
+  background: #0d1626;
+  border: 1px solid #1e2d45;
+  border-radius: 12px;
+  padding: 1rem;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-bottom: 1.25rem;
+  line-height: 1.4;
+}
+.join-row { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+.join-row input {
+  flex: 1;
+  background: #0d1626;
+  border: 1px solid #1e2d45;
+  border-radius: 8px;
+  padding: 0.7rem 0.85rem;
+  color: #fff;
+  font-size: 0.85rem;
+}
+.join-row button {
+  background: #1e2d45;
+  border: none;
+  color: #3b82f6;
+  border-radius: 8px;
+  padding: 0 1rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.section-label {
+  font-size: 0.7rem;
+  color: #4a5568;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+.group-card {
+  background: #0d1626;
+  border: 1px solid #1e2d45;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+.group-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #1e2d45;
+  color: #a855f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.group-info { flex: 1; min-width: 0; }
+.group-name { font-size: 0.95rem; color: #e2e8f0; font-weight: 600; }
+.group-role { font-size: 0.75rem; color: #4a5568; margin-top: 2px; }
+.leader-badge {
+  background: #1e2d45;
+  color: #f97316;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.empty-state { text-align: center; padding: 2rem 1rem; color: #4a5568; font-size: 0.85rem; }
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #0d1626; border-top: 1px solid #1e2d45;
+  display: flex; padding: 8px 0 12px; z-index: 20;
+}
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 0; text-decoration: none; }
+.nav-item i { font-size: 1.2rem; color: #4a5568; }
+.nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
+.nav-item.active i { color: #3b82f6; }
+.nav-item.active span { color: #3b82f6; }
+</style>
+</head>
+<body>
+<header>
+  <button class="back-btn" onclick="window.location.href='/profile.html'"><i class="ti ti-arrow-left"></i></button>
+  <div class="header-title">Mis Grupos</div>
+  <button class="new-btn" onclick="crearGrupo()"><i class="ti ti-plus"></i> Crear</button>
+</header>
+
+<div class="content">
+  <div class="hint">Un grupo de alabanza tiene un Leader (quien lo crea) y músicos con roles. Solo el Leader puede crear setlists y medleys dentro del grupo y ajustar tonalidades; los demás miembros ven lo mismo que el Leader.</div>
+
+  <div class="join-row">
+    <input type="text" id="join-code" placeholder="¿Tienes un código de invitación?">
+    <button onclick="unirseConCodigo()">Unirme</button>
+  </div>
+
+  <div class="section-label">Tus grupos</div>
+  <div id="groups-list"></div>
+</div>
+
+<nav class="bottom-nav">
+  <a class="nav-item" href="/library.html"><i class="ti ti-music"></i><span>Canciones</span></a>
+  <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
+  <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
+  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
+</nav>
+
+<script>
+const _supabase = supabase.createClient(
+  'https://kzqnsbztfyhyyageuboz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+)
+
+let currentUser = null
+
+function generarCodigo() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let code = ''
+  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)]
+  return code
+}
+
+async function init() {
+  const { data: { session } } = await _supabase.auth.getSession()
+  if (!session) { window.location.href = '/login.html'; return }
+  currentUser = session.user
+  await cargarGrupos()
+}
+
+async function cargarGrupos() {
+  const { data, error } = await _supabase
+    .from('group_members')
+    .select('roles, groups(id, name, leader_id)')
+    .eq('user_id', currentUser.id)
+
+  const list = document.getElementById('groups-list')
+  list.innerHTML = ''
+
+  if (error) {
+    list.innerHTML = '<div class="empty-state">No se pudieron cargar tus grupos.</div>'
+    return
+  }
+
+  if (!data || data.length === 0) {
+    list.innerHTML = '<div class="empty-state">Aún no perteneces a ningún grupo. Crea uno o únete con un código de invitación.</div>'
+    return
+  }
+
+  data.forEach(row => {
+    const g = row.groups
+    if (!g) return
+    const isLeader = g.leader_id === currentUser.id
+    const card = document.createElement('a')
+    card.className = 'group-card'
+    card.href = `/group-view.html?id=${g.id}`
+    card.innerHTML = `
+      <div class="group-icon"><i class="ti ti-users"></i></div>
+      <div class="group-info">
+        <div class="group-name">${g.name}</div>
+        <div class="group-role">${isLeader ? 'Eres el Leader' : ((row.roles && row.roles.length) ? row.roles.join(', ') : 'Miembro')}</div>
+      </div>
+      ${isLeader ? '<span class="leader-badge">LEADER</span>' : ''}
+    `
+    list.appendChild(card)
+  })
+}
+
+async function crearGrupo() {
+  const name = prompt('Nombre del grupo de alabanza:')
+  if (!name || !name.trim()) return
+
+  const invite_code = generarCodigo()
+
+  const { data: group, error } = await _supabase
+    .from('groups')
+    .insert({ name: name.trim(), invite_code, leader_id: currentUser.id })
+    .select()
+    .single()
+
+  if (error) { alert('No se pudo crear el grupo: ' + error.message); return }
+
+  const { error: memberError } = await _supabase
+    .from('group_members')
+    .insert({ group_id: group.id, user_id: currentUser.id, roles: [] })
+
+  if (memberError) { alert('Grupo creado, pero hubo un problema al unirte como Leader: ' + memberError.message) }
+
+  window.location.href = `/group-view.html?id=${group.id}`
+}
+
+function unirseConCodigo() {
+  const code = document.getElementById('join-code').value.trim()
+  if (!code) return
+  window.location.href = `/join-group.html?code=${encodeURIComponent(code)}`
+}
+
+init()
+</script>
+</body>
+</html>
