@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#080c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CQM">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
+<title>CQM - Grupo</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #080c14;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  padding-bottom: 90px;
+}
+header {
+  background: #0d1626;
+  border-bottom: 1px solid #1e2d45;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.back-btn { background: none; border: none; color: #3b82f6; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
+.header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; flex: 1; }
+.icon-btn { background: none; border: none; color: #ef4444; font-size: 1.1rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
+.content { padding: 1.25rem; }
+.card {
+  background: #0d1626;
+  border: 1px solid #1e2d45;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+.card-title { font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.6rem; font-weight: 600; }
+.link-row { display: flex; gap: 8px; }
+.link-row input {
+  flex: 1;
+  background: #080c14;
+  border: 1px solid #1e2d45;
+  border-radius: 8px;
+  padding: 0.6rem 0.7rem;
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+.link-row button {
+  background: #3b82f6;
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0 1rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.section-label {
+  font-size: 0.7rem;
+  color: #4a5568;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+.member-card {
+  background: #0d1626;
+  border: 1px solid #1e2d45;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 0.75rem;
+}
+.member-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #1e2d45; color: #3b82f6;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: 700; flex-shrink: 0; overflow: hidden;
+}
+.member-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.member-info { flex: 1; min-width: 0; }
+.member-name { font-size: 0.9rem; color: #e2e8f0; font-weight: 600; }
+.member-roles { font-size: 0.75rem; color: #4a5568; margin-top: 2px; }
+.member-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.member-actions button {
+  background: #1e2d45; border: none; color: #94a3b8;
+  border-radius: 8px; width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 0.9rem;
+}
+.member-actions button.danger { color: #ef4444; }
+.leader-tag {
+  background: #1e2d45; color: #f97316; border-radius: 12px;
+  padding: 2px 8px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.5px;
+  margin-left: 6px;
+}
+.leave-btn {
+  margin-top: 0.5rem;
+  width: 100%;
+  background: #1a0808;
+  border: 1px solid #7f1d1d;
+  border-radius: 10px;
+  color: #ef4444;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.85rem;
+  cursor: pointer;
+}
+.empty-state { text-align: center; padding: 2rem 1rem; color: #4a5568; font-size: 0.85rem; }
+
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 50; align-items: flex-end; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  background: #0d1626; border-top: 1px solid #1e2d45;
+  border-radius: 16px 16px 0 0; padding: 1.25rem; width: 100%; max-width: 480px;
+  max-height: 80vh; overflow-y: auto;
+}
+.modal-title { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: #e2e8f0; }
+.role-option {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0.6rem 0.25rem; border-bottom: 1px solid #1e2d45; font-size: 0.9rem;
+}
+.role-option input { width: 18px; height: 18px; }
+.modal-btns { display: flex; gap: 8px; margin-top: 1.25rem; }
+.modal-btns button {
+  flex: 1; padding: 0.8rem; border-radius: 10px; border: none;
+  font-weight: 600; font-size: 0.9rem; cursor: pointer;
+}
+.modal-btns .cancel { background: #1e2d45; color: #94a3b8; }
+.modal-btns .save { background: #3b82f6; color: #fff; }
+</style>
+</head>
+<body>
+<header>
+  <button class="back-btn" onclick="window.location.href='/groups.html'"><i class="ti ti-arrow-left"></i></button>
+  <div class="header-title" id="group-title">Grupo</div>
+  <button class="icon-btn" id="delete-group-btn" style="display:none" onclick="eliminarGrupo()"><i class="ti ti-trash"></i></button>
+</header>
+
+<div class="content">
+  <div class="card" id="invite-card" style="display:none">
+    <div class="card-title">Link de invitación (compártelo con tu equipo)</div>
+    <div class="link-row">
+      <input type="text" id="invite-link" readonly>
+      <button onclick="copiarLink()">Copiar</button>
+    </div>
+  </div>
+
+  <div class="section-label">Miembros</div>
+  <div id="members-list"></div>
+
+  <button class="leave-btn" id="leave-btn" style="display:none" onclick="salirDelGrupo()">Salir del grupo</button>
+</div>
+
+<div class="modal-overlay" id="role-modal">
+  <div class="modal-sheet">
+    <div class="modal-title">Selecciona los roles</div>
+    <div id="role-options"></div>
+    <div class="modal-btns">
+      <button class="cancel" onclick="cerrarModalRoles()">Cancelar</button>
+      <button class="save" onclick="guardarRoles()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const _supabase = supabase.createClient(
+  'https://kzqnsbztfyhyyageuboz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+)
+
+const ROLE_OPTIONS = ['Cantante','Pianista','Pianista 2','Guitarrista','Guitarrista 2','Guitarrista 3','Bajista','Coristas','Violinista','Trompetista','Drummer']
+
+const params = new URLSearchParams(window.location.search)
+const groupId = params.get('id')
+
+let currentUser = null
+let currentGroup = null
+let isLeader = false
+let editingMemberId = null
+
+async function init() {
+  const { data: { session } } = await _supabase.auth.getSession()
+  if (!session) { window.location.href = '/login.html'; return }
+  currentUser = session.user
+
+  if (!groupId) { window.location.href = '/groups.html'; return }
+
+  const { data: group, error } = await _supabase
+    .from('groups')
+    .select('*')
+    .eq('id', groupId)
+    .single()
+
+  if (error || !group) {
+    document.getElementById('group-title').textContent = 'Sin acceso'
+    document.getElementById('members-list').innerHTML = '<div class="empty-state">No tienes acceso a este grupo.</div>'
+    return
+  }
+
+  currentGroup = group
+  isLeader = group.leader_id === currentUser.id
+  document.getElementById('group-title').textContent = group.name
+
+  if (isLeader) {
+    document.getElementById('delete-group-btn').style.display = 'flex'
+    document.getElementById('invite-card').style.display = 'block'
+    document.getElementById('invite-link').value = `${window.location.origin}/join-group.html?code=${group.invite_code}`
+  } else {
+    document.getElementById('leave-btn').style.display = 'block'
+  }
+
+  await cargarMiembros()
+}
+
+async function cargarMiembros() {
+  const { data, error } = await _supabase
+    .from('group_members')
+    .select('id, user_id, roles')
+    .eq('group_id', groupId)
+    .order('joined_at', { ascending: true })
+
+  const list = document.getElementById('members-list')
+  list.innerHTML = ''
+
+  if (error || !data) {
+    list.innerHTML = '<div class="empty-state">No se pudieron cargar los miembros.</div>'
+    return
+  }
+
+  const userIds = data.map(m => m.user_id)
+  let profilesById = {}
+  if (userIds.length) {
+    const { data: profiles } = await _supabase
+      .from('profiles')
+      .select('id, display_name, avatar_url')
+      .in('id', userIds)
+    ;(profiles || []).forEach(p => { profilesById[p.id] = p })
+  }
+
+  data.forEach(m => {
+    const p = profilesById[m.user_id] || {}
+    const name = p.display_name || 'Músico sin nombre'
+    const initials = name.substring(0, 2).toUpperCase()
+    const memberIsLeader = m.user_id === currentGroup.leader_id
+    const isSelf = m.user_id === currentUser.id
+
+    const card = document.createElement('div')
+    card.className = 'member-card'
+
+    let actions = ''
+    if (isSelf || isLeader) {
+      actions += `<button title="Editar roles" onclick="abrirModalRoles('${m.id}', '${(m.roles||[]).join(',')}')"><i class="ti ti-pencil"></i></button>`
+    }
+    if (isLeader && !memberIsLeader) {
+      actions += `<button class="danger" title="Quitar del grupo" onclick="quitarMiembro('${m.id}')"><i class="ti ti-x"></i></button>`
+    }
+
+    card.innerHTML = `
+      <div class="member-avatar">${p.avatar_url ? `<img src="${p.avatar_url}">` : initials}</div>
+      <div class="member-info">
+        <div class="member-name">${name}${memberIsLeader ? '<span class="leader-tag">LEADER</span>' : ''}</div>
+        <div class="member-roles">${(m.roles && m.roles.length) ? m.roles.join(', ') : 'Sin rol asignado'}</div>
+      </div>
+      <div class="member-actions">${actions}</div>
+    `
+    list.appendChild(card)
+  })
+}
+
+function abrirModalRoles(memberId, rolesCsv) {
+  editingMemberId = memberId
+  const currentRoles = rolesCsv ? rolesCsv.split(',') : []
+  const container = document.getElementById('role-options')
+  container.innerHTML = ROLE_OPTIONS.map(r => `
+    <label class="role-option">
+      <input type="checkbox" value="${r}" ${currentRoles.includes(r) ? 'checked' : ''}>
+      <span>${r}</span>
+    </label>
+  `).join('')
+  document.getElementById('role-modal').classList.add('open')
+}
+
+function cerrarModalRoles() {
+  document.getElementById('role-modal').classList.remove('open')
+  editingMemberId = null
+}
+
+async function guardarRoles() {
+  if (!editingMemberId) return
+  const checked = Array.from(document.querySelectorAll('#role-options input:checked')).map(i => i.value)
+
+  const { error } = await _supabase
+    .from('group_members')
+    .update({ roles: checked })
+    .eq('id', editingMemberId)
+
+  if (error) { alert('No se pudieron guardar los roles: ' + error.message); return }
+
+  cerrarModalRoles()
+  await cargarMiembros()
+}
+
+async function quitarMiembro(memberId) {
+  if (!confirm('¿Quitar a este miembro del grupo?')) return
+  const { error } = await _supabase.from('group_members').delete().eq('id', memberId)
+  if (error) { alert('No se pudo quitar al miembro: ' + error.message); return }
+  await cargarMiembros()
+}
+
+async function salirDelGrupo() {
+  if (!confirm('¿Seguro que quieres salir de este grupo?')) return
+  const { error } = await _supabase
+    .from('group_members')
+    .delete()
+    .eq('group_id', groupId)
+    .eq('user_id', currentUser.id)
+  if (error) { alert('No se pudo salir del grupo: ' + error.message); return }
+  window.location.href = '/groups.html'
+}
+
+async function eliminarGrupo() {
+  if (!confirm('Esto eliminará el grupo para todos los miembros. ¿Continuar?')) return
+  const { error } = await _supabase.from('groups').delete().eq('id', groupId)
+  if (error) { alert('No se pudo eliminar el grupo: ' + error.message); return }
+  window.location.href = '/groups.html'
+}
+
+function copiarLink() {
+  const input = document.getElementById('invite-link')
+  input.select()
+  navigator.clipboard.writeText(input.value).then(() => {
+    alert('Link copiado. Compártelo con tu equipo.')
+  }).catch(() => {
+    document.execCommand('copy')
+  })
+}
+
+init()
+</script>
+</body>
+</html>
