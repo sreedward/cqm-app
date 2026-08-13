@@ -1,288 +1,427 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- PWA Meta Tags -->
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#080c14">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="CQM">
-  <link rel="apple-touch-icon" href="/icons/icon.svg">
-  <title>CQM - Perfil</title>
-  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #080c14;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      min-height: 100vh;
-      padding-bottom: 80px;
-    }
-    header {
-      background: #0d1626;
-      border-bottom: 1px solid #1e2d45;
-      padding: 1rem 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .back-btn {
-      background: none;
-      border: none;
-      color: #3b82f6;
-      font-size: 1.3rem;
-      cursor: pointer;
-      padding: 4px;
-      display: flex;
-      align-items: center;
-    }
-    .header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; }
-    .avatar-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem 1.25rem 1.5rem;
-      border-bottom: 1px solid #1e2d45;
-    }
-    .avatar {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      background: #1e2d45;
-      border: 2px solid #3b82f6;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.75rem;
-      color: #3b82f6;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-    }
-    .user-email { font-size: 0.9rem; color: #e2e8f0; font-weight: 500; }
-    .user-since { font-size: 0.75rem; color: #4a5568; margin-top: 4px; }
-    .admin-badge {
-      background: #1e2d45;
-      color: #3b82f6;
-      border-radius: 20px;
-      padding: 3px 12px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      margin-top: 8px;
-      display: none;
-    }
-    .section-label {
-      font-size: 0.7rem;
-      color: #4a5568;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 1rem 1.25rem 0.25rem;
-    }
-    .menu-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 0.85rem 1.25rem;
-      border-bottom: 1px solid #0d1626;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .menu-item:active { opacity: 0.7; }
-    .menu-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      background: #1e2d45;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      flex-shrink: 0;
-    }
-    .menu-icon.blue { color: #3b82f6; }
-    .menu-icon.green { color: #22c55e; }
-    .menu-icon.orange { color: #f97316; }
-    .menu-icon.red { color: #ef4444; }
-    .menu-info { flex: 1; }
-    .menu-title { font-size: 0.9rem; color: #e2e8f0; }
-    .menu-sub { font-size: 0.75rem; color: #4a5568; margin-top: 1px; }
-    .menu-arrow { color: #4a5568; font-size: 1rem; }
-    .logout-btn {
-      margin: 1.5rem 1.25rem;
-      width: calc(100% - 2.5rem);
-      background: #1a0808;
-      border: 1px solid #7f1d1d;
-      border-radius: 10px;
-      color: #ef4444;
-      font-size: 0.9rem;
-      font-weight: 600;
-      padding: 0.85rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .logout-btn:hover { background: #2a0808; }
-    .version {
-      text-align: center;
-      font-size: 0.7rem;
-      color: #2a3a4a;
-      padding: 1rem;
-    }
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #0d1626;
-      border-top: 1px solid #1e2d45;
-      display: flex;
-      padding: 8px 0 12px;
-      z-index: 20;
-    }
-    .nav-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      cursor: pointer;
-      padding: 4px 0;
-      text-decoration: none;
-    }
-    .nav-item i { font-size: 1.2rem; color: #4a5568; }
-    .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
-    .nav-item.active i { color: #3b82f6; }
-    .nav-item.active span { color: #3b82f6; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- PWA Meta Tags -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#080c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CQM">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
+<title>CQM - Perfil</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #080c14;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+header {
+  background: #0d1626;
+  border-bottom: 1px solid #1e2d45;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.back-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+.header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; }
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.25rem 1.5rem;
+  border-bottom: 1px solid #1e2d45;
+}
+.avatar-wrap { position: relative; margin-bottom: 0.75rem; }
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #1e2d45;
+  border: 2px solid #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  color: #3b82f6;
+  font-weight: 700;
+  overflow: hidden;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-edit-btn {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 2px solid #080c14;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #fff;
+  cursor: pointer;
+}
+.user-email { font-size: 0.9rem; color: #e2e8f0; font-weight: 500; }
+.display-name-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.display-name-row span { font-size: 0.85rem; color: #94a3b8; }
+.edit-name-btn { color: #3b82f6; font-size: 0.9rem; cursor: pointer; background: none; border: none; display: flex; align-items: center; }
+.user-since { font-size: 0.75rem; color: #4a5568; margin-top: 4px; }
+.admin-badge {
+  background: #1e2d45;
+  color: #3b82f6;
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-top: 8px;
+  display: none;
+}
+.section-label {
+  font-size: 0.7rem;
+  color: #4a5568;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 1rem 1.25rem 0.25rem;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #0d1626;
+  cursor: pointer;
+  text-decoration: none;
+}
+.menu-item:active { opacity: 0.7; }
+.menu-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #1e2d45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.menu-icon.blue { color: #3b82f6; }
+.menu-icon.green { color: #22c55e; }
+.menu-icon.orange { color: #f97316; }
+.menu-icon.red { color: #ef4444; }
+.menu-icon.purple { color: #a855f7; }
+.menu-info { flex: 1; }
+.menu-title { font-size: 0.9rem; color: #e2e8f0; }
+.menu-sub { font-size: 0.75rem; color: #4a5568; margin-top: 1px; }
+.menu-arrow { color: #4a5568; font-size: 1rem; }
+.logout-btn {
+  margin: 1.5rem 1.25rem;
+  width: calc(100% - 2.5rem);
+  background: #1a0808;
+  border: 1px solid #7f1d1d;
+  border-radius: 10px;
+  color: #ef4444;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.logout-btn:hover { background: #2a0808; }
+.version {
+  text-align: center;
+  font-size: 0.7rem;
+  color: #2a3a4a;
+  padding: 1rem;
+}
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #0d1626;
+  border-top: 1px solid #1e2d45;
+  display: flex;
+  padding: 8px 0 12px;
+  z-index: 20;
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: none;
+}
+.nav-item i { font-size: 1.2rem; color: #4a5568; }
+.nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
+.nav-item.active i { color: #3b82f6; }
+.nav-item.active span { color: #3b82f6; }
+</style>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(e => console.error('[SW]', e));
-      });
-    }
-  </script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(e => console.error('[SW]', e));
+  });
+}
+</script>
 </head>
 <body>
-  <header>
-    <button class="back-btn" onclick="history.back()">
-      <i class="ti ti-arrow-left"></i>
-    </button>
-    <div class="header-title">Mi Perfil</div>
-  </header>
-
-  <div class="avatar-section">
-    <div class="avatar" id="avatar">?</div>
-    <div class="user-email" id="user-email">Cargando...</div>
-    <div class="user-since" id="user-since"></div>
-    <div class="admin-badge" id="admin-badge">ADMIN</div>
-  </div>
-
-  <div class="section-label">Cuenta</div>
-  <a class="menu-item" href="/reset.html">
-    <div class="menu-icon blue"><i class="ti ti-lock"></i></div>
-    <div class="menu-info">
-      <div class="menu-title">Cambiar contraseña</div>
-      <div class="menu-sub">Actualiza tu contraseña de acceso</div>
-    </div>
-    <i class="ti ti-chevron-right menu-arrow"></i>
-  </a>
-
-  <div class="section-label" id="admin-section" style="display:none">Admin</div>
-  <a class="menu-item" href="/admin.html" id="admin-link" style="display:none">
-    <div class="menu-icon orange"><i class="ti ti-music-plus"></i></div>
-    <div class="menu-info">
-      <div class="menu-title">Panel de canciones</div>
-      <div class="menu-sub">Agregar y editar canciones del catálogo</div>
-    </div>
-    <i class="ti ti-chevron-right menu-arrow"></i>
-  </a>
-
-  <div class="section-label">Acerca de</div>
-  <a class="menu-item" href="/more.html">
-    <div class="menu-icon green"><i class="ti ti-brand-instagram"></i></div>
-    <div class="menu-info">
-      <div class="menu-title">Síguenos</div>
-      <div class="menu-sub">Redes sociales de Musishens</div>
-    </div>
-    <i class="ti ti-chevron-right menu-arrow"></i>
-  </a>
-
-  <button class="logout-btn" onclick="cerrarSesion()">
-    <i class="ti ti-logout"></i> Cerrar sesión
+<header>
+  <button class="back-btn" onclick="history.back()">
+    <i class="ti ti-arrow-left"></i>
   </button>
+  <div class="header-title">Mi Perfil</div>
+</header>
 
-  <div class="version">ChartQuick by Musishens — v1.0</div>
+<div class="avatar-section">
+  <div class="avatar-wrap">
+    <div class="avatar" id="avatar">?</div>
+    <div class="avatar-edit-btn" id="avatar-edit-btn" title="Cambiar foto">
+      <i class="ti ti-camera"></i>
+    </div>
+    <input type="file" id="avatar-file" accept="image/*" style="display:none">
+  </div>
+  <div class="user-email" id="user-email">Cargando...</div>
+  <div class="display-name-row">
+    <span id="display-name">&nbsp;</span>
+    <button class="edit-name-btn" id="edit-name-btn" title="Editar nombre">
+      <i class="ti ti-pencil"></i>
+    </button>
+  </div>
+  <div class="user-since" id="user-since"></div>
+  <div class="admin-badge" id="admin-badge">ADMIN</div>
+</div>
 
-  <nav class="bottom-nav">
-    <a class="nav-item" href="/library.html">
-      <i class="ti ti-music"></i>
-      <span>Canciones</span>
-    </a>
-    <a class="nav-item" href="/setlist.html">
-      <i class="ti ti-list-check"></i>
-      <span>Setlist</span>
-    </a>
-    <a class="nav-item" href="/medleys.html">
-      <i class="ti ti-layers-intersect"></i>
-      <span>Medley</span>
-    </a>
-    <a class="nav-item" href="/more.html">
-      <i class="ti ti-dots-circle-horizontal"></i>
-      <span>Más</span>
-    </a>
-  </nav>
+<div class="section-label">Grupo de alabanza</div>
+<a class="menu-item" href="/groups.html">
+  <div class="menu-icon purple"><i class="ti ti-users"></i></div>
+  <div class="menu-info">
+    <div class="menu-title">Mis grupos</div>
+    <div class="menu-sub">Crea o únete a un grupo de alabanza</div>
+  </div>
+  <i class="ti ti-chevron-right menu-arrow"></i>
+</a>
 
-  <script>
-    const _supabase = supabase.createClient(
-      'https://kzqnsbztfyhyyageuboz.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
-    )
+<div class="section-label">Cuenta</div>
+<a class="menu-item" href="/reset.html">
+  <div class="menu-icon blue"><i class="ti ti-lock"></i></div>
+  <div class="menu-info">
+    <div class="menu-title">Cambiar contraseña</div>
+    <div class="menu-sub">Actualiza tu contraseña de acceso</div>
+  </div>
+  <i class="ti ti-chevron-right menu-arrow"></i>
+</a>
 
-    async function init() {
-      const { data: { session } } = await _supabase.auth.getSession()
-      if (!session) { window.location.href = '/login.html'; return }
+<div class="section-label" id="admin-section" style="display:none">Admin</div>
+<a class="menu-item" href="/admin.html" id="admin-link" style="display:none">
+  <div class="menu-icon orange"><i class="ti ti-music-plus"></i></div>
+  <div class="menu-info">
+    <div class="menu-title">Panel de canciones</div>
+    <div class="menu-sub">Agregar y editar canciones del catálogo</div>
+  </div>
+  <i class="ti ti-chevron-right menu-arrow"></i>
+</a>
 
-      const user = session.user
-      const email = user.email
-      const initials = email.substring(0, 2).toUpperCase()
+<div class="section-label">Acerca de</div>
+<a class="menu-item" href="/more.html">
+  <div class="menu-icon green"><i class="ti ti-brand-instagram"></i></div>
+  <div class="menu-info">
+    <div class="menu-title">Síguenos</div>
+    <div class="menu-sub">Redes sociales de Musishens</div>
+  </div>
+  <i class="ti ti-chevron-right menu-arrow"></i>
+</a>
 
-      document.getElementById('avatar').textContent = initials
-      document.getElementById('user-email').textContent = email
+<button class="logout-btn" onclick="cerrarSesion()">
+  <i class="ti ti-logout"></i> Cerrar sesión
+</button>
 
-      const since = new Date(user.created_at).toLocaleDateString('es-MX', {
-        day: 'numeric', month: 'long', year: 'numeric'
-      })
-      document.getElementById('user-since').textContent = `Miembro desde ${since}`
+<div class="version">ChartQuick by Musishens — v1.0</div>
 
-      const { data: profile } = await _supabase
-        .from('profiles')
-        .select('is_admin')
-        .eq('id', user.id)
-        .single()
+<nav class="bottom-nav">
+  <a class="nav-item" href="/library.html">
+    <i class="ti ti-music"></i>
+    <span>Canciones</span>
+  </a>
+  <a class="nav-item" href="/setlist.html">
+    <i class="ti ti-list-check"></i>
+    <span>Setlist</span>
+  </a>
+  <a class="nav-item" href="/medleys.html">
+    <i class="ti ti-layers-intersect"></i>
+    <span>Medley</span>
+  </a>
+  <a class="nav-item" href="/more.html">
+    <i class="ti ti-dots-circle-horizontal"></i>
+    <span>Más</span>
+  </a>
+</nav>
 
-      if (profile && profile.is_admin) {
-        document.getElementById('admin-badge').style.display = 'block'
-        document.getElementById('admin-section').style.display = 'block'
-        document.getElementById('admin-link').style.display = 'flex'
+<script>
+const _supabase = supabase.createClient(
+  'https://kzqnsbztfyhyyageuboz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+)
+
+let currentUser = null
+
+async function init() {
+  const { data: { session } } = await _supabase.auth.getSession()
+  if (!session) { window.location.href = '/login.html'; return }
+
+  const user = session.user
+  currentUser = user
+  const email = user.email
+  const initials = email.substring(0, 2).toUpperCase()
+
+  document.getElementById('avatar').textContent = initials
+  document.getElementById('user-email').textContent = email
+
+  const since = new Date(user.created_at).toLocaleDateString('es-MX', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  })
+  document.getElementById('user-since').textContent = `Miembro desde ${since}`
+
+  const { data: profile } = await _supabase
+    .from('profiles')
+    .select('is_admin, display_name, avatar_url')
+    .eq('id', user.id)
+    .single()
+
+  if (profile && profile.is_admin) {
+    document.getElementById('admin-badge').style.display = 'block'
+    document.getElementById('admin-section').style.display = 'block'
+    document.getElementById('admin-link').style.display = 'flex'
+  }
+
+  if (profile && profile.display_name) {
+    document.getElementById('display-name').textContent = profile.display_name
+  } else {
+    document.getElementById('display-name').textContent = 'Agrega tu nombre'
+  }
+
+  if (profile && profile.avatar_url) {
+    document.getElementById('avatar').innerHTML = `<img src="${profile.avatar_url}" alt="Foto de perfil">`
+  }
+}
+
+async function editDisplayName() {
+  const current = document.getElementById('display-name').textContent
+  const initial = current === 'Agrega tu nombre' ? '' : current
+  const name = prompt('¿Cómo quieres que te vean los demás en tus grupos?', initial)
+  if (name === null) return
+  const trimmed = name.trim()
+  if (!trimmed) return
+
+  const { error } = await _supabase
+    .from('profiles')
+    .update({ display_name: trimmed })
+    .eq('id', currentUser.id)
+
+  if (error) {
+    alert('No se pudo actualizar el nombre: ' + error.message)
+    return
+  }
+  document.getElementById('display-name').textContent = trimmed
+}
+
+function resizeImage(file, maxSize) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const reader = new FileReader()
+    reader.onload = e => { img.src = e.target.result }
+    reader.onerror = reject
+    img.onload = () => {
+      let { width, height } = img
+      if (width > height && width > maxSize) {
+        height = Math.round(height * (maxSize / width)); width = maxSize
+      } else if (height > maxSize) {
+        width = Math.round(width * (maxSize / height)); height = maxSize
       }
+      const canvas = document.createElement('canvas')
+      canvas.width = width; canvas.height = height
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height)
+      canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.85)
     }
+    img.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
 
-    async function cerrarSesion() {
-      await _supabase.auth.signOut()
-      window.location.href = '/login.html'
-    }
+async function uploadAvatar(file) {
+  if (!file || !currentUser) return
+  if (!file.type.startsWith('image/')) { alert('Selecciona un archivo de imagen'); return }
 
-    init()
-  </script>
+  try {
+    const blob = await resizeImage(file, 512)
+    const path = `${currentUser.id}/avatar-${Date.now()}.jpg`
+
+    const { error: uploadError } = await _supabase.storage
+      .from('avatars')
+      .upload(path, blob, { contentType: 'image/jpeg', upsert: true })
+
+    if (uploadError) { alert('No se pudo subir la foto: ' + uploadError.message); return }
+
+    const { data: pub } = _supabase.storage.from('avatars').getPublicUrl(path)
+    const publicUrl = pub.publicUrl
+
+    const { error: updateError } = await _supabase
+      .from('profiles')
+      .update({ avatar_url: publicUrl })
+      .eq('id', currentUser.id)
+
+    if (updateError) { alert('No se pudo guardar la foto: ' + updateError.message); return }
+
+    document.getElementById('avatar').innerHTML = `<img src="${publicUrl}" alt="Foto de perfil">`
+  } catch (e) {
+    alert('Ocurrió un error al procesar la imagen')
+  }
+}
+
+document.getElementById('avatar-edit-btn').addEventListener('click', () => {
+  document.getElementById('avatar-file').click()
+})
+document.getElementById('avatar-file').addEventListener('change', (e) => {
+  const file = e.target.files[0]
+  if (file) uploadAvatar(file)
+})
+document.getElementById('edit-name-btn').addEventListener('click', editDisplayName)
+
+async function cerrarSesion() {
+  await _supabase.auth.signOut()
+  window.location.href = '/login.html'
+}
+
+init()
+</script>
 </body>
 </html>
