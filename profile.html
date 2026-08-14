@@ -344,8 +344,7 @@ async function editDisplayName() {
 
   const { error } = await _supabase
     .from('profiles')
-    .update({ display_name: trimmed })
-    .eq('id', currentUser.id)
+    .upsert({ id: currentUser.id, display_name: trimmed })
 
   if (error) {
     alert('No se pudo actualizar el nombre: ' + error.message)
@@ -396,8 +395,7 @@ async function uploadAvatar(file) {
 
     const { error: updateError } = await _supabase
       .from('profiles')
-      .update({ avatar_url: publicUrl })
-      .eq('id', currentUser.id)
+      .upsert({ id: currentUser.id, avatar_url: publicUrl })
 
     if (updateError) { alert('No se pudo guardar la foto: ' + updateError.message); return }
 
