@@ -59,6 +59,11 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.
 .confirm-btns button { flex: 1; border: none; border-radius: 10px; padding: 0.75rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
 .btn-cancel { background: #1e2d45; color: #e2e8f0; }
 .btn-delete { background: #ef4444; color: #fff; }
+
+.context-bar { display:flex; gap:8px; padding:0 0 0.5rem; overflow-x:auto; }
+.context-chip { flex-shrink:0; background:#0d1626; border:1px solid #1e2d45; border-radius:20px; padding:6px 14px; font-size:0.75rem; color:#94a3b8; cursor:pointer; white-space:nowrap; }
+.context-chip.active { background:#3b82f6; border-color:#3b82f6; color:#fff; font-weight:600; }
+.group-banner { margin:0 0 0.75rem; padding:0.6rem 0.9rem; background:#0d1626; border:1px solid #1e2d45; border-left:3px solid #3b82f6; border-radius:8px; font-size:0.75rem; color:#94a3b8; }
 </style>
 <script>
 if ('serviceWorker' in navigator) {
@@ -75,9 +80,9 @@ if ('serviceWorker' in navigator) {
     <div class="page-title">Mis Medleys</div>
     <div class="page-sub" id="page-sub">Cargando...</div>
   </div>
-  <a class="new-btn" href="/medley-builder.html"><i class="ti ti-plus"></i> Nuevo</a>
+  <a class="new-btn" id="btn-nuevo-medley" href="/medley-builder.html"><i class="ti ti-plus"></i> Nuevo</a>
 </header>
-<div class="content" id="content">
+<div class="context-bar" id="context-bar"></div><div class="group-banner" id="group-banner" style="display:none"></div><div class="content" id="content">
   <div class="loading"><i class="ti ti-loader-2" style="font-size:1.5rem;display:block;margin-bottom:0.5rem"></i>Cargando medleys...</div>
 </div>
 <nav class="bottom-nav">
@@ -103,6 +108,10 @@ var _sb = supabase.createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
 );
 var allMedleys = [];
+var userId = null;
+var currentGroupId = null;
+var userGroups = [];
+var isLeaderOfCurrent = true;
 
 function escHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -140,7 +149,7 @@ function renderMedleys(list) {
         '</div>' +
       '</a>' +
       '<div class="medley-actions">' +
-        '<button class="action-btn del" data-action="delete" data-id="' + m.id + '" data-name="' + escHtml(m.name) + '" title="Eliminar"><i class="ti ti-trash"></i></button>' +
+        (isLeaderOfCurrent ? '<button class="action-btn del" data-action="delete" data-id="' + m.id + '" data-name="' + escHtml(m.name) + '" title="Eliminar"><i class="ti ti-trash"></i></button>' : '') +
       '</div>';
     el.appendChild(card);
   });
@@ -159,6 +168,7 @@ document.getElementById('content').addEventListener('click', function(e) {
 var pendingDeleteId = null;
 
 function confirmDelete(id, name) {
+if (!isLeaderOfCurrent) { return }
   pendingDeleteId = id;
   document.getElementById('confirm-sub').textContent = '¿Eliminar "' + name + '"? Esta acción no se puede deshacer.';
   document.getElementById('confirm-overlay').classList.add('open');
@@ -191,32 +201,93 @@ document.getElementById('confirm-overlay').addEventListener('click', function(e)
   if (e.target === this) closeConfirm();
 });
 
+
+function renderContextBar() {
+  var bar = document.getElementById('context-bar')
+  if (!bar) return
+  if (userGroups.length === 0) { bar.style.display = "none"; actualizarUIPermisos(); return }
+  bar.style.display = "flex"
+  var chips = '<div class="context-chip ' + (currentGroupId === null ? "active" : "") + '" onclick="cambiarContexto(null)">Personal</div>'
+  userGroups.forEach(function(g) {
+    var activa = (String(currentGroupId) === String(g.id)) ? "active" : ""
+    chips += '<div class="context-chip ' + activa + '" onclick="cambiarContexto(\'' + g.id + '\')">' + escHtml(g.name) + '</div>'
+  })
+  bar.innerHTML = chips
+}
+
+async function cargarGrupos() {
+  var memRes = await _sb.from('group_members').select('group_id').eq('user_id', userId)
+  var memberships = memRes.data || []
+  userGroups = []
+  if (memberships.length > 0) {
+    var groupIds = memberships.map(function(m) { return m.group_id })
+    var grpRes = await _sb.from('groups').select('id, name, leader_id').in('id', groupIds)
+    var groups = grpRes.data || []
+    userGroups = groups.map(function(g) { return { id: g.id, name: g.name, isLeader: g.leader_id === userId } })
+  }
+  renderContextBar()
+}
+
+function cambiarContexto(gid) {
+  currentGroupId = gid === null ? null : gid
+  var g = null
+  userGroups.forEach(function(x) { if (String(x.id) === String(gid)) g = x })
+  isLeaderOfCurrent = currentGroupId === null ? true : (g ? g.isLeader : false)
+  renderContextBar()
+  actualizarUIPermisos()
+  cargarMedleys()
+}
+
+function actualizarUIPermisos() {
+  var btn = document.getElementById('btn-nuevo-medley')
+  if (btn) {
+    btn.style.display = isLeaderOfCurrent ? '' : 'none'
+    btn.setAttribute('href', currentGroupId === null ? '/medley-builder.html' : '/medley-builder.html?group=' + currentGroupId)
+  }
+  var banner = document.getElementById('group-banner')
+  if (banner) {
+    if (currentGroupId !== null && !isLeaderOfCurrent) {
+      banner.style.display = "block"
+      banner.textContent = "Estas viendo los medleys del grupo. Solo el lider puede crear o eliminar."
+    } else {
+      banner.style.display = "none"
+    }
+  }
+}
+
+async function cargarMedleys() {
+  var queryBuilder = _sb.from('medleys').select('id, name, created_at')
+  if (currentGroupId === null) {
+    queryBuilder = queryBuilder.eq('user_id', userId).is('group_id', null)
+  } else {
+    queryBuilder = queryBuilder.eq('group_id', currentGroupId)
+  }
+  var medRes = await queryBuilder.order('created_at', { ascending: false })
+  if (medRes.error) {
+    document.getElementById("content").innerHTML = '<div class="loading">Error cargando medleys</div>'
+    return
+  }
+  var medleys = medRes.data || []
+  if (!medleys.length) { allMedleys = []; renderMedleys([]); return }
+  var ids = medleys.map(function(m) { return m.id })
+  var secRes = await _sb.from('medley_sections').select('medley_id').in('medley_id', ids)
+  var countMap = {}
+  ;(secRes.data || []).forEach(function(r) {
+    countMap[r.medley_id] = (countMap[r.medley_id] || 0) + 1
+  })
+  allMedleys = medleys.map(function(m) {
+    return { id: m.id, name: m.name, created_at: m.created_at, sec_count: countMap[m.id] || 0 }
+  })
+  renderMedleys(allMedleys)
+}
 async function init() {
   var authRes = await _sb.auth.getSession();
   var session = authRes.data.session;
   if (!session) { window.location.href = '/login.html'; return; }
-  var userId = session.user.id;
-  var medRes = await _sb
-    .from('medleys')
-    .select('id, name, created_at')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-  if (medRes.error) {
-    document.getElementById('content').innerHTML = '<div class="loading">❌ Error cargando medleys</div>';
-    return;
-  }
-  var medleys = medRes.data || [];
-  if (!medleys.length) { allMedleys = []; renderMedleys([]); return; }
-  var ids = medleys.map(function(m) { return m.id; });
-  var secRes = await _sb.from('medley_sections').select('medley_id').in('medley_id', ids);
-  var countMap = {};
-  (secRes.data || []).forEach(function(r) {
-    countMap[r.medley_id] = (countMap[r.medley_id] || 0) + 1;
-  });
-  allMedleys = medleys.map(function(m) {
-    return { id: m.id, name: m.name, created_at: m.created_at, sec_count: countMap[m.id] || 0 };
-  });
-  renderMedleys(allMedleys);
+  userId = session.user.id;
+await cargarGrupos();
+actualizarUIPermisos();
+cargarMedleys();
 }
 
 init();

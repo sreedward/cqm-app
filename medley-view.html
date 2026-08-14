@@ -82,6 +82,8 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.85rem
   .mynote-cancel-btn { color: #8b9cb5; }
 .divider { display: flex; align-items: center; gap: 8px; margin: 0.5rem 0 1rem; }
 .divider-line { flex: 1; height: 1px; background: #1e2d45; }
+
+.group-banner { margin:0.5rem 1.25rem 0; padding:0.6rem 0.9rem; background:#0d1626; border:1px solid #1e2d45; border-left:3px solid #3b82f6; border-radius:8px; font-size:0.75rem; color:#94a3b8; display:none; }
 </style>
 <script>
 if ('serviceWorker' in navigator) {
@@ -103,7 +105,7 @@ if ('serviceWorker' in navigator) {
   <div class="transpose-row">
     <span class="t-label">Tonalidad:</span>
     <div class="key-display" id="key-display">-</div>
-    <div class="key-select-wrap">
+    <div class="key-select-wrap" id="key-select-wrap">
       <select class="key-select" id="target-key">
         <option value="">Cambiar...</option>
         <option value="C">C</option>
@@ -127,6 +129,7 @@ if ('serviceWorker' in navigator) {
     </div>
   </div>
 </div>
+<div class="group-banner" id="group-banner"></div>
 <div class="content" id="content">
   <div class="loading">Cargando medley...</div>
 </div>
@@ -144,6 +147,8 @@ const _sb = supabase.createClient(
 const NOTAS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const BEMOLES = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'};
 let semitones = 0;
+let isLeader = true;
+let groupIdMedley = null;
 let cifrado   = 'americano';
 let baseKey   = 'C';
 let allSections = [];
@@ -377,12 +382,14 @@ function renderAll() {
 
 
 function applyTargetKey() {
+if (!isLeader) { alert('Solo el lider del grupo puede cambiar la tonalidad.'); return }
   var sel = document.getElementById('target-key').value;
   if (!sel) return;
   var targetIdx = noteToIdx(sel);
   var baseIdx   = noteToIdx(baseKey);
   if (targetIdx === -1 || baseIdx === -1) return;
   semitones = (targetIdx - baseIdx + 12) % 12;
+_sb.from('medleys').update({ transpose_semitones: semitones }).eq('id', medleyId).then(function(){});
   renderAll();
 }
 
@@ -393,6 +400,20 @@ function setCifrado(tipo) {
   renderAll();
 }
 
+
+function actualizarUIPermisos() {
+  var wrap = document.getElementById('key-select-wrap')
+  if (wrap) wrap.style.display = isLeader ? "" : "none"
+  var banner = document.getElementById('group-banner')
+  if (banner) {
+    if (groupIdMedley !== null && !isLeader) {
+      banner.style.display = "block"
+      banner.textContent = "Estas viendo el medley del grupo. Solo el lider puede cambiar la tonalidad."
+    } else {
+      banner.style.display = "none"
+    }
+  }
+}
 async function init() {
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) { window.location.href = '/login.html'; return; }
@@ -400,6 +421,15 @@ async function init() {
   if (!medleyId) { window.location.href = '/medley-builder.html'; return; }
   const { data: medley, error: mErr } = await _sb.from('medleys').select('*').eq('id', medleyId).single();
   if (mErr || !medley) { window.location.href = '/medley-builder.html'; return; }
+semitones = medley.transpose_semitones || 0;
+groupIdMedley = medley.group_id || null;
+if (groupIdMedley) {
+  const { data: grp } = await _sb.from('groups').select('leader_id').eq('id', groupIdMedley).single();
+  isLeader = grp ? grp.leader_id === currentUserId : false;
+} else {
+  isLeader = true;
+}
+actualizarUIPermisos();
   document.getElementById('medley-title').textContent = medley.name;
   document.title = 'CQM - ' + medley.name;
   const { data: mSecs, error: msErr } = await _sb.from('medley_sections')

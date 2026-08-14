@@ -90,6 +90,8 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.
 .nav-item.active i, .nav-item.active span { color: #3b82f6; }
 .toast { position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%); background: #1e2d45; border: 1px solid #3b82f6; color: #e2e8f0; border-radius: 8px; padding: 0.6rem 1.25rem; font-size: 0.85rem; z-index: 60; display: none; white-space: nowrap; }
 .loading { text-align: center; color: #4a5568; padding: 2rem; }
+
+.group-banner { margin:0.75rem 1.25rem 0; padding:0.6rem 0.9rem; background:#0d1626; border:1px solid #1e2d45; border-left:3px solid #3b82f6; border-radius:8px; font-size:0.75rem; color:#94a3b8; display:none; }
 </style>
 <script>
 if ('serviceWorker' in navigator) {
@@ -112,6 +114,7 @@ if ('serviceWorker' in navigator) {
   </button>
 </header>
 
+<div class="group-banner" id="group-banner"></div>
 <div class="name-row">
   <input class="name-input" id="medley-name" placeholder="Nombre del medley..." oninput="checkSaveBtn()">
 </div>
@@ -163,11 +166,30 @@ let allSongs = [];
 let sectionsMap = {};
 let track = [];
 let userId = null;
+let groupIdParam = null;
 
 async function init() {
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) { window.location.href = '/login.html'; return; }
   userId = session.user.id;
+const _params = new URLSearchParams(window.location.search);
+const _gid = _params.get('group');
+if (_gid) {
+  const { data: _grp } = await _sb.from('groups').select('leader_id, name').eq('id', _gid).single();
+  if (!_grp || _grp.leader_id !== userId) {
+    alert('Solo el lider del grupo puede crear medleys para el grupo.');
+    window.location.href = '/medleys.html';
+    return;
+  }
+  groupIdParam = _gid;
+  const _sub = document.querySelector('.page-sub');
+  if (_sub) _sub.textContent = 'Para el grupo: ' + _grp.name;
+  const _banner = document.getElementById('group-banner');
+  if (_banner) {
+    _banner.style.display = 'block';
+    _banner.textContent = 'Este medley se creara para el grupo: ' + _grp.name;
+  }
+}
   const { data: songs } = await _sb.from('Songs').select('id, title, artist, "original key"').order('title');
   allSongs = songs || [];
   renderSongs(allSongs);
@@ -289,7 +311,7 @@ btn.disabled = true;
 btn.innerHTML = '<i class="ti ti-loader-2"></i> Guardando...';
 try {
   const { data: medley, error: mErr } = await _sb.from('medleys')
-    .insert({ name, user_id: userId }).select('id').single();
+    .insert({ name, user_id: userId, group_id: groupIdParam }).select('id').single();
   if (mErr || !medley || !medley.id) throw new Error((mErr && mErr.message) || 'Sin ID de medley');
   const rows = track.map((item, idx) => ({
     medley_id: medley.id, song_id: item.songId, section_id: item.secId, order: idx + 1
