@@ -209,7 +209,12 @@
       font-weight: 600;
       cursor: pointer;
     }
-  </style>
+  
+.context-bar { display:flex; gap:8px; padding:0.75rem 1.25rem 0.25rem; overflow-x:auto; }
+.context-chip { flex-shrink:0; background:#0d1626; border:1px solid #1e2d45; border-radius:20px; padding:6px 14px; font-size:0.75rem; color:#94a3b8; cursor:pointer; white-space:nowrap; }
+.context-chip.active { background:#3b82f6; border-color:#3b82f6; color:#fff; font-weight:600; }
+.group-banner { margin:0 1.25rem 0.5rem; padding:0.6rem 0.9rem; background:#0d1626; border:1px solid #1e2d45; border-left:3px solid #3b82f6; border-radius:8px; font-size:0.75rem; color:#94a3b8; }
+</style>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -222,12 +227,14 @@
 <body>
   <header>
     <div class="header-title">Mis Setlists</div>
-    <button class="new-btn" onclick="abrirModal()">
+    <button class="new-btn" id="btn-nueva" onclick="abrirModal()">
       <i class="ti ti-plus"></i> Nueva
     </button>
   </header>
 
-  <div id="contenido">
+  <div class="context-bar" id="context-bar"></div>
+<div class="group-banner" id="group-banner" style="display:none"></div>
+<div id="contenido">
     <div class="section-label">Cargando...</div>
   </div>
 
@@ -269,20 +276,75 @@
     )
 
     let userId = null
+let currentGroupId = null
+let userGroups = []
+let isLeaderOfCurrent = true
 
     async function init() {
       const { data: { session } } = await _supabase.auth.getSession()
       if (!session) { window.location.href = '/login.html'; return }
       userId = session.user.id
+      await cargarGrupos()
       cargarSetlists()
     }
 
-    async function cargarSetlists() {
-      const { data: setlists, error } = await _supabase
-        .from('setlist')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
+    
+async function cargarGrupos() {
+  const { data: memberships } = await _supabase.from('group_members').select('group_id').eq('user_id', userId)
+  userGroups = []
+  if (memberships && memberships.length > 0) {
+    const groupIds = memberships.map(m => m.group_id)
+    const { data: groups } = await _supabase.from('groups').select('id, name, leader_id').in('id', groupIds)
+    if (groups) {
+      userGroups = groups.map(g => ({ id: g.id, name: g.name, isLeader: g.leader_id === userId }))
+    }
+  }
+  renderContextBar()
+}
+
+function renderContextBar() {
+  const bar = document.getElementById('context-bar')
+  if (!bar) return
+  if (userGroups.length === 0) { bar.style.display = "none"; actualizarUIPermisos(); return }
+  bar.style.display = "flex"
+  let chips = '<div class="context-chip ' + (currentGroupId === null ? "active" : "") + '" onclick="cambiarContexto(null)">Personal</div>'
+  for (const g of userGroups) {
+    const activa = (String(currentGroupId) === String(g.id)) ? "active" : ""
+    chips += '<div class="context-chip ' + activa + '" onclick="cambiarContexto(\'' + g.id + '\')">' + g.name + '</div>'
+  }
+  bar.innerHTML = chips
+}
+
+function cambiarContexto(groupId) {
+  currentGroupId = groupId === null ? null : groupId
+  const g = userGroups.find(x => String(x.id) === String(groupId))
+  isLeaderOfCurrent = currentGroupId === null ? true : (g ? g.isLeader : false)
+  renderContextBar()
+  actualizarUIPermisos()
+  cargarSetlists()
+}
+
+function actualizarUIPermisos() {
+  const btn = document.getElementById('btn-nueva')
+  if (btn) btn.style.display = isLeaderOfCurrent ? "flex" : "none"
+  const banner = document.getElementById('group-banner')
+  if (banner) {
+    if (currentGroupId !== null && !isLeaderOfCurrent) {
+      banner.style.display = "block"
+      banner.textContent = "Estas viendo el contenido del grupo. Solo el lider puede crear o modificar setlists."
+    } else {
+      banner.style.display = "none"
+    }
+  }
+}
+async function cargarSetlists() {
+      let queryBuilder = _supabase.from('setlist').select('*')
+      if (currentGroupId === null) {
+        queryBuilder = queryBuilder.eq('user_id', userId).is('group_id', null)
+      } else {
+        queryBuilder = queryBuilder.eq('group_id', currentGroupId)
+      }
+      const { data: setlists, error } = await queryBuilder.order('created_at', { ascending: false })
 
       const contenido = document.getElementById('contenido')
 
@@ -291,7 +353,7 @@
           <div class="empty">
             <i class="ti ti-list-check"></i>
             <p>Aún no tienes setlists.<br>Crea uno para tu próximo show.</p>
-            <button class="empty-btn" onclick="abrirModal()">+ Crear Setlist</button>
+            ${isLeaderOfCurrent ? '<button class="empty-btn" onclick="abrirModal()">+ Crear Setlist</button>' : ''}
           </div>`
         return
       }
@@ -346,6 +408,7 @@
     }
 
     function abrirModal() {
+      if (!isLeaderOfCurrent) { return }
       document.getElementById('modal').classList.add('show')
       document.getElementById('setlist-date').value = new Date().toISOString().split('T')[0]
     }
@@ -356,6 +419,7 @@
     }
 
     async function crearSetlist() {
+      if (!isLeaderOfCurrent) { alert('Solo el lider del grupo puede crear setlists.'); return }
       const name = document.getElementById('setlist-name').value.trim()
       const date = document.getElementById('setlist-date').value
 
@@ -366,7 +430,7 @@
 
       const { error } = await _supabase
         .from('setlist')
-        .insert({ name, date, user_id: userId })
+        .insert({ name, date, user_id: userId, group_id: currentGroupId })
 
       if (error) {
         alert('Error creando setlist: ' + error.message)
