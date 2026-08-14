@@ -240,7 +240,10 @@ function cambiarContexto(gid) {
 
 function actualizarUIPermisos() {
   var btn = document.getElementById('btn-nuevo-medley')
-  if (btn) btn.style.display = isLeaderOfCurrent ? "" : "none"
+  if (btn) {
+    btn.style.display = isLeaderOfCurrent ? '' : 'none'
+    btn.setAttribute('href', currentGroupId === null ? '/medley-builder.html' : '/medley-builder.html?group=' + currentGroupId)
+  }
   var banner = document.getElementById('group-banner')
   if (banner) {
     if (currentGroupId !== null && !isLeaderOfCurrent) {
