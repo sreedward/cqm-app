@@ -217,7 +217,9 @@
     .song-card.drag-over {
       border-top: 2px solid #3b82f6;
     }
-  </style>
+  
+.group-banner { margin:0.75rem 1.25rem 0; padding:0.6rem 0.9rem; background:#0d1626; border:1px solid #1e2d45; border-left:3px solid #3b82f6; border-radius:8px; font-size:0.75rem; color:#94a3b8; }
+</style>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -236,12 +238,13 @@
       <div class="setlist-title" id="setlist-title">Cargando...</div>
       <div class="setlist-date" id="setlist-date"></div>
     </div>
-    <button onclick="eliminarSetlist()" style="background:none;border:1px solid #7f1d1d;border-radius:8px;color:#ef4444;padding:5px 10px;font-size:0.8rem;cursor:pointer">
+    <button id="btn-eliminar-setlist" onclick="eliminarSetlist()" style="background:none;border:1px solid #7f1d1d;border-radius:8px;color:#ef4444;padding:5px 10px;font-size:0.8rem;cursor:pointer">
       <i class="ti ti-trash"></i>
     </button>
   </header>
 
-  <div id="contenido">
+  <div class="group-banner" id="group-banner" style="display:none"></div>
+<div id="contenido">
     <div class="loading">Cargando...</div>
   </div>
 
@@ -272,6 +275,7 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
     )
 async function eliminarSetlist() {
+if (!isLeader) { alert('Solo el lider puede eliminar el setlist.'); return }
       if (!confirm('¿Eliminar este setlist completo?')) return
       await _supabase.from('setlist_songs').delete().eq('setlist_id', setlistId)
       await _supabase.from('setlist').delete().eq('id', setlistId)
@@ -280,14 +284,32 @@ async function eliminarSetlist() {
     const params = new URLSearchParams(window.location.search)
     const setlistId = params.get('id')
     let songsOrdered = []
+let userId = null
+let isLeader = true
+let groupId = null
 
     async function init() {
       const { data: { session } } = await _supabase.auth.getSession()
       if (!session) { window.location.href = '/login.html'; return }
+userId = session.user.id
       cargarSetlist()
     }
 
-    async function cargarSetlist() {
+    
+function actualizarUIPermisos() {
+  const btn = document.getElementById('btn-eliminar-setlist')
+  if (btn) btn.style.display = isLeader ? '' : 'none'
+  const banner = document.getElementById('group-banner')
+  if (banner) {
+    if (groupId && !isLeader) {
+      banner.style.display = 'block'
+      banner.textContent = 'Estas viendo el setlist del grupo. Solo el lider puede editarlo.'
+    } else {
+      banner.style.display = 'none'
+    }
+  }
+}
+async function cargarSetlist() {
       const { data: setlist } = await _supabase
         .from('setlist')
         .select('*')
@@ -295,6 +317,15 @@ async function eliminarSetlist() {
         .single()
 
       if (!setlist) { window.location.href = '/setlist.html'; return }
+
+groupId = setlist.group_id || null
+if (groupId) {
+  const { data: grupo } = await _supabase.from('groups').select('leader_id').eq('id', groupId).single()
+  isLeader = grupo ? grupo.leader_id === userId : false
+} else {
+  isLeader = true
+}
+actualizarUIPermisos()
 
       document.getElementById('setlist-title').textContent = setlist.name
       document.title = setlist.name
@@ -358,15 +389,15 @@ async function eliminarSetlist() {
 
       songsOrdered.forEach((song, idx) => {
         html += `
-          <div class="song-card" draggable="true" data-item-id="${song.itemId}" data-index="${idx}">
-            <div class="drag-handle" title="Arrastrar para reordenar">&#9776;</div>
+          <div class="song-card" draggable="${isLeader}" data-item-id="${song.itemId}" data-index="${idx}">
+            <div class="drag-handle" title="Arrastrar para reordenar" style="${isLeader ? '' : 'visibility:hidden'}">&#9776;</div>
             <div class="song-num">${idx + 1}</div>
             <div class="song-info" onclick="iniciarShow(${idx})">
               <div class="song-title">${song.title}</div>
               <div class="song-artist">${song.artist || 'Artista desconocido'}</div>
             </div>
             <div class="song-key${song.keyOverride ? ' key-override' : ''}">${song.keyOverride || song['original key'] || '?'}</div>
-            <button class="remove-btn" onclick="eliminarCancion(${song.itemId}, '${song.title}')">
+            <button class="remove-btn" onclick="eliminarCancion(${song.itemId}, '${song.title}')" style="${isLeader ? '' : 'display:none'}">
               <i class="ti ti-trash"></i>
             </button>
           </div>`
@@ -388,6 +419,7 @@ async function eliminarSetlist() {
     }
 
     async function eliminarCancion(itemId, titulo) {
+if (!isLeader) { alert('Solo el lider puede quitar canciones.'); return }
       if (!confirm(`¿Quitar "${titulo}" del setlist?`)) return
       const { error } = await _supabase
         .from('setlist_songs')
@@ -509,6 +541,7 @@ async function eliminarSetlist() {
     }
 
     async function guardarOrden() {
+if (!isLeader) { return }
       // UPDATE bloqueado por RLS  usar DELETE + INSERT para cada canci�n
       for (let idx = 0; idx < songsOrdered.length; idx++) {
         const song = songsOrdered[idx]
