@@ -133,6 +133,142 @@ header {
 .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
 .nav-item.active i { color: #3b82f6; }
 .nav-item.active span { color: #3b82f6; }
+
+    /* ===== GLASSMORPHISM + GRADIENT ===== */
+    body {
+      background: linear-gradient(135deg, #060b18 0%, #0b1628 35%, #0d0c20 65%, #13082a 100%) fixed !important;
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(59,130,246,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.10) 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 10%, rgba(34,197,94,0.06) 0%, transparent 40%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body > * { position: relative; z-index: 1; }
+
+    /* Navbar superior */
+    .header, nav.header {
+      background: rgba(8, 15, 28, 0.75) !important;
+      backdrop-filter: blur(16px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+      border-bottom: 1px solid rgba(59,130,246,0.15) !important;
+    }
+    /* Barra de transposición */
+    .transpose-bar {
+      background: rgba(10, 18, 35, 0.72) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      border-bottom: 1px solid rgba(59,130,246,0.12) !important;
+    }
+    /* Nav inferior */
+    .bottom-nav {
+      background: rgba(8, 15, 28, 0.80) !important;
+      backdrop-filter: blur(18px) saturate(160%) !important;
+      -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+      border-top: 1px solid rgba(59,130,246,0.13) !important;
+    }
+    /* Barra de búsqueda */
+    .search-bar {
+      background: rgba(10, 18, 38, 0.70) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border-bottom: 1px solid rgba(59,130,246,0.10) !important;
+    }
+    /* Tarjetas de canciones */
+    .song-item {
+      background: rgba(13, 22, 38, 0.55) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      border: 1px solid rgba(59,130,246,0.10) !important;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .song-item:hover, .song-item:active {
+      background: rgba(20, 35, 60, 0.70) !important;
+      border-color: rgba(59,130,246,0.25) !important;
+    }
+    /* Secciones de canción — mantienen borde de color, se vuelven translúcidas */
+    .section {
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+    }
+    .section.intro       { background: rgba(10, 31, 18, 0.55) !important; }
+    .section.verso       { background: rgba(10, 18, 38, 0.55) !important; }
+    .section.pre-coro    { background: rgba(31, 18, 10, 0.55) !important; }
+    .section.coro        { background: rgba(19, 10, 38, 0.55) !important; }
+    .section.vamp        { background: rgba(26, 10, 31, 0.55) !important; }
+    .section.bridge      { background: rgba(31, 26, 10, 0.55) !important; }
+    .section.instrumental{ background: rgba(20, 20, 20, 0.50) !important; }
+    .section.outro       { background: rgba(31, 10, 10, 0.55) !important; }
+    /* Modal / overlay */
+    .modal {
+      background: rgba(10, 18, 35, 0.85) !important;
+      backdrop-filter: blur(20px) saturate(150%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+      border: 1px solid rgba(59,130,246,0.18) !important;
+    }
+    /* FAB (paginación Opción A) */
+    .fab {
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+      box-shadow: 0 4px 20px rgba(59,130,246,0.35) !important;
+    }
+    /* Indicador de página */
+    .page-indicator {
+      background: rgba(13, 22, 38, 0.75) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      border: 1px solid rgba(59,130,246,0.20) !important;
+    }
+    /* Toast */
+    .toast {
+      background: rgba(13, 22, 38, 0.90) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+    }
+    /* Inputs en modales y búsqueda */
+    .search-input-wrap, .modal-input {
+      background: rgba(20, 32, 55, 0.60) !important;
+      border: 1px solid rgba(59,130,246,0.15) !important;
+    }
+    /* Chips / badges de acordes */
+    .key-display, .cifrado-toggle {
+      background: rgba(30, 45, 69, 0.70) !important;
+      backdrop-filter: blur(6px) !important;
+      -webkit-backdrop-filter: blur(6px) !important;
+    }
+    /* Tarjetas genéricas de setlist / medley */
+    .setlist-item, .medley-item, .group-item {
+      background: rgba(13, 22, 38, 0.55) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      border: 1px solid rgba(59,130,246,0.10) !important;
+    }
+    /* Banner de grupo */
+    .group-banner {
+      background: rgba(13, 22, 38, 0.60) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+    }
+    /* Barra de contexto */
+    .context-bar {
+      background: rgba(13, 22, 38, 0.65) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      border-bottom: 1px solid rgba(59,130,246,0.10) !important;
+    }
+    /* Barra "guardar alineación" */
+    .save-align-bar {
+      background: rgba(13, 22, 38, 0.85) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+    }
+    /* ===== FIN GLASSMORPHISM ===== */
 </style>
 </head>
 <body>
