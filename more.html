@@ -15,36 +15,39 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #080c14;
+      background: linear-gradient(150deg,#04060e 0%,#080d22 40%,#0b0617 70%,#040609 100%);
+  background-attachment: fixed;
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
       padding-bottom: 80px;
     }
     header {
-      background: #0d1626;
-      border-bottom: 1px solid #1e2d45;
+      background: rgba(4,6,18,0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
       padding: 1rem 1.25rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    .logo { font-size: 1.1rem; font-weight: 700; color: #e2e8f0; letter-spacing: -0.5px; }
-    .logo span { color: #3b82f6; }
-    .logo small { font-size: 0.65rem; color: #4a5568; font-weight: 400; letter-spacing: 1px; text-transform: uppercase; display: block; margin-top: -2px; }
+    .logo { font-size: 1.1rem; font-weight: 700; color: #dce4f0; letter-spacing: -0.5px; }
+    .logo span { color: #5b5fcc; }
+    .logo small { font-size: 0.65rem; color: #3d4a66; font-weight: 400; letter-spacing: 1px; text-transform: uppercase; display: block; margin-top: -2px; }
     .news-card {
       margin: 1rem 1.25rem;
-      background: #0d1626;
-      border: 1px solid #1e2d45;
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.07);
       border-radius: 12px;
       padding: 1.25rem;
     }
-    .news-tag { font-size: 0.65rem; color: #3b82f6; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
-    .news-title { font-size: 0.95rem; font-weight: 500; color: #e2e8f0; line-height: 1.5; margin-bottom: 4px; }
-    .news-date { font-size: 0.75rem; color: #4a5568; }
+    .news-tag { font-size: 0.65rem; color: #5b5fcc; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+    .news-title { font-size: 0.95rem; font-weight: 500; color: #dce4f0; line-height: 1.5; margin-bottom: 4px; }
+    .news-date { font-size: 0.75rem; color: #3d4a66; }
     .section-label {
       font-size: 0.7rem;
-      color: #4a5568;
+      color: #3d4a66;
       letter-spacing: 1.5px;
       text-transform: uppercase;
       padding: 0.75rem 1.25rem 0.25rem;
@@ -63,7 +66,7 @@
       width: 40px;
       height: 40px;
       border-radius: 10px;
-      background: #1e2d45;
+      background: rgba(255,255,255,0.05);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -71,28 +74,30 @@
       flex-shrink: 0;
     }
     .social-info { flex: 1; }
-    .social-name { font-size: 0.9rem; color: #e2e8f0; font-weight: 500; }
-    .social-handle { font-size: 0.75rem; color: #4a5568; margin-top: 1px; }
-    .social-arrow { color: #4a5568; font-size: 1rem; }
+    .social-name { font-size: 0.9rem; color: #dce4f0; font-weight: 500; }
+    .social-handle { font-size: 0.75rem; color: #3d4a66; margin-top: 1px; }
+    .social-arrow { color: #3d4a66; font-size: 1rem; }
     .app-info {
       margin: 1.5rem 1.25rem 0;
-      background: #0d1626;
-      border: 1px solid #1e2d45;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
       border-radius: 12px;
       padding: 1.25rem;
       text-align: center;
     }
-    .app-logo { font-size: 1.2rem; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
-    .app-logo span { color: #3b82f6; }
-    .app-version { font-size: 0.75rem; color: #4a5568; margin-bottom: 0.75rem; }
-    .app-desc { font-size: 0.8rem; color: #4a5568; line-height: 1.6; }
+    .app-logo { font-size: 1.2rem; font-weight: 700; color: #dce4f0; margin-bottom: 4px; }
+    .app-logo span { color: #5b5fcc; }
+    .app-version { font-size: 0.75rem; color: #3d4a66; margin-bottom: 0.75rem; }
+    .app-desc { font-size: 0.8rem; color: #3d4a66; line-height: 1.6; }
     .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: #0d1626;
-      border-top: 1px solid #1e2d45;
+      background: rgba(5,7,16,0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255,255,255,0.06);
       display: flex;
       padding: 8px 0 12px;
       z-index: 20;
@@ -107,10 +112,10 @@
       padding: 4px 0;
       text-decoration: none;
     }
-    .nav-item i { font-size: 1.2rem; color: #4a5568; }
-    .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
-    .nav-item.active i { color: #3b82f6; }
-    .nav-item.active span { color: #3b82f6; }
+    .nav-item i { font-size: 1.2rem; color: #3d4a66; }
+    .nav-item span { font-size: 0.6rem; color: #3d4a66; letter-spacing: 0.5px; }
+    .nav-item.active i { color: #dce4f0; }
+    .nav-item.active span { color: #dce4f0; }
 
     /* Install button item */
     .install-item {
@@ -128,14 +133,14 @@
     .install-item:active { opacity: 0.7; }
     .install-icon {
       width: 36px; height: 36px;
-      background: #0d1626;
+      background: rgba(255,255,255,0.04);
       border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
       font-size: 1rem;
     }
     .install-info { flex: 1; }
-    .install-name { font-size: 0.9rem; color: #e2e8f0; font-weight: 500; }
-    .install-sub { font-size: 0.75rem; color: #4a5568; margin-top: 1px; }
+    .install-name { font-size: 0.9rem; color: #dce4f0; font-weight: 500; }
+    .install-sub { font-size: 0.75rem; color: #3d4a66; margin-top: 1px; }
 
     /* PWA Overlay for more.html */
     #ob-overlay-more {
@@ -145,12 +150,12 @@
     }
     #ob-overlay-more.visible { display: flex; }
     #ob-modal-more {
-      background: #0d1626; border-radius: 16px;
+      background: rgba(4,6,18,0.92); border-radius: 16px;
       padding: 2rem 1.5rem; max-width: 360px; width: 90%;
       text-align: center;
     }
-    .ob-title-m { font-size: 1.15rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.5rem; }
-    .ob-desc-m { font-size: 0.875rem; color: #8a9bb0; line-height: 1.6; margin-bottom: 1.5rem; }
+    .ob-title-m { font-size: 1.15rem; font-weight: 700; color: #dce4f0; margin-bottom: 0.5rem; }
+    .ob-desc-m { font-size: 0.875rem; color: #8896b3; line-height: 1.6; margin-bottom: 1.5rem; }
     .ob-btn-m {
       display: block; width: 100%; padding: 0.75rem;
       background: #38a169; color: #fff;
@@ -159,13 +164,13 @@
     }
     .ob-skip-m {
       display: block; width: 100%; padding: 0.5rem;
-      background: none; border: none; color: #4a5568;
+      background: none; border: none; color: #3d4a66;
       cursor: pointer; font-size: 0.875rem;
     }
     .pwa-steps-m { margin: 8px 0 16px; text-align: left; }
     .pwa-step-m {
       display: flex; align-items: center; gap: 12px;
-      padding: 10px 0; border-bottom: 1px solid #1e2d40;
+      padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
     }
     .pwa-step-m:last-child { border-bottom: none; }
     .pwa-step-num-m {
@@ -177,6 +182,33 @@
     .pwa-step-text-m { font-size: 0.9rem; color: #c8d6e5; line-height: 1.4; flex: 1; }
     .pwa-step-text-m strong { color: #fff; }
     .pwa-step-icon-m { font-size: 1.2rem; min-width: 28px; text-align: center; }
+  
+/* ── Cosmos Grain Texture ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  background-size: 180px;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+
+/* ── Cosmos Nav Pill ── */
+.nav-item { position: relative; }
+.nav-item.active i,
+.nav-item.active span { color: #dce4f0; }
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 28px; height: 2.5px;
+  border-radius: 0 0 3px 3px;
+  background: #7c7fdc;
+}
+
   </style>
 
   <script>
@@ -212,7 +244,7 @@
   </button>
 
 <a class="social-item" href="/medley-builder.html">
-  <div class="social-icon" style="color:#3b82f6"><i class="ti ti-layers-intersect"></i></div>
+  <div class="social-icon" style="color:#5b5fcc"><i class="ti ti-layers-intersect"></i></div>
   <div class="social-info">
     <div class="social-name">Medley Builder</div>
     <div class="social-handle">Combina secciones de canciones</div>
@@ -242,7 +274,7 @@
   </a>
 
   <a class="social-item" href="https://tiktok.com/@musishens" target="_blank">
-    <div class="social-icon" style="color:#e2e8f0"><i class="ti ti-brand-tiktok"></i></div>
+    <div class="social-icon" style="color:#dce4f0"><i class="ti ti-brand-tiktok"></i></div>
     <div class="social-info">
       <div class="social-name">TikTok</div>
       <div class="social-handle">@musishens</div>
@@ -251,7 +283,7 @@
   </a>
 
   <a class="social-item" href="https://facebook.com/musishens" target="_blank">
-    <div class="social-icon" style="color:#3b82f6"><i class="ti ti-brand-facebook"></i></div>
+    <div class="social-icon" style="color:#5b5fcc"><i class="ti ti-brand-facebook"></i></div>
     <div class="social-info">
       <div class="social-name">Facebook</div>
       <div class="social-handle">Musishens</div>

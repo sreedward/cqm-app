@@ -16,15 +16,18 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #080c14;
+      background: linear-gradient(150deg,#04060e 0%,#080d22 40%,#0b0617 70%,#040609 100%);
+  background-attachment: fixed;
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
       padding-bottom: 70px;
     }
     header {
-      background: #0d1626;
-      border-bottom: 1px solid #1e2d45;
+      background: rgba(4,6,18,0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
       padding: 1rem 1.25rem;
       display: flex;
       align-items: center;
@@ -33,9 +36,9 @@
       top: 0;
       z-index: 10;
     }
-    .header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; }
+    .header-title { font-size: 1rem; font-weight: 600; color: #dce4f0; }
     .new-btn {
-      background: #3b82f6;
+      background: linear-gradient(135deg,#5b5fcc,#7c7fdc);
       border: none;
       border-radius: 8px;
       color: #fff;
@@ -49,14 +52,16 @@
     }
     .section-label {
       font-size: 0.7rem;
-      color: #4a5568;
+      color: #3d4a66;
       letter-spacing: 1.5px;
       text-transform: uppercase;
       padding: 0.75rem 1.25rem 0.25rem;
     }
     .setlist-card {
-      background: #0d1626;
-      border: 1px solid #1e2d45;
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.07);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border-radius: 12px;
       margin: 0 1.25rem 0.75rem;
       overflow: hidden;
@@ -68,13 +73,13 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #1e2d45;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
-    .setlist-name { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; }
-    .setlist-date { font-size: 0.75rem; color: #4a5568; margin-top: 2px; }
+    .setlist-name { font-size: 0.95rem; font-weight: 600; color: #dce4f0; }
+    .setlist-date { font-size: 0.75rem; color: #3d4a66; margin-top: 2px; }
     .setlist-count {
-      background: #1e2d45;
-      color: #3b82f6;
+      background: rgba(91,95,204,0.12);
+      color: #5b5fcc;
       border-radius: 20px;
       padding: 3px 10px;
       font-size: 0.75rem;
@@ -93,34 +98,34 @@
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      background: #1e2d45;
+      background: rgba(255,255,255,0.05);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.7rem;
-      color: #3b82f6;
+      color: #5b5fcc;
       font-weight: 700;
       flex-shrink: 0;
     }
-    .song-name { font-size: 0.85rem; color: #e2e8f0; flex: 1; }
+    .song-name { font-size: 0.85rem; color: #dce4f0; flex: 1; }
     .song-key-tag {
       font-size: 0.7rem;
-      color: #3b82f6;
+      color: #5b5fcc;
       font-weight: 700;
-      background: #1e2d45;
+      background: rgba(91,95,204,0.12);
       border-radius: 4px;
       padding: 2px 6px;
       font-family: monospace;
     }
     .empty {
       text-align: center;
-      color: #4a5568;
+      color: #3d4a66;
       padding: 4rem 2rem;
     }
     .empty i { font-size: 3rem; display: block; margin-bottom: 1rem; }
     .empty p { font-size: 0.9rem; margin-bottom: 1.5rem; }
     .empty-btn {
-      background: #3b82f6;
+      background: linear-gradient(135deg,#5b5fcc,#7c7fdc);
       border: none;
       border-radius: 8px;
       color: #fff;
@@ -134,8 +139,10 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: #0d1626;
-      border-top: 1px solid #1e2d45;
+      background: rgba(5,7,16,0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255,255,255,0.06);
       display: flex;
       padding: 8px 0 12px;
       z-index: 20;
@@ -150,10 +157,10 @@
       padding: 4px 0;
       text-decoration: none;
     }
-    .nav-item i { font-size: 1.2rem; color: #4a5568; }
-    .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
-    .nav-item.active i { color: #3b82f6; }
-    .nav-item.active span { color: #3b82f6; }
+    .nav-item i { font-size: 1.2rem; color: #3d4a66; }
+    .nav-item span { font-size: 0.6rem; color: #3d4a66; letter-spacing: 0.5px; }
+    .nav-item.active i { color: #dce4f0; }
+    .nav-item.active span { color: #dce4f0; }
 
     /* Modal nueva setlist */
     .modal-overlay {
@@ -167,30 +174,30 @@
     }
     .modal-overlay.show { display: flex; }
     .modal {
-      background: #0d1626;
-      border: 1px solid #1e2d45;
+      background: rgba(4,6,18,0.92);
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 16px 16px 0 0;
       padding: 1.5rem;
       width: 100%;
       max-width: 480px;
     }
-    .modal h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; color: #e2e8f0; }
+    .modal h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; color: #dce4f0; }
     .modal-input {
       width: 100%;
-      background: #080c14;
-      border: 1px solid #1e2d45;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
       border-radius: 8px;
       padding: 0.75rem 1rem;
-      color: #e2e8f0;
+      color: #dce4f0;
       font-size: 0.9rem;
       outline: none;
       margin-bottom: 1rem;
     }
-    .modal-input:focus { border-color: #3b82f6; }
+    .modal-input:focus { border-color: #5b5fcc; }
     .modal-btns { display: flex; gap: 0.75rem; }
     .modal-cancel {
       flex: 1;
-      background: #1e2d45;
+      background: rgba(255,255,255,0.06);
       border: none;
       border-radius: 8px;
       color: #888;
@@ -200,7 +207,7 @@
     }
     .modal-save {
       flex: 1;
-      background: #3b82f6;
+      background: linear-gradient(135deg,#5b5fcc,#7c7fdc);
       border: none;
       border-radius: 8px;
       color: #fff;
@@ -211,10 +218,37 @@
     }
   
 .context-bar { display:flex; gap:8px; padding:0.75rem 1.25rem 0.25rem; overflow-x:auto; }
-.context-chip { flex-shrink:0; background:#0d1626; border:1px solid #1e2d45; border-radius:20px; padding:6px 14px; font-size:0.75rem; color:#94a3b8; cursor:pointer; white-space:nowrap; }
-.context-chip.active { background:#3b82f6; border-color:#3b82f6; color:#fff; font-weight:600; }
-.group-banner { margin:0 1.25rem 0.5rem; padding:0.6rem 0.9rem; background:#0d1626; border:1px solid #1e2d45; border-left:3px solid #3b82f6; border-radius:8px; font-size:0.75rem; color:#94a3b8; }
-</style>
+.context-chip { flex-shrink:0; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius:20px; padding:6px 14px; font-size:0.75rem; color:#8896b3; cursor:pointer; white-space:nowrap; }
+.context-chip.active { background: #5b5fcc; border-color: #5b5fcc; color:#fff; font-weight:600; }
+.group-banner { margin:0 1.25rem 0.5rem; padding:0.6rem 0.9rem; background: rgba(91,95,204,0.08); border: 1px solid rgba(255,255,255,0.07); border-left: 3px solid rgba(91,95,204,0.5); border-radius:8px; font-size:0.75rem; color:#8896b3; }
+
+/* ── Cosmos Grain Texture ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  background-size: 180px;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+
+/* ── Cosmos Nav Pill ── */
+.nav-item { position: relative; }
+.nav-item.active i,
+.nav-item.active span { color: #dce4f0; }
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 28px; height: 2.5px;
+  border-radius: 0 0 3px 3px;
+  background: #7c7fdc;
+}
+
+  </style>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -274,6 +308,27 @@
       'https://kzqnsbztfyhyyageuboz.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
     )
+
+const KEY_COLORS = {
+  'C': {bg:'rgba(239,68,68,0.13)',bd:'rgba(239,68,68,0.3)',tx:'#f87171'},
+  'C#':{bg:'rgba(239,68,68,0.1)', bd:'rgba(239,68,68,0.25)',tx:'#f87171'},
+  'Db':{bg:'rgba(239,68,68,0.1)', bd:'rgba(239,68,68,0.25)',tx:'#f87171'},
+  'D': {bg:'rgba(249,115,22,0.13)',bd:'rgba(249,115,22,0.3)',tx:'#fb923c'},
+  'D#':{bg:'rgba(249,115,22,0.1)',bd:'rgba(249,115,22,0.25)',tx:'#fb923c'},
+  'Eb':{bg:'rgba(249,115,22,0.1)',bd:'rgba(249,115,22,0.25)',tx:'#fb923c'},
+  'E': {bg:'rgba(234,179,8,0.13)', bd:'rgba(234,179,8,0.3)', tx:'#facc15'},
+  'F': {bg:'rgba(34,197,94,0.12)', bd:'rgba(34,197,94,0.3)', tx:'#4ade80'},
+  'F#':{bg:'rgba(34,197,94,0.1)', bd:'rgba(34,197,94,0.25)',tx:'#4ade80'},
+  'Gb':{bg:'rgba(34,197,94,0.1)', bd:'rgba(34,197,94,0.25)',tx:'#4ade80'},
+  'G': {bg:'rgba(20,184,166,0.13)',bd:'rgba(20,184,166,0.3)',tx:'#2dd4bf'},
+  'G#':{bg:'rgba(20,184,166,0.1)',bd:'rgba(20,184,166,0.25)',tx:'#2dd4bf'},
+  'Ab':{bg:'rgba(91,95,204,0.13)', bd:'rgba(91,95,204,0.3)', tx:'#818cf8'},
+  'A': {bg:'rgba(59,130,246,0.13)',bd:'rgba(59,130,246,0.3)',tx:'#60a5fa'},
+  'A#':{bg:'rgba(139,92,246,0.1)',bd:'rgba(139,92,246,0.25)',tx:'#a78bfa'},
+  'Bb':{bg:'rgba(139,92,246,0.1)',bd:'rgba(139,92,246,0.25)',tx:'#a78bfa'},
+  'B': {bg:'rgba(168,85,247,0.13)',bd:'rgba(168,85,247,0.3)',tx:'#c084fc'},
+}
+function keyColor(k){ return KEY_COLORS[k] || {bg:'rgba(91,95,204,0.12)',bd:'rgba(91,95,204,0.3)',tx:'#7c7fdc'} }
 
     let userId = null
 let currentGroupId = null
@@ -399,7 +454,7 @@ async function cargarSetlists() {
                     <div class="song-key-tag">${song['original key'] || '?'}</div>
                   </div>
                 `).join('')}
-                ${songsOrdered.length > 4 ? `<div style="font-size:0.75rem;color:#4a5568;padding:0.4rem 0">+${songsOrdered.length - 4} más...</div>` : ''}
+                ${songsOrdered.length > 4 ? `<div style="font-size:0.75rem;color:#3d4a66;padding:0.4rem 0">+${songsOrdered.length - 4} más...</div>` : ''}
               </div>` : ''}
           </div>`
       }

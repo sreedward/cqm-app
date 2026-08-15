@@ -16,15 +16,18 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #080c14;
+      background: linear-gradient(150deg,#04060e 0%,#080d22 40%,#0b0617 70%,#040609 100%);
+  background-attachment: fixed;
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
       padding-bottom: 80px;
     }
     header {
-      background: #0d1626;
-      border-bottom: 1px solid #1e2d45;
+      background: rgba(4,6,18,0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
       padding: 1rem 1.25rem;
       display: flex;
       align-items: center;
@@ -36,7 +39,7 @@
     .back-btn {
       background: none;
       border: none;
-      color: #3b82f6;
+      color: #5b5fcc;
       font-size: 1.3rem;
       cursor: pointer;
       padding: 4px;
@@ -44,10 +47,10 @@
       align-items: center;
     }
     .header-info { flex: 1; }
-    .setlist-title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; }
-    .setlist-date { font-size: 0.75rem; color: #4a5568; }
+    .setlist-title { font-size: 0.95rem; font-weight: 600; color: #dce4f0; }
+    .setlist-date { font-size: 0.75rem; color: #3d4a66; }
     .start-btn {
-      background: #3b82f6;
+      background: rgba(91,95,204,0.85);
       border: none;
       border-radius: 8px;
       color: #fff;
@@ -61,7 +64,7 @@
     }
     .section-label {
       font-size: 0.7rem;
-      color: #4a5568;
+      color: #3d4a66;
       letter-spacing: 1.5px;
       text-transform: uppercase;
       padding: 0.75rem 1.25rem 0.25rem;
@@ -79,36 +82,36 @@
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      background: #1e2d45;
+      background: rgba(255,255,255,0.05);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.75rem;
-      color: #3b82f6;
+      color: #5b5fcc;
       font-weight: 700;
       flex-shrink: 0;
     }
     .song-num.active-song {
-      background: #3b82f6;
+      background: #5b5fcc;
       color: #fff;
     }
     .song-info { flex: 1; cursor: pointer; }
-    .song-title { font-size: 0.9rem; font-weight: 500; color: #e2e8f0; margin-bottom: 2px; }
-    .song-artist { font-size: 0.75rem; color: #4a5568; }
+    .song-title { font-size: 0.9rem; font-weight: 500; color: #dce4f0; margin-bottom: 2px; }
+    .song-artist { font-size: 0.75rem; color: #3d4a66; }
     .song-key {
       font-size: 0.7rem;
-      color: #3b82f6;
+      color: #5b5fcc;
       font-weight: 700;
-      background: #1e2d45;
+      background: rgba(91,95,204,0.12);
       border-radius: 4px;
       padding: 2px 7px;
       font-family: monospace;
     }
-        .key-override { background: #1e3a1e; color: #4ade80; }
+        .key-override { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
     .remove-btn {
       background: none;
       border: none;
-      color: #4a5568;
+      color: #3d4a66;
       font-size: 1rem;
       cursor: pointer;
       padding: 4px;
@@ -116,13 +119,13 @@
     .remove-btn:hover { color: #ef4444; }
     .empty {
       text-align: center;
-      color: #4a5568;
+      color: #3d4a66;
       padding: 4rem 2rem;
     }
     .empty i { font-size: 3rem; display: block; margin-bottom: 1rem; }
     .empty p { font-size: 0.9rem; margin-bottom: 1.5rem; }
     .empty-btn {
-      background: #3b82f6;
+      background: linear-gradient(135deg,#5b5fcc,#7c7fdc);
       border: none;
       border-radius: 8px;
       color: #fff;
@@ -136,8 +139,10 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: #0d1626;
-      border-top: 1px solid #1e2d45;
+      background: rgba(5,7,16,0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255,255,255,0.06);
       display: flex;
       padding: 8px 0 12px;
       z-index: 20;
@@ -152,18 +157,18 @@
       padding: 4px 0;
       text-decoration: none;
     }
-    .nav-item i { font-size: 1.2rem; color: #4a5568; }
-    .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
-    .nav-item.active i { color: #3b82f6; }
-    .nav-item.active span { color: #3b82f6; }
+    .nav-item i { font-size: 1.2rem; color: #3d4a66; }
+    .nav-item span { font-size: 0.6rem; color: #3d4a66; letter-spacing: 0.5px; }
+    .nav-item.active i { color: #dce4f0; }
+    .nav-item.active span { color: #dce4f0; }
     .toast {
       position: fixed;
       bottom: 5rem;
       left: 50%;
       transform: translateX(-50%);
-      background: #1e2d45;
-      border: 1px solid #3b82f6;
-      color: #e2e8f0;
+      background: rgba(4,6,18,0.88);
+      border: 1px solid #5b5fcc;
+      color: #dce4f0;
       border-radius: 8px;
       padding: 0.6rem 1.25rem;
       font-size: 0.85rem;
@@ -171,10 +176,10 @@
       display: none;
       white-space: nowrap;
     }
-    .loading { text-align: center; color: #4a5568; padding: 3rem; }
+    .loading { text-align: center; color: #3d4a66; padding: 3rem; }
     .show-banner {
-      background: #0d1a2d;
-      border: 1px solid #1e2d45;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
       border-radius: 12px;
       margin: 0.75rem 1.25rem;
       padding: 0.85rem 1rem;
@@ -182,10 +187,10 @@
       align-items: center;
       justify-content: space-between;
     }
-    .show-banner-text { font-size: 0.8rem; color: #4a5568; }
-    .show-banner-text span { color: #3b82f6; font-weight: 600; }
+    .show-banner-text { font-size: 0.8rem; color: #3d4a66; }
+    .show-banner-text span { color: #5b5fcc; font-weight: 600; }
     .play-btn {
-      background: #3b82f6;
+      background: rgba(91,95,204,0.85);
       border: none;
       border-radius: 8px;
       color: #fff;
@@ -215,11 +220,38 @@
       border-radius: 8px;
     }
     .song-card.drag-over {
-      border-top: 2px solid #3b82f6;
+      border-top: 2px solid #5b5fcc;
     }
   
-.group-banner { margin:0.75rem 1.25rem 0; padding:0.6rem 0.9rem; background:#0d1626; border:1px solid #1e2d45; border-left:3px solid #3b82f6; border-radius:8px; font-size:0.75rem; color:#94a3b8; }
-</style>
+.group-banner { margin:0.75rem 1.25rem 0; padding:0.6rem 0.9rem; background: rgba(91,95,204,0.08); border: 1px solid rgba(255,255,255,0.07); border-left: 3px solid rgba(91,95,204,0.5); border-radius:8px; font-size:0.75rem; color:#8896b3; }
+
+/* ── Cosmos Grain Texture ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  background-size: 180px;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+
+/* ── Cosmos Nav Pill ── */
+.nav-item { position: relative; }
+.nav-item.active i,
+.nav-item.active span { color: #dce4f0; }
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 28px; height: 2.5px;
+  border-radius: 0 0 3px 3px;
+  background: #7c7fdc;
+}
+
+  </style>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -244,6 +276,12 @@
   </header>
 
   <div class="group-banner" id="group-banner" style="display:none"></div>
+
+  <!-- Show Progress Bar -->
+  <div id="show-progress-bar" style="display:none; height:3px; background:rgba(255,255,255,0.06); position:sticky; top:0; z-index:15;">
+    <div id="show-progress-fill" style="height:100%; background:linear-gradient(90deg,#5b5fcc,#7c7fdc); width:0%; transition:width 0.4s;"></div>
+  </div>
+
 <div id="contenido">
     <div class="loading">Cargando...</div>
   </div>
@@ -281,6 +319,27 @@ if (!isLeader) { alert('Solo el lider puede eliminar el setlist.'); return }
       await _supabase.from('setlist').delete().eq('id', setlistId)
       window.location.href = '/setlist.html'
     }
+const KEY_COLORS = {
+  'C': {bg:'rgba(239,68,68,0.13)',bd:'rgba(239,68,68,0.3)',tx:'#f87171'},
+  'C#':{bg:'rgba(239,68,68,0.1)', bd:'rgba(239,68,68,0.25)',tx:'#f87171'},
+  'Db':{bg:'rgba(239,68,68,0.1)', bd:'rgba(239,68,68,0.25)',tx:'#f87171'},
+  'D': {bg:'rgba(249,115,22,0.13)',bd:'rgba(249,115,22,0.3)',tx:'#fb923c'},
+  'D#':{bg:'rgba(249,115,22,0.1)',bd:'rgba(249,115,22,0.25)',tx:'#fb923c'},
+  'Eb':{bg:'rgba(249,115,22,0.1)',bd:'rgba(249,115,22,0.25)',tx:'#fb923c'},
+  'E': {bg:'rgba(234,179,8,0.13)', bd:'rgba(234,179,8,0.3)', tx:'#facc15'},
+  'F': {bg:'rgba(34,197,94,0.12)', bd:'rgba(34,197,94,0.3)', tx:'#4ade80'},
+  'F#':{bg:'rgba(34,197,94,0.1)', bd:'rgba(34,197,94,0.25)',tx:'#4ade80'},
+  'Gb':{bg:'rgba(34,197,94,0.1)', bd:'rgba(34,197,94,0.25)',tx:'#4ade80'},
+  'G': {bg:'rgba(20,184,166,0.13)',bd:'rgba(20,184,166,0.3)',tx:'#2dd4bf'},
+  'G#':{bg:'rgba(20,184,166,0.1)',bd:'rgba(20,184,166,0.25)',tx:'#2dd4bf'},
+  'Ab':{bg:'rgba(91,95,204,0.13)', bd:'rgba(91,95,204,0.3)', tx:'#818cf8'},
+  'A': {bg:'rgba(59,130,246,0.13)',bd:'rgba(59,130,246,0.3)',tx:'#60a5fa'},
+  'A#':{bg:'rgba(139,92,246,0.1)',bd:'rgba(139,92,246,0.25)',tx:'#a78bfa'},
+  'Bb':{bg:'rgba(139,92,246,0.1)',bd:'rgba(139,92,246,0.25)',tx:'#a78bfa'},
+  'B': {bg:'rgba(168,85,247,0.13)',bd:'rgba(168,85,247,0.3)',tx:'#c084fc'},
+}
+function keyColor(k){ return KEY_COLORS[k] || {bg:'rgba(91,95,204,0.12)',bd:'rgba(91,95,204,0.3)',tx:'#7c7fdc'} }
+
     const params = new URLSearchParams(window.location.search)
     const setlistId = params.get('id')
     let songsOrdered = []

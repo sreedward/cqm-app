@@ -16,15 +16,18 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-  background: #080c14;
+  background: linear-gradient(150deg,#04060e 0%,#080d22 40%,#0b0617 70%,#040609 100%);
+  background-attachment: fixed;
   color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100vh;
   padding-bottom: 80px;
 }
 header {
-  background: #0d1626;
-  border-bottom: 1px solid #1e2d45;
+  background: rgba(4,6,18,0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
@@ -36,33 +39,33 @@ header {
 .back-btn {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: #5b5fcc;
   font-size: 1.3rem;
   cursor: pointer;
   padding: 4px;
   display: flex;
   align-items: center;
 }
-.header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; }
+.header-title { font-size: 1rem; font-weight: 600; color: #dce4f0; }
 .avatar-section {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2rem 1.25rem 1.5rem;
-  border-bottom: 1px solid #1e2d45;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .avatar-wrap { position: relative; margin-bottom: 0.75rem; }
 .avatar {
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: #1e2d45;
-  border: 2px solid #3b82f6;
+  background: rgba(255,255,255,0.06);
+  border: 2px solid #7c7fdc;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.75rem;
-  color: #3b82f6;
+  color: #5b5fcc;
   font-weight: 700;
   overflow: hidden;
 }
@@ -74,8 +77,8 @@ header {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #3b82f6;
-  border: 2px solid #080c14;
+  background: #5b5fcc;
+  border: 2px solid rgba(4,6,18,0.9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -83,14 +86,14 @@ header {
   color: #fff;
   cursor: pointer;
 }
-.user-email { font-size: 0.9rem; color: #e2e8f0; font-weight: 500; }
+.user-email { font-size: 0.9rem; color: #dce4f0; font-weight: 500; }
 .display-name-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-.display-name-row span { font-size: 0.85rem; color: #94a3b8; }
-.edit-name-btn { color: #3b82f6; font-size: 0.9rem; cursor: pointer; background: none; border: none; display: flex; align-items: center; }
-.user-since { font-size: 0.75rem; color: #4a5568; margin-top: 4px; }
+.display-name-row span { font-size: 0.85rem; color: #8896b3; }
+.edit-name-btn { color: #5b5fcc; font-size: 0.9rem; cursor: pointer; background: none; border: none; display: flex; align-items: center; }
+.user-since { font-size: 0.75rem; color: #3d4a66; margin-top: 4px; }
 .admin-badge {
-  background: #1e2d45;
-  color: #3b82f6;
+  background: rgba(255,255,255,0.06);
+  color: #5b5fcc;
   border-radius: 20px;
   padding: 3px 12px;
   font-size: 0.7rem;
@@ -101,7 +104,7 @@ header {
 }
 .section-label {
   font-size: 0.7rem;
-  color: #4a5568;
+  color: #3d4a66;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   padding: 1rem 1.25rem 0.25rem;
@@ -120,22 +123,22 @@ header {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: #1e2d45;
+  background: rgba(255,255,255,0.06);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1rem;
   flex-shrink: 0;
 }
-.menu-icon.blue { color: #3b82f6; }
+.menu-icon.blue { color: #5b5fcc; }
 .menu-icon.green { color: #22c55e; }
 .menu-icon.orange { color: #f97316; }
 .menu-icon.red { color: #ef4444; }
 .menu-icon.purple { color: #a855f7; }
 .menu-info { flex: 1; }
-.menu-title { font-size: 0.9rem; color: #e2e8f0; }
-.menu-sub { font-size: 0.75rem; color: #4a5568; margin-top: 1px; }
-.menu-arrow { color: #4a5568; font-size: 1rem; }
+.menu-title { font-size: 0.9rem; color: #dce4f0; }
+.menu-sub { font-size: 0.75rem; color: #3d4a66; margin-top: 1px; }
+.menu-arrow { color: #3d4a66; font-size: 1rem; }
 .logout-btn {
   margin: 1.5rem 1.25rem;
   width: calc(100% - 2.5rem);
@@ -164,8 +167,10 @@ header {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #0d1626;
-  border-top: 1px solid #1e2d45;
+  background: rgba(5,7,16,0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(255,255,255,0.06);
   display: flex;
   padding: 8px 0 12px;
   z-index: 20;
@@ -180,11 +185,38 @@ header {
   padding: 4px 0;
   text-decoration: none;
 }
-.nav-item i { font-size: 1.2rem; color: #4a5568; }
-.nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
-.nav-item.active i { color: #3b82f6; }
-.nav-item.active span { color: #3b82f6; }
-</style>
+.nav-item i { font-size: 1.2rem; color: #3d4a66; }
+.nav-item span { font-size: 0.6rem; color: #3d4a66; letter-spacing: 0.5px; }
+.nav-item.active i { color: #dce4f0; }
+.nav-item.active span { color: #dce4f0; }
+
+/* ── Cosmos Grain Texture ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  background-size: 180px;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+
+/* ── Cosmos Nav Pill ── */
+.nav-item { position: relative; }
+.nav-item.active i,
+.nav-item.active span { color: #dce4f0; }
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 28px; height: 2.5px;
+  border-radius: 0 0 3px 3px;
+  background: #7c7fdc;
+}
+
+  </style>
 
 <script>
 if ('serviceWorker' in navigator) {
@@ -344,8 +376,7 @@ async function editDisplayName() {
 
   const { error } = await _supabase
     .from('profiles')
-    .update({ display_name: trimmed })
-    .eq('id', currentUser.id)
+    .upsert({ id: currentUser.id, display_name: trimmed })
 
   if (error) {
     alert('No se pudo actualizar el nombre: ' + error.message)
@@ -396,8 +427,7 @@ async function uploadAvatar(file) {
 
     const { error: updateError } = await _supabase
       .from('profiles')
-      .update({ avatar_url: publicUrl })
-      .eq('id', currentUser.id)
+      .upsert({ id: currentUser.id, avatar_url: publicUrl })
 
     if (updateError) { alert('No se pudo guardar la foto: ' + updateError.message); return }
 
