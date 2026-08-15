@@ -52,7 +52,7 @@ header {
   border-radius: 8px;
   padding: 0.6rem 0.7rem;
   color: #94a3b8;
-  font-size: 0.75rem;
+  font-size: 16px;
 }
 .link-row button {
   background: #3b82f6;
@@ -148,6 +148,7 @@ header {
 <header>
   <button class="back-btn" onclick="window.location.href='/groups.html'"><i class="ti ti-arrow-left"></i></button>
   <div class="header-title" id="group-title">Grupo</div>
+  <button class="icon-btn" id="rename-group-btn" style="display:none;color:#3b82f6" onclick="renombrarGrupo()"><i class="ti ti-pencil"></i></button>
   <button class="icon-btn" id="delete-group-btn" style="display:none" onclick="eliminarGrupo()"><i class="ti ti-trash"></i></button>
 </header>
 
@@ -217,6 +218,7 @@ async function init() {
   document.getElementById('group-title').textContent = group.name
 
   if (isLeader) {
+    document.getElementById('rename-group-btn').style.display = 'flex'
     document.getElementById('delete-group-btn').style.display = 'flex'
     document.getElementById('invite-card').style.display = 'block'
     document.getElementById('invite-link').value = `${window.location.origin}/join-group.html?code=${group.invite_code}`
@@ -340,12 +342,23 @@ async function eliminarGrupo() {
   window.location.href = '/groups.html'
 }
 
+async function renombrarGrupo() {
+  const nuevoNombre = prompt('Nuevo nombre del grupo:', currentGroup.name)
+  if (nuevoNombre === null) return
+  const trimmed = nuevoNombre.trim()
+  if (!trimmed || trimmed === currentGroup.name) return
+  const { error } = await _supabase.from('groups').update({ name: trimmed }).eq('id', groupId)
+  if (error) { alert('No se pudo renombrar el grupo: ' + error.message); return }
+  currentGroup.name = trimmed
+  document.getElementById('group-title').textContent = trimmed
+}
+
 function copiarLink() {
   const input = document.getElementById('invite-link')
-  input.select()
   navigator.clipboard.writeText(input.value).then(() => {
     alert('Link copiado. Compártelo con tu equipo.')
   }).catch(() => {
+    input.select()
     document.execCommand('copy')
   })
 }
