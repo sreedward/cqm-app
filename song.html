@@ -16,18 +16,15 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: linear-gradient(150deg,#04060e 0%,#080d22 40%,#0b0617 70%,#040609 100%);
-  background-attachment: fixed;
+      background: #080c14;
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
       padding-bottom: 80px;
     }
     header {
-      background: rgba(4,6,18,0.55);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: #0d1626;
+      border-bottom: 1px solid #1e2d45;
       padding: 0.85rem 1.25rem;
       display: flex;
       align-items: center;
@@ -36,197 +33,76 @@
       top: 0;
       z-index: 10;
     }
-    .back-btn { background: none; border: none; color: #5b5fcc; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
+    .back-btn { background: none; border: none; color: #3b82f6; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
     .header-info { flex: 1; }
-    .song-title { font-size: 0.95rem; font-weight: 600; color: #dce4f0; }
-    .song-artist { font-size: 0.75rem; color: #3d4a66; }
-    .add-setlist-btn { background: none; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; color: #3d4a66; font-size: 0.72rem; padding: 5px 10px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-    .add-setlist-btn:hover { border-color: #5b5fcc; color: #5b5fcc; }
-    .transpose-bar { background: rgba(4,6,18,0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; row-gap: 0.5rem; position: sticky; top: 57px; z-index: 9; }
-    .t-label { font-size: 0.75rem; color: #3d4a66; }
-    .t-btn { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.08); border: none; color: #dce4f0; border-radius: 6px; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .t-btn:hover { background: #5b5fcc; }
-    .key-display { background: rgba(255,255,255,0.06); color: #5b5fcc; border-radius: 6px; padding: 3px 10px; font-size: 0.85rem; font-weight: 700; font-family: monospace; min-width: 36px; text-align: center; }
-    .cifrado-toggle { margin-left: auto; display: flex; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden; }
-    .cifrado-btn { background: none; border: none; color: #3d4a66; padding: 4px 10px; font-size: 0.72rem; cursor: pointer; font-weight: 700; }
-    .cifrado-btn.active { background: #5b5fcc; color: #fff; }
-    .align-btn { background: rgba(202,162,5,0.08); border: 1px solid rgba(202,162,5,0.5); color: #c9a208; border-radius: 6px; height: 30px; padding: 0 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; justify-content: center; margin-left: 6px; white-space: nowrap; }
-    .align-btn.active { background: rgba(202,162,5,0.3); color: #c9a208; border-color: rgba(202,162,5,0.7); }
+    .song-title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; }
+    .song-artist { font-size: 0.75rem; color: #4a5568; }
+    .add-setlist-btn { background: none; border: 1px solid #1e2d45; border-radius: 8px; color: #4a5568; font-size: 0.72rem; padding: 5px 10px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .add-setlist-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+    .transpose-bar { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; row-gap: 0.5rem; position: sticky; top: 57px; z-index: 9; }
+    .t-label { font-size: 0.75rem; color: #4a5568; }
+    .t-btn { background: #1e2d45; border: none; color: #e2e8f0; border-radius: 6px; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .t-btn:hover { background: #3b82f6; }
+    .key-display { background: #1e2d45; color: #3b82f6; border-radius: 6px; padding: 3px 10px; font-size: 0.85rem; font-weight: 700; font-family: monospace; min-width: 36px; text-align: center; }
+    .cifrado-toggle { margin-left: auto; display: flex; background: #1e2d45; border-radius: 6px; overflow: hidden; }
+    .cifrado-btn { background: none; border: none; color: #4a5568; padding: 4px 10px; font-size: 0.72rem; cursor: pointer; font-weight: 700; }
+    .cifrado-btn.active { background: #3b82f6; color: #fff; }
+    .align-btn { background: #1e2d45; border: 1px solid #f59e0b; color: #f59e0b; border-radius: 6px; height: 30px; padding: 0 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; justify-content: center; margin-left: 6px; white-space: nowrap; }
+    .align-btn.active { background: #f59e0b; color: #0d1626; border-color: #f59e0b; }
     .chord-row-draggable { border-radius: 3px; }
     body.align-mode .chord-row-draggable { cursor: grab; outline: 1px dashed rgba(245,158,11,0.5); outline-offset: 2px; touch-action: none; }
     body.align-mode .chord-row-draggable:active { cursor: grabbing; background: rgba(245,158,11,0.15); }
-    .save-align-bar { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: rgba(4,6,18,0.88); border: 1px solid rgba(202,162,5,0.5); color: #dce4f0; border-radius: 20px; padding: 0.55rem 0.6rem 0.55rem 1.1rem; font-size: 0.8rem; z-index: 25; display: none; align-items: center; gap: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); white-space: nowrap; }
+    .save-align-bar { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #0d1626; border: 1px solid #f59e0b; color: #e2e8f0; border-radius: 20px; padding: 0.55rem 0.6rem 0.55rem 1.1rem; font-size: 0.8rem; z-index: 25; display: none; align-items: center; gap: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); white-space: nowrap; }
     .save-align-bar.show { display: flex; }
     .save-align-btn { background: #f59e0b; border: none; color: #0d1626; border-radius: 14px; padding: 0.4rem 0.9rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
-    .reset-align-btn { background: none; border: none; color: #3d4a66; font-size: 0.78rem; cursor: pointer; text-decoration: underline; }
+    .reset-align-btn { background: none; border: none; color: #4a5568; font-size: 0.78rem; cursor: pointer; text-decoration: underline; }
     .page { display: none; padding: 1rem 1.25rem 2rem; }
     .page.active { display: block; }
     .section { border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.85rem; }
     .section-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.75rem; }
-.section { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.065); box-shadow: 0 2px 14px rgba(0,0,0,0.25); }
-    .section.verso { background: rgba(91,95,204,0.09); border-left: 3px solid rgba(91,95,204,0.7); }
-    .section.intro { background: rgba(34,197,94,0.07); border-left: 3px solid rgba(34,197,94,0.7); }
-    .section.pre-coro { background: rgba(249,115,22,0.07); border-left: 3px solid rgba(249,115,22,0.7); }
-    .section.coro { background: rgba(139,68,204,0.09); border-left: 3px solid rgba(168,85,247,0.7); }
-    .section.vamp { background: rgba(236,72,153,0.08); border-left: 3px solid rgba(236,72,153,0.7); }
-    .section.bridge { background: rgba(180,140,0,0.07); border-left: 3px solid rgba(202,162,5,0.7); }
-    .section.instrumental { background: rgba(100,100,100,0.06); border-left: 3px solid rgba(107,114,128,0.7); }
-    .section.outro { background: rgba(220,50,50,0.07); border-left: 3px solid rgba(239,68,68,0.7); }
-    .section.intro .section-label { color: #4ade80; }
-    .section.verso .section-label { color: #7c7fdc; }
-    .section.pre-coro .section-label { color: #fb923c; }
-    .section.coro .section-label { color: #c084fc; }
-    .section.vamp .section-label { color: #f472b6; }
-    .section.bridge .section-label { color: #c9a208; }
-    .section.instrumental .section-label { color: #6b7280; }
-    .section.outro .section-label { color: #f87171; }
+    .section.intro { background: #0a1f12; border-left: 3px solid #22c55e; }
+    .section.intro .section-label { color: #22c55e; }
+    .section.verso { background: #0a1226; border-left: 3px solid #3b82f6; }
+    .section.verso .section-label { color: #3b82f6; }
+    .section.pre-coro { background: #1f120a; border-left: 3px solid #f97316; }
+    .section.pre-coro .section-label { color: #f97316; }
+    .section.coro { background: #130a26; border-left: 3px solid #a855f7; }
+    .section.coro .section-label { color: #a855f7; }
+    .section.vamp { background: #1a0a1f; border-left: 3px solid #ec4899; }
+    .section.vamp .section-label { color: #ec4899; }
+    .section.bridge { background: #1f1a0a; border-left: 3px solid #f59e0b; }
+    .section.bridge .section-label { color: #f59e0b; }
+    .section.instrumental { background: #141414; border-left: 3px solid #555; }
+    .section.instrumental .section-label { color: #555; }
+    .section.outro { background: #1f0a0a; border-left: 3px solid #ef4444; }
+    .section.outro .section-label { color: #ef4444; }
     .line { margin-bottom: 0.75rem; padding-top: 0.4em; }
-    .chords { font-size: 1.05rem; font-weight: 700; color: #d4ba6e; letter-spacing: 2px; margin-bottom: 3px; font-family: monospace; }
+    .chords { font-size: 1rem; font-weight: 700; color: #facc15; letter-spacing: 2px; margin-bottom: 3px; font-family: monospace; }
 .chord-root { display: inline-block; white-space: nowrap; }
 .chord-qual { font-size: 0.83em; font-weight: 700; position: relative; top: -0.35em; line-height: 1; letter-spacing: 0; white-space: nowrap; margin-left: 0.05em; }
-    .lyrics { font-size: 0.95rem; color: #a8b8ce; line-height: 1.5; }
-    .fab { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: rgba(91,95,204,0.85); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 4px 18px rgba(91,95,204,0.35); color: #fff; border: none; border-radius: 20px; padding: 0.7rem 1.75rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; z-index: 20; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-    .page-indicator { position: fixed; bottom: 1.5rem; right: 1.25rem; background: rgba(4,6,18,0.65); border: 1px solid rgba(255,255,255,0.08); color: #3d4a66; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; z-index: 20; }
+    .lyrics { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
+    .fab { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #3b82f6; color: #fff; border: none; border-radius: 20px; padding: 0.7rem 1.75rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; z-index: 20; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .page-indicator { position: fixed; bottom: 1.5rem; right: 1.25rem; background: #0d1626; border: 1px solid #1e2d45; color: #4a5568; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; z-index: 20; }
     .setlist-nav { position: fixed; bottom: 4rem; left: 0; right: 0; display: none; justify-content: space-between; padding: 0 1.25rem; z-index: 19; }
     .setlist-nav.show { display: flex; }
-    .nav-song-btn { background: rgba(4,6,18,0.75); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-    .nav-song-btn.prev { color: #3d4a66; }
-    .nav-song-btn.next { color: #5b5fcc; font-weight: 600; }
-    .loading { text-align: center; color: #3d4a66; padding: 3rem; }
+    .nav-song-btn { background: #0d1626; border: 1px solid #1e2d45; border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .nav-song-btn.prev { color: #4a5568; }
+    .nav-song-btn.next { color: #3b82f6; font-weight: 600; }
+    .loading { text-align: center; color: #4a5568; padding: 3rem; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; display: none; align-items: flex-end; justify-content: center; }
     .modal-overlay.show { display: flex; }
-    .modal { background: rgba(4,6,18,0.92); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px 16px 0 0; padding: 1.5rem; width: 100%; max-width: 480px; }
-    .modal h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; color: #dce4f0; }
-    .modal-cancel { width: 100%; background: rgba(255,255,255,0.07); border: none; border-radius: 8px; color: #888; padding: 0.75rem; font-size: 0.9rem; cursor: pointer; margin-top: 1rem; }
-    .setlist-opcion { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer; }
+    .modal { background: #0d1626; border: 1px solid #1e2d45; border-radius: 16px 16px 0 0; padding: 1.5rem; width: 100%; max-width: 480px; }
+    .modal h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; color: #e2e8f0; }
+    .modal-cancel { width: 100%; background: #1e2d45; border: none; border-radius: 8px; color: #888; padding: 0.75rem; font-size: 0.9rem; cursor: pointer; margin-top: 1rem; }
+    .setlist-opcion { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #1e2d45; cursor: pointer; }
     .setlist-opcion:last-child { border-bottom: none; }
-    .opcion-name { font-size: 0.9rem; color: #dce4f0; }
-    .opcion-date { font-size: 0.75rem; color: #3d4a66; }
-    .opcion-add { color: #5b5fcc; font-size: 1.2rem; }
-    .toast { position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.06); border: 1px solid #5b5fcc; color: #dce4f0; border-radius: 8px; padding: 0.6rem 1.25rem; font-size: 0.85rem; z-index: 60; display: none; white-space: nowrap; }
+    .opcion-name { font-size: 0.9rem; color: #e2e8f0; }
+    .opcion-date { font-size: 0.75rem; color: #4a5568; }
+    .opcion-add { color: #3b82f6; font-size: 1.2rem; }
+    .toast { position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%); background: #1e2d45; border: 1px solid #3b82f6; color: #e2e8f0; border-radius: 8px; padding: 0.6rem 1.25rem; font-size: 0.85rem; z-index: 60; display: none; white-space: nowrap; }
   
-.group-banner { margin:0.5rem 1.25rem 0; padding:0.6rem 0.9rem; background: rgba(91,95,204,0.08); border: 1px solid rgba(255,255,255,0.07); border-left: 3px solid rgba(91,95,204,0.5); border-radius:8px; font-size:0.75rem; color:#8896b3; display:none; }
-
-/* ===== MODO ESCENARIO ===== */
-#escenario-overlay {
-  position: fixed; inset: 0; z-index: 100;
-  background: linear-gradient(145deg, #060a12 0%, #0b1030 35%, #150828 65%, #080d1c 100%);
-  display: none; flex-direction: column; overflow: hidden;
-}
-#escenario-overlay.active { display: flex; }
-.esc-topbar {
-  display: flex; align-items: center; gap: 0.75rem;
-  padding: 0.9rem 1.25rem;
-  background: rgba(0,0,0,0.3);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  flex-shrink: 0;
-}
-.esc-song-info { flex: 1; min-width: 0; }
-.esc-song-title { font-size: 1rem; font-weight: 700; color: #dce4f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.esc-song-meta  { font-size: 0.72rem; color: #3d4a66; margin-top: 1px; }
-.esc-key-pill {
-  background: rgba(91,95,204,0.18); border: 1px solid rgba(91,95,204,0.35);
-  color: #a8b0f8; border-radius: 8px; padding: 3px 10px;
-  font-size: 0.8rem; font-weight: 700; font-family: monospace;
-  flex-shrink: 0;
-}
-.esc-close-btn {
-  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
-  color: #8896b3; border-radius: 50%; width: 36px; height: 36px;
-  font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  backdrop-filter: blur(4px); flex-shrink: 0; transition: background 0.15s;
-}
-.esc-close-btn:hover { background: rgba(255,255,255,0.14); color: #dce4f0; }
-.esc-pages-wrap {
-  flex: 1; overflow-y: auto; padding: 1.1rem 1rem 6rem;
-  scrollbar-width: none;
-}
-.esc-pages-wrap::-webkit-scrollbar { display: none; }
-.esc-page { display: none; }
-.esc-page.active { display: block; }
-/* Secciones con vidrio esmerilado */
-.esc-section {
-  border-radius: 14px; padding: 1.1rem 1.15rem; margin-bottom: 1rem;
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255,255,255,0.07);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
-}
-.esc-section.intro        { background: rgba(34,197,94,0.07);   border-left: 3px solid #22c55e; }
-.esc-section.verso        { background: rgba(91,95,204,0.08);  border-left: 3px solid #5b5fcc; }
-.esc-section.pre-coro     { background: rgba(249,115,22,0.07);  border-left: 3px solid #f97316; }
-.esc-section.coro         { background: rgba(168,85,247,0.09);  border-left: 3px solid #a855f7; }
-.esc-section.vamp         { background: rgba(236,72,153,0.08);  border-left: 3px solid #ec4899; }
-.esc-section.bridge       { background: rgba(245,158,11,0.07);  border-left: 3px solid #f59e0b; }
-.esc-section.instrumental { background: rgba(100,100,100,0.07); border-left: 3px solid #6b7280; }
-.esc-section.outro        { background: rgba(239,68,68,0.07);   border-left: 3px solid #ef4444; }
-.esc-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.9rem; }
-.esc-section.intro .esc-label        { color: #22c55e; }
-.esc-section.verso .esc-label        { color: #5b5fcc; }
-.esc-section.pre-coro .esc-label     { color: #f97316; }
-.esc-section.coro .esc-label         { color: #a855f7; }
-.esc-section.vamp .esc-label         { color: #ec4899; }
-.esc-section.bridge .esc-label       { color: #f59e0b; }
-.esc-section.instrumental .esc-label { color: #6b7280; }
-.esc-section.outro .esc-label        { color: #ef4444; }
-/* Tipografía ampliada — !important para ganar a los inline styles */
-#escenario-overlay .chords           { font-size: 1.35rem !important; }
-#escenario-overlay .chord-root       { font-size: 1.35rem !important; }
-#escenario-overlay .chord-qual       { font-size: 1.12rem !important; }
-#escenario-overlay .lyrics           { font-size: 1.1rem !important; line-height: 1.55 !important; }
-#escenario-overlay .line             { margin-bottom: 1.05rem !important; }
-/* Inline spans generados por procesarLinea */
-#escenario-overlay .chord-row        { font-size: 1.35rem !important; }
-#escenario-overlay span[style*="font-size:1rem"]   { font-size: 1.35rem !important; }
-#escenario-overlay span[style*="font-size:0.95rem"]{ font-size: 1.1rem  !important; }
-/* FAB escenario */
-.esc-fab {
-  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
-  background: rgba(91,95,204,0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.18); color: #fff; border-radius: 22px;
-  padding: 0.75rem 2rem; font-size: 0.88rem; font-weight: 600; cursor: pointer;
-  z-index: 101; display: none; align-items: center; gap: 6px; white-space: nowrap;
-  box-shadow: 0 4px 22px rgba(91,95,204,0.4);
-}
-.esc-fab.show { display: flex; }
-.esc-indicator {
-  position: fixed; bottom: 1.5rem; right: 1.25rem;
-  background: rgba(8,12,20,0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.1); color: #3d4a66;
-  border-radius: 20px; padding: 4px 12px; font-size: 0.7rem; z-index: 101; display: none;
-}
-.esc-indicator.show { display: block; }
-/* Botón en header */
-.escenario-btn { background: none; border: 1px solid rgba(168,85,247,0.4); border-radius: 8px; color: #a855f7; font-size: 0.72rem; padding: 5px 10px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-.escenario-btn:hover { border-color: #a855f7; background: rgba(168,85,247,0.1); }
-
-/* ── Cosmos Grain Texture ── */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
-  background-size: 180px;
-  opacity: 0.4;
-  mix-blend-mode: overlay;
-}
-
-/* ── Cosmos Nav Pill ── */
-.nav-item { position: relative; }
-.nav-item.active i,
-.nav-item.active span { color: #dce4f0; }
-.nav-item.active::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 50%; transform: translateX(-50%);
-  width: 28px; height: 2.5px;
-  border-radius: 0 0 3px 3px;
-  background: #7c7fdc;
-}
-
-  </style>
+.group-banner { margin:0.5rem 1.25rem 0; padding:0.6rem 0.9rem; background:#0d1626; border:1px solid #1e2d45; border-left:3px solid #3b82f6; border-radius:8px; font-size:0.75rem; color:#94a3b8; display:none; }
+</style>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -245,7 +121,6 @@ body::after {
     </div>
     <button class="add-setlist-btn" onclick="abrirModalSetlist()"><i class="ti ti-plus"></i> Setlist</button>
       <button class="add-setlist-btn" id="save-key-btn" onclick="guardarTonalidad()" style="display:none"><i class="ti ti-device-floppy"></i> Guardar tono</button>
-    <button class="escenario-btn" onclick="toggleEscenario()" title="Modo Escenario"><i class="ti ti-microphone-2"></i> Escenario</button>
   </header>
 
   <div class="transpose-bar">
@@ -291,52 +166,11 @@ body::after {
 
   <div class="toast" id="toast"></div>
 
-  <!-- ===== MODO ESCENARIO ===== -->
-  <div id="escenario-overlay">
-    <div class="esc-topbar">
-      <div class="esc-song-info">
-        <div class="esc-song-title" id="esc-song-title">—</div>
-        <div class="esc-song-meta" id="esc-song-meta"></div>
-      </div>
-      <div class="esc-key-pill" id="esc-key-pill">—</div>
-      <button class="esc-close-btn" onclick="toggleEscenario()" title="Salir del modo escenario"><i class="ti ti-x"></i></button>
-    </div>
-    <div class="esc-pages-wrap" id="esc-pages-wrap">
-      <div id="esc-pages"></div>
-    </div>
-  </div>
-  <button class="esc-fab" id="esc-fab" onclick="toggleEscPage()">
-    <i class="ti ti-arrow-down" id="esc-fab-icon"></i>
-    <span id="esc-fab-text">Siguiente</span>
-  </button>
-  <div class="esc-indicator" id="esc-indicator">1 / 1</div>
-
   <script>
     const _supabase = supabase.createClient(
       'https://kzqnsbztfyhyyageuboz.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
     )
-
-    const KEY_COLORS = {
-  'C': {bg:'rgba(239,68,68,0.13)',bd:'rgba(239,68,68,0.3)',tx:'#f87171'},
-  'C#':{bg:'rgba(239,68,68,0.1)', bd:'rgba(239,68,68,0.25)',tx:'#f87171'},
-  'Db':{bg:'rgba(239,68,68,0.1)', bd:'rgba(239,68,68,0.25)',tx:'#f87171'},
-  'D': {bg:'rgba(249,115,22,0.13)',bd:'rgba(249,115,22,0.3)',tx:'#fb923c'},
-  'D#':{bg:'rgba(249,115,22,0.1)',bd:'rgba(249,115,22,0.25)',tx:'#fb923c'},
-  'Eb':{bg:'rgba(249,115,22,0.1)',bd:'rgba(249,115,22,0.25)',tx:'#fb923c'},
-  'E': {bg:'rgba(234,179,8,0.13)', bd:'rgba(234,179,8,0.3)', tx:'#facc15'},
-  'F': {bg:'rgba(34,197,94,0.12)', bd:'rgba(34,197,94,0.3)', tx:'#4ade80'},
-  'F#':{bg:'rgba(34,197,94,0.1)', bd:'rgba(34,197,94,0.25)',tx:'#4ade80'},
-  'Gb':{bg:'rgba(34,197,94,0.1)', bd:'rgba(34,197,94,0.25)',tx:'#4ade80'},
-  'G': {bg:'rgba(20,184,166,0.13)',bd:'rgba(20,184,166,0.3)',tx:'#2dd4bf'},
-  'G#':{bg:'rgba(20,184,166,0.1)',bd:'rgba(20,184,166,0.25)',tx:'#2dd4bf'},
-  'Ab':{bg:'rgba(91,95,204,0.13)', bd:'rgba(91,95,204,0.3)', tx:'#818cf8'},
-  'A': {bg:'rgba(59,130,246,0.13)',bd:'rgba(59,130,246,0.3)',tx:'#60a5fa'},
-  'A#':{bg:'rgba(139,92,246,0.1)',bd:'rgba(139,92,246,0.25)',tx:'#a78bfa'},
-  'Bb':{bg:'rgba(139,92,246,0.1)',bd:'rgba(139,92,246,0.25)',tx:'#a78bfa'},
-  'B': {bg:'rgba(168,85,247,0.13)',bd:'rgba(168,85,247,0.3)',tx:'#c084fc'},
-}
-function keyColor(k){ return KEY_COLORS[k] || {bg:'rgba(91,95,204,0.12)',bd:'rgba(91,95,204,0.3)',tx:'#7c7fdc'} }
 
     const NOTAS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
     const BEMOLES = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}
@@ -471,8 +305,8 @@ function esNota(texto) {
         const chordClass = c.chord ? 'chord-row chord-row-draggable' : 'chord-row'
         const chordAttrs = c.chord ? ` data-key="${key}" data-offset="${offset}"` : ''
         return `<span style="display:inline-block;vertical-align:bottom;text-align:left;margin-right:0.25em;min-width:${minCh}ch;font-family:monospace">` +
-        `<span class="${chordClass}"${chordAttrs} style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#d4ba6e;min-height:1.3em;white-space:pre;transform:translateX(${offset}px)">${c.chord ? styledChord(c.chord) + ' ' : ' '.repeat(lyricLen)}</span>` +
-        `<span style="display:block;font-size:0.95rem;color:#a8b8ce;white-space:pre;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">${c.lyric}</span>` +
+        `<span class="${chordClass}"${chordAttrs} style="display:block;font-family:monospace;font-size:1rem;font-weight:700;color:#facc15;min-height:1.3em;white-space:pre;transform:translateX(${offset}px)">${c.chord ? styledChord(c.chord) + ' ' : ' '.repeat(lyricLen)}</span>` +
+        `<span style="display:block;font-size:0.95rem;color:#cbd5e1;white-space:pre;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">${c.lyric}</span>` +
         `</span>`
       }).join('')
       const notasHTML = notas.length ? notas.map(renderNota).join('') : ''
@@ -627,10 +461,10 @@ let  notesCache = {};
       style.textContent = `
       .section-label { display:flex; align-items:center; justify-content:space-between; }
       .mynote-btn { background:none; border:1px solid #2a3b57; color:#8b9cb5; border-radius:12px; font-size:0.7rem; padding:2px 9px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; font-family:inherit; letter-spacing:0.02em; opacity:0.85; }
-      .mynote-btn:hover { opacity:1; border-color:#5b5fcc; color:#5b5fcc; }
-      .mynote-dot { width:6px; height:6px; border-radius:50%; background:#5b5fcc; display:none; }
+      .mynote-btn:hover { opacity:1; border-color:#3b82f6; color:#3b82f6; }
+      .mynote-dot { width:6px; height:6px; border-radius:50%; background:#3b82f6; display:none; }
       .mynote-dot.show { display:inline-block; }
-      .mynote-box { margin-top:0.5rem; margin-bottom:0.5rem; padding:0.6rem 0.75rem; background:rgba(91,95,204,0.06); border:1px dashed #2a3b57; border-radius:8px; display:none; }
+      .mynote-box { margin-top:0.5rem; margin-bottom:0.5rem; padding:0.6rem 0.75rem; background:rgba(59,130,246,0.06); border:1px dashed #2a3b57; border-radius:8px; display:none; }
       .mynote-box.open { display:block; }
       .mynote-box textarea { width:100%; background:transparent; border:none; color:#cdd6e3; font-size:0.85rem; font-family:inherit; resize:none; outline:none; min-height:40px; }
       .mynote-hint { font-size:0.68rem; color:#5b6b85; margin-top:0.25rem; }
@@ -706,12 +540,7 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede cambiar la 
       semitones = (semitones + n + 12) % 12
       const rootIdx = NOTAS.indexOf(originalKey)
       const newIdx = (rootIdx + semitones) % 12
-      const newKey = NOTAS[newIdx]
-      document.getElementById('key-display').textContent = newKey
-      const kc = keyColor(newKey)
-      const kd = document.getElementById('key-display')
-      kd.style.background = kc.bg; kd.style.borderColor = kc.bd; kd.style.color = kc.tx
-      kd.style.border = '1px solid ' + kc.bd
+      document.getElementById('key-display').textContent = NOTAS[newIdx]
       renderAll()
             if (setlistId) { const btn = document.getElementById('save-key-btn'); if (btn) btn.style.display = 'flex' }
     }
@@ -815,7 +644,7 @@ await cargarOffsetsGrupo()
       const { data: setlists } = await _supabase.from('setlist').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false })
       const container = document.getElementById('setlist-opciones')
       if (!setlists || setlists.length === 0) {
-        container.innerHTML = '<div style="color:#3d4a66;font-size:0.85rem;text-align:center;padding:1rem">No tienes setlists. <a href="/setlist.html" style="color:#5b5fcc">Crea uno primero.</a></div>'
+        container.innerHTML = '<div style="color:#4a5568;font-size:0.85rem;text-align:center;padding:1rem">No tienes setlists. <a href="/setlist.html" style="color:#3b82f6">Crea uno primero.</a></div>'
         return
       }
       container.innerHTML = setlists.map(s => `
@@ -895,101 +724,6 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede guardar la 
         history.replaceState(null, '', newUrl)
       }
     }
-
-    // ===== MODO ESCENARIO =====
-    let escenarioActive = false
-    let escenarioPage = 1
-
-    function toggleEscenario() {
-      escenarioActive = !escenarioActive
-      const overlay = document.getElementById('escenario-overlay')
-      overlay.classList.toggle('active', escenarioActive)
-      if (escenarioActive) {
-        escenarioPage = currentPage
-        // Poblamos título y tono
-        const titleEl = document.getElementById('esc-song-title')
-        const metaEl  = document.getElementById('esc-song-meta')
-        const keyEl   = document.getElementById('esc-key-pill')
-        if (titleEl) titleEl.textContent = document.getElementById('song-title').textContent
-        if (metaEl)  metaEl.textContent  = document.getElementById('song-artist').textContent
-        if (keyEl)   keyEl.textContent   = 'Tono: ' + document.getElementById('key-display').textContent
-        renderEscenario()
-      } else {
-        // Ocultamos FAB e indicator del escenario
-        document.getElementById('esc-fab').classList.remove('show')
-        document.getElementById('esc-indicator').classList.remove('show')
-        // Al salir, sincronizamos la página normal con la que estaba en escenario
-        if (escenarioPage !== currentPage) {
-          currentPage = escenarioPage
-          document.querySelectorAll('#pages-container .page').forEach((el, idx) => {
-            el.classList.toggle('active', idx === currentPage - 1)
-          })
-          document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`
-          const fabIcon = document.getElementById('fab-icon')
-          const fabText = document.getElementById('fab-text')
-          if (fabIcon) fabIcon.className = currentPage < totalPages ? 'ti ti-arrow-down' : 'ti ti-arrow-up'
-          if (fabText) fabText.textContent = currentPage < totalPages ? 'Siguiente' : 'Anterior'
-          window.scrollTo(0, 0)
-        }
-      }
-    }
-
-    function renderEscSection(sec) {
-      const lines = (sec.content || '').split('\n').filter(l => l.trim())
-      const offsets = modifiedSections[sec.id] || (groupId ? (groupOffsets[sec.id] || sec.chord_offsets) : (isAdmin ? sec.chord_offsets : (personalOffsets[sec.id] || sec.chord_offsets))) || {}
-      const linesHTML = lines.map((line, li) => procesarLinea(line, sec.id, li, offsets)).join('')
-      const tipo = sec.type.toLowerCase().replace(' ', '-')
-      return `<div class="esc-section ${tipo}"><div class="esc-label">${sec.type}</div>${linesHTML}</div>`
-    }
-
-    function renderEscenario() {
-      const container = document.getElementById('esc-pages')
-      const PAGE_SIZE = 4
-      const chunks = []
-      for (let i = 0; i < sections.length; i += PAGE_SIZE) chunks.push(sections.slice(i, i + PAGE_SIZE))
-      const escTotal = chunks.length || 1
-      if (escenarioPage > escTotal) escenarioPage = escTotal
-
-      container.innerHTML = chunks.length
-        ? chunks.map((chunk, idx) =>
-            `<div class="esc-page${idx === escenarioPage - 1 ? ' active' : ''}" id="esc-page-${idx + 1}">${chunk.map(renderEscSection).join('')}</div>`
-          ).join('')
-        : '<div class="esc-page active" id="esc-page-1"><div class="loading">Sin secciones.</div></div>'
-
-      const fab  = document.getElementById('esc-fab')
-      const ind  = document.getElementById('esc-indicator')
-      const fabIcon = document.getElementById('esc-fab-icon')
-      const fabText = document.getElementById('esc-fab-text')
-      if (escTotal > 1) {
-        ind.textContent = `${escenarioPage} / ${escTotal}`
-        ind.classList.add('show')
-        fab.classList.add('show')
-        fabIcon.className = escenarioPage < escTotal ? 'ti ti-arrow-down' : 'ti ti-arrow-up'
-        fabText.textContent = escenarioPage < escTotal ? 'Siguiente' : 'Anterior'
-      } else {
-        ind.classList.remove('show')
-        fab.classList.remove('show')
-      }
-    }
-
-    function toggleEscPage() {
-      const PAGE_SIZE = 4
-      const escTotal = Math.ceil(sections.length / PAGE_SIZE) || 1
-      escenarioPage = escenarioPage < escTotal ? escenarioPage + 1 : 1
-      document.querySelectorAll('#esc-pages .esc-page').forEach((el, idx) => {
-        el.classList.toggle('active', idx === escenarioPage - 1)
-      })
-      const fabIcon = document.getElementById('esc-fab-icon')
-      const fabText = document.getElementById('esc-fab-text')
-      fabIcon.className = escenarioPage < escTotal ? 'ti ti-arrow-down' : 'ti ti-arrow-up'
-      fabText.textContent = escenarioPage < escTotal ? 'Siguiente' : 'Anterior'
-      document.getElementById('esc-indicator').textContent = `${escenarioPage} / ${escTotal}`
-      const wrap = document.getElementById('esc-pages-wrap')
-      if (wrap) wrap.scrollTop = 0
-    }
-
-    // Cerrar escenario con Escape
-    document.addEventListener('keydown', e => { if (e.key === 'Escape' && escenarioActive) toggleEscenario() })
 
     function mostrarToast(msg) {
       const toast = document.getElementById('toast')
