@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/icons/icon.svg">
 <title>CQM - Perfil</title>
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/iconhs-webfont@latest/tabler-icons.min.css">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -473,7 +473,7 @@ async function init() {
 async function editDisplayName() {
   const current = document.getElementById('display-name').textContent
   const initial = current === 'Agrega tu nombre' ? '' : current
-  const name = prompt("·ñmo quieres que te vean los demás en tus grupos?', initial)
+  const name = prompt('¿Cómo quieres que te vean los demás en tus grupos?', initial)
   if (name === null) return
   const trimmed = name.trim()
   if (!trimmed) return
