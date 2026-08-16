@@ -76,7 +76,7 @@
       -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
       border-bottom: 1px solid rgba(59,130,246,0.15) !important;
     }
-    /* Barra de transposición */
+    /* Barra de transposiciÃ³n */
     .transpose-bar {
       background: rgba(10, 18, 35, 0.72) !important;
       backdrop-filter: blur(14px) !important;
@@ -90,7 +90,7 @@
       -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
       border-top: 1px solid rgba(59,130,246,0.13) !important;
     }
-    /* Barra de búsqueda */
+    /* Barra de bÃºsqueda */
     .search-bar {
       background: rgba(10, 18, 38, 0.70) !important;
       backdrop-filter: blur(12px) !important;
@@ -109,7 +109,7 @@
       background: rgba(20, 35, 60, 0.70) !important;
       border-color: rgba(59,130,246,0.25) !important;
     }
-    /* Secciones de canción — mantienen borde de color, se vuelven translúcidas */
+    /* Secciones de canciÃ³n â mantienen borde de color, se vuelven translÃºcidas */
     .section {
       backdrop-filter: blur(8px) !important;
       -webkit-backdrop-filter: blur(8px) !important;
@@ -129,13 +129,13 @@
       -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
       border: 1px solid rgba(59,130,246,0.18) !important;
     }
-    /* FAB (paginación Opción A) */
+    /* FAB (paginaciÃ³n OpciÃ³n A) */
     .fab {
       backdrop-filter: blur(8px) !important;
       -webkit-backdrop-filter: blur(8px) !important;
       box-shadow: 0 4px 20px rgba(59,130,246,0.35) !important;
     }
-    /* Indicador de página */
+    /* Indicador de pÃ¡gina */
     .page-indicator {
       background: rgba(13, 22, 38, 0.75) !important;
       backdrop-filter: blur(10px) !important;
@@ -148,7 +148,7 @@
       backdrop-filter: blur(12px) !important;
       -webkit-backdrop-filter: blur(12px) !important;
     }
-    /* Inputs en modales y búsqueda */
+    /* Inputs en modales y bÃºsqueda */
     .search-input-wrap, .modal-input {
       background: rgba(20, 32, 55, 0.60) !important;
       border: 1px solid rgba(59,130,246,0.15) !important;
@@ -159,7 +159,7 @@
       backdrop-filter: blur(6px) !important;
       -webkit-backdrop-filter: blur(6px) !important;
     }
-    /* Tarjetas genéricas de setlist / medley */
+    /* Tarjetas genÃ©ricas de setlist / medley */
     .setlist-item, .medley-item, .group-item {
       background: rgba(13, 22, 38, 0.55) !important;
       backdrop-filter: blur(10px) !important;
@@ -179,7 +179,7 @@
       -webkit-backdrop-filter: blur(10px) !important;
       border-bottom: 1px solid rgba(59,130,246,0.10) !important;
     }
-    /* Barra "guardar alineación" */
+    /* Barra "guardar alineaciÃ³n" */
     .save-align-bar {
       background: rgba(13, 22, 38, 0.85) !important;
       backdrop-filter: blur(14px) !important;
@@ -197,17 +197,17 @@
 
   <div class="container">
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('nueva')">Nueva canción</button>
+      <button class="tab-btn active" onclick="switchTab('nueva')">Nueva canciÃ³n</button>
       <button class="tab-btn" onclick="switchTab('editar')">Editar canciones</button>
     </div>
 
-    <!-- TAB NUEVA CANCIÓN -->
+    <!-- TAB NUEVA CANCIÃN -->
     <div class="tab-content active" id="tab-nueva">
       <div class="mensaje error" id="error-nueva"></div>
       <div class="mensaje success" id="success-nueva"></div>
       <div class="form-row">
         <div class="form-group">
-          <label>Título *</label>
+          <label>TÃ­tulo *</label>
           <input type="text" id="title" placeholder="Ej: Holy Forever">
         </div>
         <div class="form-group">
@@ -230,12 +230,12 @@
         <div class="form-group">
           <label>Slug *</label>
           <input type="text" id="slug" placeholder="holy-forever">
-          <p class="hint">Se genera automático</p>
+          <p class="hint">Se genera automÃ¡tico</p>
         </div>
       </div>
       <div id="sections-container"></div>
-      <button class="add-section-btn" onclick="addSection()">+ Agregar sección</button>
-      <button class="save-btn" id="save-btn" onclick="guardarCancion()">💾 Guardar canción</button>
+      <button class="add-section-btn" onclick="addSection()">+ Agregar secciÃ³n</button>
+      <button class="save-btn" id="save-btn" onclick="guardarCancion()">ð¾ Guardar canciÃ³n</button>
     </div>
 
     <!-- TAB EDITAR -->
@@ -278,10 +278,10 @@
           <select class="tipo-select">
             ${TIPOS.map(t => `<option value="${t}">${t}</option>`).join('')}
           </select>
-          <button class="del-btn" onclick="document.getElementById('${id}').remove()">🗑</button>
+          <button class="del-btn" onclick="document.getElementById('${id}').remove()">ð</button>
         </div>
         <div class="pad">
-          ${NUMEROS.map(n => `<button class="pad-btn" onclick="insertarAcorde('${id}','${n}')">[${n}]</button>`).join('')}<button class="pad-btn builder-trigger" onclick="abrirConstructor('${id}')">+ Personalizado</button></div><textarea id="content-${id}" placeholder="Escribe la letra. Usa los botones para insertar acordes donde está el cursor."></textarea>
+          ${NUMEROS.map(n => `<button class="pad-btn" onclick="insertarAcorde('${id}','${n}')">[${n}]</button>`).join('')}<button class="pad-btn builder-trigger" onclick="abrirConstructor('${id}')">+ Personalizado</button></div><textarea id="content-${id}" placeholder="Escribe la letra. Usa los botones para insertar acordes donde estÃ¡ el cursor."></textarea>
       `
       document.getElementById('sections-container').appendChild(div)
     }
@@ -291,14 +291,14 @@
       const s = ta.selectionStart, e = ta.selectionEnd
       ta.value = ta.value.slice(0, s) + `[${acorde}]` + ta.value.slice(e)
       ta.selectionStart = ta.selectionEnd = s + acorde.length + 2
-      ta.focus()}let builderSecId=null;const builderState={grado:1,alt:'',calidad:'',ext:'',bajoOn:false,bajoGrado:1,bajoAlt:''};function abrirConstructor(secId){builderSecId=secId;builderState.grado=1;builderState.alt='';builderState.calidad='';builderState.ext='';builderState.bajoOn=false;builderState.bajoGrado=1;builderState.bajoAlt='';document.querySelectorAll('#bd-grado .chip').forEach(function(b,i){b.classList.toggle('active',i===0)});document.querySelectorAll('#bd-alt .chip').forEach(function(b,i){b.classList.toggle('active',i===0)});document.querySelectorAll('#bd-calidad .chip').forEach(function(b,h�{b.classList.toggle('active',i===0)});document.querySelectorAll('#bd-bajo-grado .chip').forEach(function(b,i){b.classList.toggle('active',i===0)});document.querySelectorAll('#bd-bajo-alt .chip').forEach(function(b,h�{b.classList.toggle('active',i===0)});document.getElementById('bd-bajo-on').checked=false;document.getElementById('bd-bajo-section').style.display='none';document.getElementById('bd-ext').value='';actualizarPreview();document.getElementById('builder-overlay').classList.add('open')}function cerrarConstructor(){document.getElementById('builder-overlay').classList.remove('open')}function setBuilder(campo,valor,btn){builderState[campo]=valor;const row=btn.parentElement;Array.from(row.children).forEach(function(c){c.classList.remove('active')});btn.classList.add('active');actualizarPreview()}function setExt(v){builderState.ext=v;actualizarPreview()}function toggleBajo(){builderState.bajoOn=document.getElementById('bd-bajo-on').checked;document.getElementById('bd-bajo-section').style.display=builderState.bajoOn?'block':'none';actualizarPreview()}function tokenActual(){const s=builderState;let chord=(s.alt||'')+s.grado+(s.calidad||'')+(s.ext||'');if(s.bajoOn)chord+='/'+(s.bajoAlt||'')+s.bajoGrado;return chord}function actualizarPreview(){document.getElementById('bd-preview').textContent='['+tokenActual()+']'}function confirmarConstructor(){if(builderSecId)insertarAcorde(builderSecId,tokenActual());cerrarConstructor()}document.addEventListener('DOMContentLoaded', () => {
+      ta.focus()}let builderSecId=null;const builderState={grado:1,alt:'',calidad:'',ext:'',bajoOn:false,bajoGrado:1,bajoAlt:''};function abrirConstructor(secId){builderSecId=secId;builderState.grado=1;builderState.alt='';builderState.calidad='';builderState.ext='';builderState.bajoOn=false;builderState.bajoGrado=1;builderState.bajoAlt='';document.querySelectorAll('#bd-grado .chip').forEach(function(b,i){b.classList.toggle('active',i===0)});document.querySelectorAll('#bd-alt .chip').forEach(function(b,i){b.classList.toggle('active',i===0)});document.querySelectorAll('#bd-calidad .chip').forEach(function(b,i){b.classList.toggle('active',i===0)});document.querySelectorAll('#bd-bajo-grado .chip').forEach(function(b,i){b.classList.toggle('active',i===0)});document.querySelectorAll('#bd-bajo-alt .chip').forEach(function(b,i){b.classList.toggle('active',i===0)});document.getElementById('bd-bajo-on').checked=false;document.getElementById('bd-bajo-section').style.display='none';document.getElementById('bd-ext').value='';actualizarPreview();document.getElementById('builder-overlay').classList.add('open')}function cerrarConstructor(){document.getElementById('builder-overlay').classList.remove('open')}function setBuilder(campo,valor,btn){builderState[campo]=valor;const row=btn.parentElement;Array.from(row.children).forEach(function(c){c.classList.remove('active')});btn.classList.add('active');actualizarPreview()}function setExt(v){builderState.ext=v;actualizarPreview()}function toggleBajo(){builderState.bajoOn=document.getElementById('bd-bajo-on').checked;document.getElementById('bd-bajo-section').style.display=builderState.bajoOn?'block':'none';actualizarPreview()}function tokenActual(){const s=builderState;let chord=(s.alt||'')+s.grado+(s.calidad||'')+(s.ext||'');if(s.bajoOn)chord+='/'+(s.bajoAlt||'')+s.bajoGrado;return chord}function actualizarPreview(){document.getElementById('bd-preview').textContent='['+tokenActual()+']'}function confirmarConstructor(){if(builderSecId)insertarAcorde(builderSecId,tokenActual());cerrarConstructor()}document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('title')?.addEventListener('input', function() {
         const slugEl = document.getElementById('slug')
         if (!slugEl.dataset.manual) {
           slugEl.value = this.value.toLowerCase()
-            .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
-            .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o')
-            .replace(/[úùü]/g,'u').replace(/ñ/g,'n')
+            .replace(/[Ã¡Ã Ã¤]/g,'a').replace(/[Ã©Ã¨Ã«]/g,'e')
+            .replace(/[Ã­Ã¬Ã¯]/g,'i').replace(/[Ã³Ã²Ã¶]/g,'o')
+            .replace(/[ÃºÃ¹Ã¼]/g,'u').replace(/Ã±/g,'n')
             .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
         }
       })
@@ -318,7 +318,7 @@
       successEl.style.display = 'none'
 
       if (!title || !slug) {
-        errorEl.textContent = 'El título y el slug son obligatorios.'
+        errorEl.textContent = 'El tÃ­tulo y el slug son obligatorios.'
         errorEl.style.display = 'block'
         return
       }
@@ -333,7 +333,7 @@
         errorEl.textContent = 'Error: ' + songError.message
         errorEl.style.display = 'block'
         btn.disabled = false
-        btn.textContent = '💾 Guardar canción'
+        btn.textContent = 'ð¾ Guardar canciÃ³n'
         return
       }
 
@@ -351,15 +351,15 @@
           errorEl.textContent = 'Error en secciones: ' + secError.message
           errorEl.style.display = 'block'
           btn.disabled = false
-          btn.textContent = '💾 Guardar canción'
+          btn.textContent = 'ð¾ Guardar canciÃ³n'
           return
         }
       }
 
-      successEl.textContent = `✅ "${title}" guardada exitosamente!`
+      successEl.textContent = `â "${title}" guardada exitosamente!`
       successEl.style.display = 'block'
       btn.disabled = false
-      btn.textContent = '💾 Guardar canción'
+      btn.textContent = 'ð¾ Guardar canciÃ³n'
       document.getElementById('title').value = ''
       document.getElementById('artist').value = ''
       document.getElementById('slug').value = ''
@@ -373,14 +373,14 @@
       const { data: songs } = await _supabase.from('Songs').select('*').order('title')
       const container = document.getElementById('songs-list')
       if (!songs || songs.length === 0) {
-        container.innerHTML = '<div class="loading">No hay canciones todavía.</div>'
+        container.innerHTML = '<div class="loading">No hay canciones todavÃ­a.</div>'
         return
       }
       container.innerHTML = songs.map(s => `
         <div class="song-list-item">
           <div class="song-list-info">
             <div class="song-list-title">${s.title}</div>
-            <div class="song-list-sub">${s.artist || 'Sin artista'} · ${s['original key'] || '?'}</div>
+            <div class="song-list-sub">${s.artist || 'Sin artista'} Â· ${s['original key'] || '?'}</div>
           </div>
           <button class="edit-btn" onclick="window.location.href='/admin-edit.html?id=${s.id}'">
             <i class="ti ti-edit"></i> Editar
