@@ -90,7 +90,7 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.
       -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
       border-bottom: 1px solid rgba(59,130,246,0.15) !important;
     }
-    /* Barra de transposición */
+    /* Barra de transposiciÃ³n */
     .transpose-bar {
       background: rgba(10, 18, 35, 0.72) !important;
       backdrop-filter: blur(14px) !important;
@@ -104,7 +104,7 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.
       -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
       border-top: 1px solid rgba(59,130,246,0.13) !important;
     }
-    /* Barra de búsqueda */
+    /* Barra de bÃºsqueda */
     .search-bar {
       background: rgba(10, 18, 38, 0.70) !important;
       backdrop-filter: blur(12px) !important;
@@ -123,7 +123,7 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.
       background: rgba(20, 35, 60, 0.70) !important;
       border-color: rgba(59,130,246,0.25) !important;
     }
-    /* Secciones de canción — mantienen borde de color, se vuelven translúcidas */
+    /* Secciones de canciÃ³n â mantienen borde de color, se vuelven translÃºcidas */
     .section {
       backdrop-filter: blur(8px) !important;
       -webkit-backdrop-filter: blur(8px) !important;
@@ -143,13 +143,13 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.
       -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
       border: 1px solid rgba(59,130,246,0.18) !important;
     }
-    /* FAB (paginación Opción A) */
+    /* FAB (paginaciÃ³n OpciÃ³n A) */
     .fab {
       backdrop-filter: blur(8px) !important;
       -webkit-backdrop-filter: blur(8px) !important;
       box-shadow: 0 4px 20px rgba(59,130,246,0.35) !important;
     }
-    /* Indicador de página */
+    /* Indicador de pÃ¡gina */
     .page-indicator {
       background: rgba(13, 22, 38, 0.75) !important;
       backdrop-filter: blur(10px) !important;
@@ -162,7 +162,7 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.
       backdrop-filter: blur(12px) !important;
       -webkit-backdrop-filter: blur(12px) !important;
     }
-    /* Inputs en modales y búsqueda */
+    /* Inputs en modales y bÃºsqueda */
     .search-input-wrap, .modal-input {
       background: rgba(20, 32, 55, 0.60) !important;
       border: 1px solid rgba(59,130,246,0.15) !important;
@@ -173,7 +173,7 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.
       backdrop-filter: blur(6px) !important;
       -webkit-backdrop-filter: blur(6px) !important;
     }
-    /* Tarjetas genéricas de setlist / medley */
+    /* Tarjetas genÃ©ricas de setlist / medley */
     .setlist-item, .medley-item, .group-item {
       background: rgba(13, 22, 38, 0.55) !important;
       backdrop-filter: blur(10px) !important;
@@ -193,7 +193,7 @@ header { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 1rem 1.
       -webkit-backdrop-filter: blur(10px) !important;
       border-bottom: 1px solid rgba(59,130,246,0.10) !important;
     }
-    /* Barra "guardar alineación" */
+    /* Barra "guardar alineaciÃ³n" */
     .save-align-bar {
       background: rgba(13, 22, 38, 0.85) !important;
       backdrop-filter: blur(14px) !important;
@@ -225,13 +225,13 @@ if ('serviceWorker' in navigator) {
   <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
   <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
   <a class="nav-item active" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
-  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
+  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>MÃ¡s</span></a>
 </nav>
 <div class="toast" id="toast"></div>
 <div class="confirm-overlay" id="confirm-overlay">
   <div class="confirm-sheet">
     <div class="confirm-title">Eliminar medley</div>
-    <div class="confirm-sub" id="confirm-sub">Esta acción no se puede deshacer.</div>
+    <div class="confirm-sub" id="confirm-sub">Esta acciÃ³n no se puede deshacer.</div>
     <div class="confirm-btns">
       <button class="btn-cancel" onclick="closeConfirm()">Cancelar</button>
       <button class="btn-delete" id="btn-confirm-del">Eliminar</button>
@@ -264,7 +264,7 @@ function renderMedleys(list) {
   var sub = document.getElementById('page-sub');
   sub.textContent = list.length + ' medley' + (list.length !== 1 ? 's' : '') + ' guardados';
   if (!list.length) {
-    el.innerHTML = '<div class="empty-state"><i class="ti ti-layers-intersect empty-icon"></i><div class="empty-title">Aún no tienes medleys</div><div class="empty-sub">Crea tu primer medley combinando secciones de canciones.</div><a class="empty-cta" href="/medley-builder.html"><i class="ti ti-plus"></i> Crear medley</a></div>';
+    el.innerHTML = '<div class="empty-state"><i class="ti ti-layers-intersect empty-icon"></i><div class="empty-title">AÃºn no tienes medleys</div><div class="empty-sub">Crea tu primer medley combinando secciones de canciones.</div><a class="empty-cta" href="/medley-builder.html"><i class="ti ti-plus"></i> Crear medley</a></div>';
     return;
   }
   el.innerHTML = '<div class="section-label">Tus medleys</div>';
@@ -279,7 +279,7 @@ function renderMedleys(list) {
         '<div class="medley-info">' +
           '<div class="medley-name">' + escHtml(m.name) + '</div>' +
           '<div class="medley-meta">' +
-            '<span class="meta-chip"><i class="ti ti-list"></i>&nbsp;' + secCount + ' sección' + (secCount !== 1 ? 'es' : '') + '</span>' +
+            '<span class="meta-chip"><i class="ti ti-list"></i>&nbsp;' + secCount + ' secciÃ³n' + (secCount !== 1 ? 'es' : '') + '</span>' +
             '<span class="meta-chip"><i class="ti ti-calendar"></i>&nbsp;' + formatDate(m.created_at) + '</span>' +
           '</div>' +
         '</div>' +
@@ -306,7 +306,7 @@ var pendingDeleteId = null;
 function confirmDelete(id, name) {
 if (!isLeaderOfCurrent) { return }
   pendingDeleteId = id;
-  document.getElementById('confirm-sub').textContent = '¿Eliminar "' + name + '"? Esta acción no se puede deshacer.';
+  document.getElementById('confirm-sub').textContent = 'Â¿Eliminar "' + name + '"? Esta acciÃ³n no se puede deshacer.';
   document.getElementById('confirm-overlay').classList.add('open');
   document.getElementById('btn-confirm-del').onclick = function() { doDelete(id); };
 }
@@ -320,10 +320,10 @@ async function doDelete(id) {
   closeConfirm();
   await _sb.from('medley_sections').delete().eq('medley_id', id);
   var res = await _sb.from('medleys').delete().eq('id', id);
-  if (res.error) { mostrarToast('✕ Error al eliminar'); return; }
+  if (res.error) { mostrarToast('â Error al eliminar'); return; }
   allMedleys = allMedleys.filter(function(m) { return m.id !== id; });
   renderMedleys(allMedleys);
-  mostrarToast('✓ Medley eliminado');
+  mostrarToast('â Medley eliminado');
 }
 
 function mostrarToast(msg) {
@@ -384,7 +384,7 @@ function actualizarUIPermisos() {
   if (banner) {
     if (currentGroupId !== null && !isLeaderOfCurrent) {
       banner.style.display = "block"
-      banner.textContent = "Estas&�iendo los medleys del grupo. Solo el lider puede crear o eliminar."
+      banner.textContent = "Estás viendo los medleys del grupo. Solo el lider puede crear o eliminar."
     } else {
       banner.style.display = "none"
     }
