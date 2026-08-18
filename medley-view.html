@@ -325,7 +325,7 @@ function noteToIdx(note) {
 
 function transposeChord(chord, shift) {
   if (!chord || !chord.trim()) return chord
-  const re = /^([A-G][#b]?)(.*?)(/[A-G][#b]?)?$/
+  const re = /^([A-G][#b]?)(.*?)(\/[A-G][#b]?)?$/
   const m  = chord.trim().match(re)
   if (!m) return chord
   const rootIdx = noteToIdx(m[1])
