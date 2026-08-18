@@ -42,7 +42,7 @@ header {
   display: flex; align-items: center; gap: 0.6rem;
   position: sticky; top: 0; z-index: 30;
 }
-.back-btn {
+.back-btn, .home-btn {
   background: none; border: none; color: #3b82f6;
   font-size: 1.15rem; cursor: pointer;
   display: flex; align-items: center; padding: 2px; flex-shrink: 0;
@@ -273,6 +273,7 @@ if ('serviceWorker' in navigator) {
     <button class="cifrado-btn active" id="btn-am" onclick="setCifrado('americano')">AM</button>
     <button class="cifrado-btn" id="btn-nns" onclick="setCifrado('nashville')">NNS</button>
   </div>
+  <button class="home-btn" onclick="window.location.href='/index.html'" title="Inicio"><i class="ti ti-home"></i></button>
 </header>
 
 <!-- Section index pills -->
