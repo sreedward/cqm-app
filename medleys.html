@@ -295,7 +295,8 @@ const GRADIENTS = [
 ]
 
 function gradientForId(id) {
-  const n = parseInt((id || '000000').slice(-6), 16) || 0
+  const s = String(id || '000000')
+  const n = parseInt(s.slice(-6), 16) || 0
   return GRADIENTS[n % GRADIENTS.length]
 }
 
