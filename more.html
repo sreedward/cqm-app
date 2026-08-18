@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="CQM">
   <link rel="apple-touch-icon" href="/icons/icon.svg">
   <title>CQM - Más</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/tabler-icons.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -94,7 +94,8 @@
       background: #0d1626;
       border-top: 1px solid #1e2d45;
       display: flex;
-      padding: 8px 0 12px;
+      padding: 8px 0;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
       z-index: 20;
     }
     .nav-item {
@@ -107,7 +108,7 @@
       padding: 4px 0;
       text-decoration: none;
     }
-    .nav-item i { font-size: 1.2rem; color: #4a5568; }
+    .nav-item i { font-size: 1.2rem; color: #4a5568; display: block; line-height: 1.2; }
     .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
     .nav-item.active i { color: #3b82f6; }
     .nav-item.active span { color: #3b82f6; }
@@ -348,7 +349,7 @@
   </button>
 
 <a class="social-item" href="/medley-builder.html">
-  <div class="social-icon" style="color:#3b82f6"><i class="ti ti-layers-intersect"></i></div>
+  <div class="social-icon"><i class="ti ti-layers-intersect" style="color:#3b82f6"></i></div>
   <div class="social-info">
     <div class="social-name">Medley Builder</div>
     <div class="social-handle">Combina secciones de canciones</div>
@@ -360,7 +361,7 @@
   <div class="section-label">Síguenos</div>
 
   <a class="social-item" href="https://instagram.com/musishens" target="_blank">
-    <div class="social-icon" style="color:#a855f7"><i class="ti ti-brand-instagram"></i></div>
+    <div class="social-icon"><i class="ti ti-brand-instagram" style="color:#a855f7"></i></div>
     <div class="social-info">
       <div class="social-name">Instagram</div>
       <div class="social-handle">@musishens</div>
@@ -369,7 +370,7 @@
   </a>
 
   <a class="social-item" href="https://youtube.com/@musishens" target="_blank">
-    <div class="social-icon" style="color:#ef4444"><i class="ti ti-brand-youtube"></i></div>
+    <div class="social-icon"><i class="ti ti-brand-youtube" style="color:#ef4444"></i></div>
     <div class="social-info">
       <div class="social-name">YouTube</div>
       <div class="social-handle">@musishens</div>
@@ -378,7 +379,7 @@
   </a>
 
   <a class="social-item" href="https://tiktok.com/@musishens" target="_blank">
-    <div class="social-icon" style="color:#e2e8f0"><i class="ti ti-brand-tiktok"></i></div>
+    <div class="social-icon"><i class="ti ti-brand-tiktok" style="color:#e2e8f0"></i></div>
     <div class="social-info">
       <div class="social-name">TikTok</div>
       <div class="social-handle">@musishens</div>
@@ -387,7 +388,7 @@
   </a>
 
   <a class="social-item" href="https://facebook.com/musishens" target="_blank">
-    <div class="social-icon" style="color:#3b82f6"><i class="ti ti-brand-facebook"></i></div>
+    <div class="social-icon"><i class="ti ti-brand-facebook" style="color:#3b82f6"></i></div>
     <div class="social-info">
       <div class="social-name">Facebook</div>
       <div class="social-handle">Musishens</div>
