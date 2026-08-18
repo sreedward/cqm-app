@@ -447,7 +447,7 @@ btn.disabled = true;
 btn.innerHTML = '<i class="ti ti-loader-2"></i> Guardando...';
 try {
   const { data: medley, error: mErr } = await _sb.from('medleys')
-    .insert({ name, user_id: userId, group_id: groupIdParam, song_ids: [...new Set(track.map(i=>i.songId))] }).select('id').single();
+    .insert({ name, user_id: userId, group_id: groupIdParam }).select('id').single();
   if (mErr || !medley || !medley.id) throw new Error((mErr && mErr.message) || 'Sin ID de medley');
   const rows = track.map((item, idx) => ({
     medley_id: medley.id, song_id: item.songId, section_id: item.secId, order: idx + 1
