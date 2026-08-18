@@ -310,7 +310,7 @@ async function init() {
     session = s
 
     // Cargar canciones (para preview de nombres)
-    const { data: songs } = await _sb.from('Songs').select('id,title').order('title').catch(() => ({ data: [] }))
+    const { data: songs } = await _sb.from('Songs').select('id,title').order('title')
     allSongs = songs || []
 
     await cargarMedleys()
