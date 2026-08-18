@@ -577,51 +577,57 @@ function setCifrado(tipo) {
 }
 
 async function init() {
-  const { data: { session } } = await _sb.auth.getSession()
-  if (!session) { window.location.href = '/login.html'; return }
-  currentUserId = session.user.id
-  if (!medleyId) { window.location.href = '/medleys.html'; return }
-  const { data: medley, error: mErr } = await _sb.from('medleys').select('*').eq('id', medleyId).single()
-  if (mErr || !medley) { window.location.href = '/medleys.html'; return }
-  semitones = medley.transpose_semitones || 0
-  document.getElementById('medley-title').textContent = medley.name
-  document.title = 'CQM — ' + medley.name
-  const { data: mSecs, error: msErr } = await _sb
-    .from('medley_sections')
-    .select('id, section_id, song_id, order')
-    .eq('medley_id', medleyId)
-    .order('order')
-  if (msErr || !mSecs || !mSecs.length) {
-    document.getElementById('scroll').innerHTML = '<div class="loading">Este medley está vacío.</div>'
-    return
+  try {
+    const { data: { session } } = await _sb.auth.getSession()
+    if (!session) { window.location.href = '/login.html'; return }
+    currentUserId = session.user.id
+    if (!medleyId) { window.location.href = '/medleys.html'; return }
+    const { data: medley, error: mErr } = await _sb.from('medleys').select('*').eq('id', medleyId).single()
+    if (mErr || !medley) { window.location.href = '/medleys.html'; return }
+    semitones = medley.transpose_semitones || 0
+    document.getElementById('medley-title').textContent = medley.name
+    document.title = 'CQM — ' + medley.name
+    const { data: mSecs, error: msErr } = await _sb
+      .from('medley_sections')
+      .select('id, section_id, song_id, order')
+      .eq('medley_id', medleyId)
+      .order('order')
+    if (msErr || !mSecs || !mSecs.length) {
+      document.getElementById('scroll').innerHTML = '<div class="loading">Este medley está vacío.</div>'
+      return
+    }
+    const secIds  = mSecs.map(s => s.section_id)
+    const songIds = [...new Set(mSecs.map(s => s.song_id))]
+    const [{ data: sections }, { data: songs }] = await Promise.all([
+      _sb.from('sections').select('id, type, content, song_id').in('id', secIds),
+      _sb.from('Songs').select('id, title, "original key"').in('id', songIds)
+    ])
+    const secsMap  = {}; (sections || []).forEach(s => secsMap[s.id]  = s)
+    const songsMap = {}; (songs    || []).forEach(s => songsMap[s.id] = s)
+    const firstSong = songsMap[mSecs[0]?.song_id]
+    if (firstSong) {
+      const rk = firstSong['original key'] || 'C'
+      baseKey = ({'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}[rk] || rk)
+    }
+    allSections = mSecs.map(ms => {
+      const sec  = secsMap[ms.section_id]  || {}
+      const song = songsMap[ms.song_id]    || {}
+      return { ...sec, songTitle: song.title || '—', songKey: song['original key'] || 'C' }
+    })
+    if (currentUserId) {
+      const { data: notesData } = await _sb
+        .from('song_notes')
+        .select('section_id, content')
+        .eq('user_id', currentUserId)
+      notesCache = {}
+      ;(notesData || []).forEach(n => { notesCache[n.section_id] = n.content })
+    }
+    renderAll()
+  } catch (err) {
+    console.error('[medley-view init]', err)
+    const sc = document.getElementById('scroll')
+    if (sc) sc.innerHTML = '<div class="loading" style="color:#f87171">Error al cargar el medley. Intenta de nuevo.</div>'
   }
-  const secIds  = mSecs.map(s => s.section_id)
-  const songIds = [...new Set(mSecs.map(s => s.song_id))]
-  const [{ data: sections }, { data: songs }] = await Promise.all([
-    _sb.from('sections').select('id, type, content, song_id').in('id', secIds),
-    _sb.from('Songs').select('id, title, "original key"').in('id', songIds)
-  ])
-  const secsMap  = {}; (sections || []).forEach(s => secsMap[s.id]  = s)
-  const songsMap = {}; (songs    || []).forEach(s => songsMap[s.id] = s)
-  const firstSong = songsMap[mSecs[0]?.song_id]
-  if (firstSong) {
-    const rk = firstSong['original key'] || 'C'
-    baseKey = ({'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}[rk] || rk)
-  }
-  allSections = mSecs.map(ms => {
-    const sec  = secsMap[ms.section_id]  || {}
-    const song = songsMap[ms.song_id]    || {}
-    return { ...sec, songTitle: song.title || '—', songKey: song['original key'] || 'C' }
-  })
-  if (currentUserId) {
-    const { data: notesData } = await _sb
-      .from('song_notes')
-      .select('section_id, content')
-      .eq('user_id', currentUserId)
-    notesCache = {}
-    ;(notesData || []).forEach(n => { notesCache[n.section_id] = n.content })
-  }
-  renderAll()
 }
 
 init()
