@@ -316,12 +316,20 @@ async function init() {
     await cargarMedleys()
   } catch (err) {
     console.error('[init]', err)
+    document.getElementById('page-sub').textContent = 'Error JS: ' + ((err && err.message) || String(err))
     renderGrid([])
   }
 }
 async function cargarMedleys() {
   const { data, error } = await _sb.from('medleys').select('*').order('created_at', { ascending: false })
-  if (error) { showToast('Error al cargar medleys', true); renderGrid([]); return }
+  if (error) {
+    console.error('[cargarMedleys] error:', JSON.stringify(error))
+    document.getElementById('page-sub').textContent = 'Error: ' + (error.message || error.code || JSON.stringify(error))
+    showToast('Error al cargar medleys', true)
+    renderGrid([])
+    return
+  }
+  console.log('[cargarMedleys] rows:', data && data.length)
   allMedleys = (data || []).map(m => ({
     ...m,
     song_ids: Array.isArray(m.song_ids) ? m.song_ids : []
