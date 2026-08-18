@@ -264,9 +264,9 @@ header {
 
 <nav class="bottom-nav">
   <a class="nav-item" href="/library.html"><i class="ti ti-music"></i>Biblioteca</a>
-  <a class="nav-item" href="/setlists.html"><i class="ti ti-list"></i>Setlists</a>
+  <a class="nav-item" href="/setlist.html"><i class="ti ti-list"></i>Setlist</a>
   <a class="nav-item active" href="/medleys.html"><i class="ti ti-layers-intersect"></i>Medleys</a>
-  <a class="nav-item" href="/profile.html"><i class="ti ti-user"></i>Perfil</a>
+  <a class="nav-item" href="/more.html"><i class="ti ti-dots"></i>Más</a>
 </nav>
 
 <script>
@@ -304,14 +304,21 @@ function initials(name) {
 }
 
 async function init() {
-  const { data: { session: s } } = await _sb.auth.getSession()
-  if (!s) { window.location.href = '/login.html'; return }
-  session = s
-  const { data: songs } = await _sb.from('Songs').select('id,title').order('title')
-  allSongs = songs || []
-  await cargarMedleys()
-}
+  try {
+    const { data: { session: s } } = await _sb.auth.getSession()
+    if (!s) { window.location.href = '/login.html'; return }
+    session = s
 
+    // Cargar canciones (para preview de nombres)
+    const { data: songs } = await _sb.from('Songs').select('id,title').order('title').catch(() => ({ data: [] }))
+    allSongs = songs || []
+
+    await cargarMedleys()
+  } catch (err) {
+    console.error('[init]', err)
+    renderGrid([])
+  }
+}
 async function cargarMedleys() {
   const { data, error } = await _sb.from('medleys').select('*').order('created_at', { ascending: false })
   if (error) { showToast('Error al cargar medleys', true); renderGrid([]); return }
