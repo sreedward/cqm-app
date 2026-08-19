@@ -425,38 +425,27 @@ if ('serviceWorker' in navigator) {
 <script>
 const _supabase = supabase.createClient(
   'https://kzqnsbztfyhyyageuboz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnpQZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
 )
 
 let currentUser = null
 
-async function init() {
-  const { data: { session } } = await _supabase.auth.getSession()
-  if (!session) { window.location.href = '/login.html'; return }
-
-  const user = session.user
-  currentUser = user
-  const email = user.email
+function applyProfile(email, createdAt, profile) {
   const initials = email.substring(0, 2).toUpperCase()
-
-  document.getElementById('avatar').textContent = initials
   document.getElementById('user-email').textContent = email
-
-  const since = new Date(user.created_at).toLocaleDateString('es-MX', {
+  const since = new Date(createdAt).toLocaleDateString('es-MX', {
     day: 'numeric', month: 'long', year: 'numeric'
   })
   document.getElementById('user-since').textContent = `Miembro desde ${since}`
-
-  const { data: profile } = await _supabase
-    .from('profiles')
-    .select('is_admin, display_name, avatar_url')
-    .eq('id', user.id)
-    .single()
 
   if (profile && profile.is_admin) {
     document.getElementById('admin-badge').style.display = 'block'
     document.getElementById('admin-section').style.display = 'block'
     document.getElementById('admin-link').style.display = 'flex'
+  } else {
+    document.getElementById('admin-badge').style.display = 'none'
+    document.getElementById('admin-section').style.display = 'none'
+    document.getElementById('admin-link').style.display = 'none'
   }
 
   if (profile && profile.display_name) {
@@ -467,7 +456,38 @@ async function init() {
 
   if (profile && profile.avatar_url) {
     document.getElementById('avatar').innerHTML = `<img src="${profile.avatar_url}" alt="Foto de perfil">`
+  } else {
+    document.getElementById('avatar').textContent = initials
   }
+}
+
+async function init() {
+  // Mostrar caché inmediatamente si existe
+  const cached = localStorage.getItem('cqm_profile_cache')
+  if (cached) {
+    try {
+      const c = JSON.parse(cached)
+      applyProfile(c.email, c.created_at, c.profile)
+    } catch(e) {}
+  }
+
+  const { data: { session } } = await _supabase.auth.getSession()
+  if (!session) { window.location.href = '/login.html'; return }
+
+  const user = session.user
+  currentUser = user
+
+  const { data: profile } = await _supabase
+    .from('profiles')
+    .select('is_admin, display_name, avatar_url')
+    .eq('id', user.id)
+    .single()
+
+  // Guardar en caché y actualizar UI
+  localStorage.setItem('cqm_profile_cache', JSON.stringify({
+    email: user.email, created_at: user.created_at, profile
+  }))
+  applyProfile(user.email, user.created_at, profile)
 }
 
 async function editDisplayName() {
@@ -487,6 +507,13 @@ async function editDisplayName() {
     return
   }
   document.getElementById('display-name').textContent = trimmed
+  // Actualizar caché
+  try {
+    const c = JSON.parse(localStorage.getItem('cqm_profile_cache') || '{}')
+    if (c.profile) c.profile.display_name = trimmed
+    else c.profile = { display_name: trimmed }
+    localStorage.setItem('cqm_profile_cache', JSON.stringify(c))
+  } catch(e) {}
 }
 
 function resizeImage(file, maxSize) {
@@ -536,6 +563,13 @@ async function uploadAvatar(file) {
     if (updateError) { alert('No se pudo guardar la foto: ' + updateError.message); return }
 
     document.getElementById('avatar').innerHTML = `<img src="${publicUrl}" alt="Foto de perfil">`
+    // Actualizar caché
+    try {
+      const c = JSON.parse(localStorage.getItem('cqm_profile_cache') || '{}')
+      if (c.profile) c.profile.avatar_url = publicUrl
+      else c.profile = { avatar_url: publicUrl }
+      localStorage.setItem('cqm_profile_cache', JSON.stringify(c))
+    } catch(e) {}
   } catch (e) {
     alert('Ocurrió un error al procesar la imagen')
   }
@@ -551,6 +585,7 @@ document.getElementById('avatar-file').addEventListener('change', (e) => {
 document.getElementById('edit-name-btn').addEventListener('click', editDisplayName)
 
 async function cerrarSesion() {
+  localStorage.removeItem('cqm_profile_cache')
   await _supabase.auth.signOut()
   window.location.href = '/login.html'
 }
