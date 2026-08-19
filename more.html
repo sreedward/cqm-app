@@ -88,29 +88,38 @@
     .app-desc { font-size: 0.8rem; color: #4a5568; line-height: 1.6; }
     .bottom-nav {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #0d1626;
-      border-top: 1px solid #1e2d45;
+      bottom: 0; left: 0; right: 0;
+      height: calc(60px + env(safe-area-inset-bottom, 0px));
+      background: rgba(6, 10, 20, 0.94);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border-top: 1px solid rgba(59,130,246,0.18);
       display: flex;
-      padding: 8px 0;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-      z-index: 20;
+      align-items: flex-start;
+      padding: 6px 6px 0;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      z-index: 100;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.45);
     }
     .nav-item {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       gap: 3px;
-      cursor: pointer;
-      padding: 4px 0;
+      padding: 7px 6px 6px;
       text-decoration: none;
+      border-radius: 12px;
+      margin: 0 2px;
+      transition: background 0.18s;
+      min-width: 0;
     }
-    .nav-item i { font-size: 1.2rem; color: #4a5568; display: block; line-height: 1.2; }
-    .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
+    .nav-item i { font-size: 1.35rem; color: #526070; line-height: 1; display: block; }
+    .nav-item span { font-size: 0.62rem; color: #526070; letter-spacing: 0.2px; white-space: nowrap; }
+    .nav-item.active { background: rgba(59,130,246,0.14); }
     .nav-item.active i { color: #3b82f6; }
+    .nav-item.active span { color: #3b82f6; font-weight: 600; }
     .nav-item.active span { color: #3b82f6; }
 
     /* Install button item */
@@ -405,7 +414,7 @@
   <nav class="bottom-nav">
   <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
   <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
-  <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
+  <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medleys</span></a>
   <a class="nav-item active" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
 </nav>
 
