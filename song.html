@@ -80,6 +80,7 @@
     .chords { font-size: 1rem; font-weight: 700; color: #facc15; letter-spacing: 2px; margin-bottom: 3px; font-family: monospace; }
 .chord-root { display: inline-block; white-space: nowrap; }
 .chord-qual { font-size: 0.83em; font-weight: 700; position: relative; top: -0.35em; line-height: 1; letter-spacing: 0; white-space: nowrap; margin-left: 0.05em; }
+.chord-slash { font-size: 0.9em; opacity: 0.7; margin: 0 0.05em; }
     .lyrics { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
     .fab { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #3b82f6; color: #fff; border: none; border-radius: 20px; padding: 0.7rem 1.75rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; z-index: 20; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
     .page-indicator { position: fixed; bottom: 1.5rem; right: 1.25rem; background: #0d1626; border: 1px solid #1e2d45; color: #4a5568; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; z-index: 20; }
@@ -309,10 +310,11 @@
     )
 
     const NOTAS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
+    const NOTAS_FLAT = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B']
     const BEMOLES = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}
+    let preferFlats = false
+    function notaDisplay(idx) { return preferFlats ? NOTAS_FLAT[idx % 12] : NOTAS[idx % 12] }
     const CALIDAD = ['','m','m','','','m','dim']
-    const PAGE1_TYPES = ['intro','verso','pre-coro']
-    const PAGE2_TYPES = ['coro','instrumental','bridge','outro']
 
     let semitones = 0
     let cifrado = 'americano'
@@ -368,7 +370,12 @@ function goBack() {
     function styledChord(chord) {
   if (!chord || !chord.trim()) return '';
   var t = chord.trim();
-  // NNS: optional b/# accidental + digit 1-7 + everything else
+  // Handle slash chords (e.g. 5/7, 1/5, Gmaj7/B) — render bass note separately, not as superscript
+  var slash = t.indexOf('/');
+  if (slash !== -1) {
+    return styledChord(t.slice(0, slash)) + '<span class="chord-slash">/</span>' + styledChord(t.slice(slash + 1));
+  }
+  // NNS: optional b/# accidental + digit 1-7 + quality/extension
   var nns = t.match(/^([b#]?[1-7])(.+)$/);
   if (nns) {
     return '<span class="chord-root">' + nns[1] + '<span class="chord-qual">' + nns[2] + '</span></span>';
@@ -384,7 +391,9 @@ function goBack() {
   return '<span>' + t + '</span>';
 }
 function esNota(texto) {
-  return /\s/.test(texto.trim())
+  var t = texto.trim();
+  // Must have whitespace AND must not look like an NNS chord token
+  return /\s/.test(t) && !/^[b#]?\d/.test(t);
 }
 
     function renderNota(texto) {
@@ -696,7 +705,7 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede cambiar la 
       semitones = (semitones + n + 12) % 12
       const rootIdx = NOTAS.indexOf(originalKey)
       const newIdx = (rootIdx + semitones) % 12
-      document.getElementById('key-display').textContent = NOTAS[newIdx]
+      document.getElementById('key-display').textContent = notaDisplay(newIdx)
       renderAll()
             if (setlistId) { const btn = document.getElementById('save-key-btn'); if (btn) btn.style.display = 'flex' }
     }
@@ -772,12 +781,18 @@ if (setlistId) {
       document.title = song.title
       const rawKey = song['original key'] || 'C'
       originalKey = BEMOLES[rawKey] || rawKey
+      preferFlats = rawKey !== originalKey  // rawKey was a flat (e.g. Eb, Bb)
       document.getElementById('key-display').textContent = rawKey
-            if (keyParam && NOTAS.includes(keyParam)) {
-                      const targetIdx = NOTAS.indexOf(keyParam)
-                      const originIdx = NOTAS.indexOf(originalKey)
-                      semitones = (targetIdx - originIdx + 12) % 12
-                      document.getElementById('key-display').textContent = keyParam
+            if (keyParam) {
+                      // Normalize keyParam through BEMOLES so flat spellings (Bb, Eb) work too
+                      const keyParamNorm = BEMOLES[keyParam] || keyParam
+                      if (NOTAS.includes(keyParamNorm)) {
+                        preferFlats = keyParam !== keyParamNorm  // prefer flats if keyParam was flat
+                        const targetIdx = NOTAS.indexOf(keyParamNorm)
+                        const originIdx = NOTAS.indexOf(originalKey)
+                        semitones = (targetIdx - originIdx + 12) % 12
+                        document.getElementById('key-display').textContent = keyParam
+                      }
             }
       // Si ya tiene tono guardado, mostrar botón para poder cambiarlo
       if (setlistId && keyParam) { const btn = document.getElementById('save-key-btn'); if (btn) btn.style.display = 'flex' }
