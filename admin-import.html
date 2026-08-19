@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#080c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CQM">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
+<title>Importar CanciÃ³n â CQM</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #080c14;
+  color: #e2e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+header {
+  background: #0d1626;
+  border-bottom: 1px solid #1e2d45;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.back-btn {
+  background: none; border: none; color: #3b82f6;
+  font-size: 1.3rem; cursor: pointer; padding: 4px;
+  display: flex; align-items: center;
+}
+.header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; }
+.container { padding: 1.25rem; max-width: 600px; margin: 0 auto; }
+
+/* API Key */
+.api-key-box {
+  background: #0d1626;
+  border: 1px solid #1e2d45;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+.api-key-row { display: flex; gap: 8px; align-items: center; }
+.api-key-status { font-size: 0.72rem; margin-top: 6px; }
+
+/* Upload */
+.upload-zone {
+  border: 2px dashed #1e2d45;
+  border-radius: 16px;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  margin-bottom: 1.25rem;
+}
+.upload-zone:hover, .upload-zone.over {
+  border-color: #3b82f6;
+  background: rgba(59,130,246,0.05);
+}
+.upload-icon { font-size: 2.5rem; color: #3b82f6; margin-bottom: 0.75rem; }
+.upload-text { font-size: 0.95rem; color: #94a3b8; }
+.upload-text strong { color: #e2e8f0; }
+.upload-hint { font-size: 0.75rem; color: #4a5568; margin-top: 6px; }
+
+/* Preview */
+.preview-wrap {
+  border-radius: 12px; overflow: hidden;
+  margin-bottom: 1.25rem;
+  border: 1px solid #1e2d45;
+}
+.preview-wrap img {
+  width: 100%; display: block;
+  max-height: 420px; object-fit: contain; background: #0d1626;
+}
+.preview-actions {
+  display: flex; gap: 8px; padding: 0.75rem;
+  background: #0d1626; border-top: 1px solid #1e2d45;
+}
+
+/* Buttons */
+.btn {
+  background: #3b82f6; border: none; border-radius: 8px;
+  color: #fff; padding: 0.65rem 1.1rem;
+  font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  white-space: nowrap; transition: opacity 0.15s;
+}
+.btn:hover { opacity: 0.88; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-sm { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+.btn-ghost { background: #1e2d45; color: #94a3b8; }
+.btn-danger { background: #1a0808; border: 1px solid #7f1d1d; color: #ef4444; }
+.btn-green { background: #15803d; }
+.btn-full { width: 100%; justify-content: center; }
+
+/* Parse */
+.parse-btn {
+  width: 100%; justify-content: center;
+  padding: 0.9rem; font-size: 0.95rem;
+  border-radius: 12px; margin-bottom: 1.25rem;
+}
+
+/* Loading */
+.loading-wrap {
+  text-align: center; padding: 2.5rem 1rem;
+  color: #94a3b8; font-size: 0.85rem;
+}
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid #1e2d45; border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto 1rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Form */
+label {
+  display: block; font-size: 0.72rem;
+  color: #4a5568; letter-spacing: 0.5px;
+  text-transform: uppercase; margin-bottom: 5px;
+}
+input, select, textarea {
+  width: 100%; background: #0d1626;
+  border: 1px solid #1e2d45; border-radius: 8px;
+  color: #e2e8f0; padding: 0.6rem 0.75rem;
+  font-size: 0.85rem; font-family: inherit;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: #3b82f6;
+}
+textarea {
+  resize: vertical; min-height: 90px;
+  font-family: monospace; font-size: 0.78rem; line-height: 1.5;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.form-group { margin-bottom: 0.85rem; }
+
+/* Section blocks */
+.section-block {
+  background: #0d1626; border: 1px solid #1e2d45;
+  border-radius: 10px; padding: 0.9rem; margin-bottom: 0.75rem;
+}
+.section-hdr {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 0.7rem;
+}
+.section-hdr select { flex: 1; }
+.add-section-btn {
+  width: 100%; background: none; border: 1px dashed #1e2d45;
+  border-radius: 10px; color: #4a5568; padding: 0.7rem;
+  cursor: pointer; font-size: 0.85rem; margin-bottom: 1rem;
+}
+.add-section-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+.sep { border: none; border-top: 1px solid #1e2d45; margin: 1.25rem 0; }
+.section-label-row {
+  font-size: 0.68rem; color: #4a5568;
+  text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 1rem;
+}
+
+/* Messages */
+.msg {
+  border-radius: 8px; padding: 0.7rem 1rem;
+  font-size: 0.82rem; margin-bottom: 1rem; display: none;
+}
+.msg-error { background: #1a0808; border: 1px solid #7f1d1d; color: #f87171; }
+.msg-success { background: #0a1a0a; border: 1px solid #14532d; color: #4ade80; }
+
+/* Tip */
+.tip {
+  background: rgba(59,130,246,0.08);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
+.tip strong { color: #60a5fa; }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i></button>
+  <div class="header-title">Importar canciÃ³n con IA</div>
+</header>
+
+<div class="container">
+  <div class="msg msg-error" id="msg-error"></div>
+  <div class="msg msg-success" id="msg-success"></div>
+
+  <!-- API Key -->
+  <div class="api-key-box">
+    <label>ð Anthropic API Key</label>
+    <div class="api-key-row">
+      <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." style="flex:1">
+      <button class="btn btn-sm" onclick="guardarKey()">Guardar</button>
+    </div>
+    <div class="api-key-status" id="key-status"></div>
+  </div>
+
+  <div class="tip">
+    <strong>CÃ³mo funciona:</strong> sube un screenshot de ChartBuilder u otra app de acordes â
+    la IA extrae tÃ­tulo, tono, secciones y acordes automÃ¡ticamente â
+    revisas y guardas. Los acordes se convierten a NNS (sistema Nashville) para que la transposiciÃ³n funcione.
+  </div>
+
+  <!-- Upload zone -->
+  <div class="upload-zone" id="upload-zone">
+    <div class="upload-icon"><i class="ti ti-photo-up"></i></div>
+    <div class="upload-text"><strong>Subir screenshot</strong> o arrastra aquÃ­</div>
+    <div class="upload-hint">JPG Â· PNG Â· WEBP</div>
+  </div>
+  <input type="file" id="file-input" accept="image/*" style="display:none">
+
+  <!-- Preview -->
+  <div class="preview-wrap" id="preview-wrap" style="display:none">
+    <img id="preview-img" src="" alt="preview">
+    <div class="preview-actions">
+      <button class="btn btn-ghost btn-sm" onclick="resetImagen()">
+        <i class="ti ti-replace"></i> Cambiar imagen
+      </button>
+    </div>
+  </div>
+
+  <!-- Parse button -->
+  <button class="btn parse-btn" id="parse-btn" onclick="parsear()" style="display:none">
+    <i class="ti ti-wand"></i> Parsear con IA
+  </button>
+
+  <!-- Loading -->
+  <div class="loading-wrap" id="loading-wrap" style="display:none">
+    <div class="spinner"></div>
+    <div>Analizando con Claude...</div>
+    <div style="font-size:0.72rem;color:#4a5568;margin-top:4px">Suele tardar 5-10 segundos</div>
+  </div>
+
+  <!-- Results -->
+  <div id="results" style="display:none">
+    <hr class="sep">
+    <div class="section-label-row">Resultado â revisa y edita antes de guardar</div>
+
+    <div class="form-row" style="margin-bottom:0.85rem">
+      <div class="form-group" style="margin:0">
+        <label>TÃ­tulo *</label>
+        <input type="text" id="r-title">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Artista</label>
+        <input type="text" id="r-artist">
+      </div>
+    </div>
+    <div class="form-row" style="margin-bottom:0.85rem">
+      <div class="form-group" style="margin:0">
+        <label>Tono original</label>
+        <select id="r-key">
+          <option>C</option><option>C#</option><option>D</option>
+          <option>Eb</option><option>E</option><option>F</option>
+          <option>F#</option><option>G</option><option>Ab</option>
+          <option>A</option><option>Bb</option><option>B</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Tempo (BPM)</label>
+        <input type="number" id="r-tempo" min="40" max="300">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Slug (URL de la canciÃ³n)</label>
+      <input type="text" id="r-slug">
+    </div>
+
+    <hr class="sep">
+    <div class="section-label-row">Secciones</div>
+    <div id="secs-container"></div>
+    <button class="add-section-btn" onclick="addSection()">+ Agregar secciÃ³n</button>
+
+    <button class="btn btn-full btn-green" onclick="guardarCancion()" style="padding:0.9rem;font-size:0.95rem;border-radius:12px">
+      <i class="ti ti-device-floppy"></i> Guardar en catÃ¡logo
+    </button>
+  </div>
+</div>
+
+<script>
+const _sb = supabase.createClient(
+  'https://kzqnsbztfyhyyageuboz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+);
+
+const TIPOS = ['intro','verso','pre-coro','coro','vamp','bridge','instrumental','outro','tag'];
+const KEYS  = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+let imageFile = null;
+let secCount = 0;
+
+// ââ Auth check ââââââââââââââââââââââââââââââââââââââââââââââ
+async function init() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) { location.href = '/login.html'; return; }
+  const { data: p } = await _sb.from('profiles').select('is_admin').eq('id', session.user.id).single();
+  if (!p?.is_admin) { location.href = '/library.html'; return; }
+  initKey();
+  initUpload();
+}
+
+// ââ API Key ââââââââââââââââââââââââââââââââââââââââââââââââââ
+function initKey() {
+  const k = localStorage.getItem('cqm_claude_key');
+  if (k) {
+    document.getElementById('api-key-input').value = k;
+    setKeyStatus('â API key cargada', '#4ade80');
+  }
+}
+
+function guardarKey() {
+  const k = document.getElementById('api-key-input').value.trim();
+  if (!k) return;
+  localStorage.setItem('cqm_claude_key', k);
+  setKeyStatus('â Guardada', '#4ade80');
+}
+
+function setKeyStatus(msg, color) {
+  const el = document.getElementById('key-status');
+  el.textContent = msg;
+  el.style.color = color;
+}
+
+function getKey() {
+  return localStorage.getItem('cqm_claude_key') || document.getElementById('api-key-input').value.trim();
+}
+
+// ââ Upload ââââââââââââââââââââââââââââââââââââââââââââââââââââ
+function initUpload() {
+  const zone = document.getElementById('upload-zone');
+  const inp  = document.getElementById('file-input');
+
+  zone.addEventListener('click', () => inp.click());
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('over');
+    const f = e.dataTransfer.files[0];
+    if (f) cargarImagen(f);
+  });
+  inp.addEventListener('change', e => { if (e.target.files[0]) cargarImagen(e.target.files[0]); });
+}
+
+function cargarImagen(file) {
+  if (!file.type.startsWith('image/')) { showError('Selecciona una imagen vÃ¡lida'); return; }
+  imageFile = file;
+  const url = URL.createObjectURL(file);
+  document.getElementById('preview-img').src = url;
+  document.getElementById('upload-zone').style.display  = 'none';
+  document.getElementById('preview-wrap').style.display = 'block';
+  document.getElementById('parse-btn').style.display    = 'flex';
+  document.getElementById('results').style.display      = 'none';
+  clearMsgs();
+}
+
+function resetImagen() {
+  imageFile = null;
+  document.getElementById('preview-img').src = '';
+  document.getElementById('upload-zone').style.display  = 'block';
+  document.getElementById('preview-wrap').style.display = 'none';
+  document.getElementById('parse-btn').style.display    = 'none';
+  document.getElementById('results').style.display      = 'none';
+  document.getElementById('file-input').value = '';
+  clearMsgs();
+}
+
+// ââ Parse âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+async function parsear() {
+  const key = getKey();
+  if (!key) { showError('Ingresa tu Anthropic API key arriba'); return; }
+  if (!imageFile) { showError('Sube una imagen primero'); return; }
+
+  setLoading(true);
+  clearMsgs();
+
+  try {
+    const { b64, mime } = await toBase64(imageFile);
+    const result = await llamarClaude(b64, mime, key);
+    mostrarResultados(result);
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+function toBase64(file) {
+  return new Promise(resolve => {
+    const r = new FileReader();
+    r.onload = e => {
+      const data = e.target.result;
+      resolve({ b64: data.split(',')[1], mime: file.type || 'image/jpeg' });
+    };
+    r.readAsDataURL(file);
+  });
+}
+
+async function llamarClaude(b64, mime, apiKey) {
+  const PROMPT = `Analyze this chord chart image and extract all song data. Return ONLY a valid JSON object â eno markdown code fences, no explanation, just raw JSON.
+
+Required JSON structure:
+{
+  "title": "Song Title",
+  "artist": "Artist name or empty string",
+ "key": "C",
+  "tempo": 120,
+  "sections": [
+    {
+      "type": "verso",
+      "content": "[1]I could [5/7]sing [4sus2]Your Name\\nFor [1]all my life\\nAnd still [5]find [4sus2]more\\nTo [6m7]love each time"
+    }
+  ]
+}
+
+âââ CHORDS â Convert to Nashville Number System (NNS) based on the key shown in the image âââ
+Numbers 1-7 represent scale degrees where 1 = root note of the key.
+
+Quality markers (add after the degree number):
+  â¢ nothing = major (auto by key)   â¢ m = minor   â¢ M = force major
+
+Extensions (add after quality):
+  7, maj7, 9, sus2, sus4, add9, aug, dism
+
+Slash chords: [5/7] = chord 5 with bass note on degree 7
+
+Accidentals before the number: [b7] = flat 7th, [#4] = sharp 4th
+
+Examples for key of C:
+  C â [1]    Dm â [2m]    Em â [3m]    F â [4]    G â [5]    Am â [6m]    Bdim â [7dism]
+  Am7 â [6m7]    G/B â [5/7]    Fsus2 â [4sus2]    Cmaj7 â [1maj7]    C7 â [17]    Bb â [b7]
+
+Examples for key of G:
+  G â [1]    Am â [2m]    Bm â [3m]    C â [4]    D â [5]    Em â [6m]
+
+âââ SECTION TYPES â use exact values âââ
+intro, verso, pre-coro, coro, vamp, bridge, instrumental, outro, tag
+
+âââ CONTENT FORMAT âââ
+â¢ Place [chord] immediately before the syllable it falls on
+â¢ Use \\n (actual newline) between lyric lines within a section
+â¢ For instrumental sections (no lyrics): just write chord pattern, e.g. "[1] [4] [5] [4]"
+â¢ Include ALL sections visible â if you only see part of the song, include what's visible
+â¢ VERSE 1 and VERSE 2 = two separate section entries both with type "verso"
+â¢ PRE-CHORUS = pre-coro, CHORUS = coro, BRIDGE = bridge, TAG = tag
+
+Return ONLY the raw JSON object. Start your response with { and end with }`;
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+      'anthropic-dangerous-direct-browser-calls': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 4096,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mime, data: b64 } },
+          { type: 'text', text: PROMPT }
+        ]
+      }]
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Error de API (${resp.status})`);
+  }
+
+  const data = await resp.json();
+  let text = (data.content?.[0]?.text || '').trim();
+
+  // Strip any markdown fences just in case
+  text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error('La IA no devolviÃ³ JSON vÃ¡lido. Intenta de nuevo o con otra imagen.');
+  }
+}
+
+// ââ Render results ââââââââââââââââââââââââââââââââââââââââââââ
+function mostrarResultados(data) {
+  document.getElementById('r-title').value  = data.title  || '';
+  document.getElementById('r-artist').value = data.artist || '';
+  document.getElementById('r-tempo').value  = data.tempo  || '';
+
+  const keyEl = document.getElementById('r-key');
+  if (data.key && KEYS.includes(data.key)) keyEl.value = data.key;
+
+  document.getElementById('r-slug').value = slugify(data.title || '');
+
+  const cont = document.getElementById('secs-container');
+  cont.innerHTML = '';
+  secCount = 0;
+  (data.sections || []).forEach(s => addSection(s));
+
+  document.getElementById('results').style.display = 'block';
+  setTimeout(() => document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function addSection(sec = null) {
+  secCount++;
+  const id  = 'sec-' + secCount;
+  const div = document.createElement('div');
+  div.className = 'section-block';
+  div.id = id;
+  div.innerHTML = `
+    <div class="section-hdr">
+      <select id="type-${id}">
+        ${TIPOS.map(t => `<option value="${t}"${sec && sec.type === t ? ' selected' : ''}>${t}</option>`).join('')}
+      </select>
+      <button class="btn btn-sm btn-danger" onclick="this.closest('.section-block').remove()">
+        <i class="ti ti-trash"></i>
+      </button>
+    </div>
+    <textarea id="content-${id}" placeholder="[1]letra con [4]acordes inline...">${sec ? (sec.content || '') : ''}</textarea>
+  `;
+  document.getElementById('secs-container').appendChild(div);
+}
+
+// ââ Save ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+async function guardarCancion() {
+  const title = document.getElementById('r-title').value.trim();
+  if (!title) { showError('El tÃ­tulo es requerido'); return; }
+
+  const slug = document.getElementById('r-slug').value.trim() || slugify(title);
+  const tempo = parseInt(document.getElementById('r-tempo').value) || null;
+
+  try {
+    const { data: song, error: songErr } = await _sb.from('Songs').insert({
+      title,
+      artist:        document.getElementById('r-artist').value.trim() || null,
+      'original key': document.getElementById('r-key').value,
+      slug,
+      ...(tempo ? { tempo } : {})
+    }).select().single();
+
+    if (songErr) throw new Error(songErr.message);
+
+    const sectionEls = document.querySelectorAll('#secs-container .section-block');
+    const inserts = [];
+    sectionEls.forEach((el, idx) => {
+      const tipo    = document.getElementById('type-' + el.id)?.value;
+      const content = document.getElementById('content-' + el.id)?.value.trim();
+      if (content) inserts.push({ song_id: song.id, type: tipo, content, order: idx + 1 });
+    });
+
+    if (inserts.length) {
+      const { error: secErr } = await _sb.from('sections').insert(inserts);
+      if (secErr) throw new Error(secErr.message);
+    }
+
+    showSuccess('â CanciÃ³n guardada. Abriendo editor...');
+    setTimeout(() => location.href = '/admin-edit.html?id=' + song.id, 1200);
+
+  } catch (err) {
+    showError('Error al guardar: ' + err.message);
+  }
+}
+
+// ââ Utils âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+function slugify(t) {
+  return (t || '').toLowerCase()
+    .normalize('NFD').replace(/[Ì-Í¯]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
+}
+
+function setLoading(on) {
+  document.getElementById('loading-wrap').style.display = on ? 'block' : 'none';
+  document.getElementById('parse-btn').style.display    = on ? 'none'  : 'flex';
+  document.getElementById('preview-wrap').style.opacity = on ? '0.5'   : '1';
+}
+
+function showError(msg) {
+  const el = document.getElementById('msg-error');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('msg-success').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showSuccess(msg) {
+  const el = document.getElementById('msg-success');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('msg-error').style.display = 'none';
+}
+
+function clearMsgs() {
+  document.getElementById('msg-error').style.display   = 'none';
+  document.getElementById('msg-success').style.display = 'none';
+}
+
+init();
+</script>
+</body>
+</html>
