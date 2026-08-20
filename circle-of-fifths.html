@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#080c14">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>CQM - CÃ­rculo de Quintas</title>
+<title>CQM - Círculo de Quintas</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -168,7 +168,7 @@ header {
   color: rgba(255,255,255,0.4);
   margin-bottom: 0.75rem;
 }
-.rel-row {
+ .rel-row {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
@@ -181,7 +181,7 @@ header {
   cursor: pointer;
   transition: transform 0.15s;
 }
-.rel-chip:active { transform: scale(0.93); }
+ .rel-chip:active { transform: scale(0.93); }
 .rel-dominant   { background: rgba(239,68,68,0.2);  border: 1px solid rgba(239,68,68,0.4);  color: #fca5a5; }
 .rel-subdominant{ background: rgba(168,85,247,0.2); border: 1px solid rgba(168,85,247,0.4); color: #d8b4fe; }
  .rel-relative   { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.35); color: #86efac; }
@@ -221,7 +221,7 @@ nav.bottom-nav {
 <body>
 <header>
   <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i></button>
-  <span class="header-title">CÃ­rculo de Quintas</span>
+  <span class="header-title">Círculo de Quintas</span>
 </header>
 
 <div class="container">
@@ -244,8 +244,8 @@ nav.bottom-nav {
   </div>
 
   <div class="info-panel hidden" id="info-panel">
-    <div class="key-name" id="key-name">â</div>
-    <div class="key-name-minor" id="key-minor">Relativa menor: â</div>
+    <div class="key-name" id="key-name">—</div>
+    <div class="key-name-minor" id="key-minor">Relativa menor: —</div>
     <div class="chords-row" id="chords-row"></div>
   </div>
 
@@ -265,9 +265,9 @@ nav.bottom-nav {
   </div>
 
   <div class="section-card">
-    <h3>Â¿CÃ³mo funciona?</h3>
+    <h3>¿Có funciona?</h3>
     <p style="font-size:0.85rem;color:rgba(255,255,255,0.65);line-height:1.6;">
-      Cada paso en sentido horario sube una quinta (7 semitonos). Las tonalidades vecinas comparten 6 de 7 notas â son fÃ¡ciles de modular. El anillo externo muestra las tonalidades <strong style="color:#d8b4fe">mayores</strong> y el interno las <strong style="color:#93c5fd">menores</strong> relativas.
+      Cada paso en sentido horario sube una quinta (7 semitonos). Las tonalidades vecinas comparten 6 de 7 notas — son fáciles de modular. El anillo externo muestra las tonalidades <strong style="color:#d8b4fe">mayores</strong> y el interno las <strong style="color:#93c5fd">menores</strong> relativas.
     </p>
   </div>
 </div>
@@ -277,11 +277,11 @@ nav.bottom-nav {
   <a href="/search.html" class="nav-item"><i class="ti ti-search"></i><span>Buscar</span></a>
   <a href="/medley.html" class="nav-item"><i class="ti ti-list-numbers"></i><span>Medley</span></a>
   <a href="/profile.html" class="nav-item"><i class="ti ti-user"></i><span>Perfil</span></a>
-  <a href="/more.html" class="nav-item active"><i class="ti ti-dots"></i><span>MÃ¡s</span></a>
+  <a href="/more.html" class="nav-item active"><i class="ti ti-dots"></i><span>Más</span></a>
 </nav>
 
 <script>
-// ââ Data ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Data ──────────────────────────────────────────────────────────────────────
 const MAJOR_KEYS = ['C','G','D','A','E','B','F#/Gb','Db','Ab','Eb','Bb','F'];
 const MINOR_KEYS = ['Am','Em','Bm','F#m','C#m','G#m','D#m/Ebm','Bbm','Fm','Cm','Gm','Dm'];
 
@@ -303,7 +303,7 @@ const CHORDS = {
 const CHORD_CLASSES = ['I','II','III','IV','V','VI','VII'];
 const CHORD_LABELS  = ['I','IIm','IIIm','IV','V','VIm','VIIdim'];
 
-// ââ SVG builder âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── SVG builder ───────────────────────────────────────────────────────────────
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const CX = 200, CY = 200;
 const R_OUTER = 155, R_INNER = 105, R_MIN = 62;
@@ -355,7 +355,7 @@ function buildCircle() {
     const minorKey = MINOR_KEYS[i];
     const isSelected = selectedKey === majorKey;
 
-    // ââ Outer arc (major) ââ
+    // ── Outer arc (major) ──
     const outerPath = document.createElementNS(SVG_NS, 'path');
     outerPath.setAttribute('d', makeArcPath(angle, angle + SLICE, R_OUTER, R_INNER));
     outerPath.setAttribute('fill', isSelected
@@ -383,7 +383,7 @@ function buildCircle() {
     majorText.textContent = majorKey;
     svg.appendChild(majorText);
 
-    // ââ Inner arc (minor) ââ
+    // ── Inner arc (minor) ──
     const innerPath = document.createElementNS(SVG_NS, 'path');
     innerPath.setAttribute('d', makeArcPath(angle, angle + SLICE, R_INNER, R_MIN));
     innerPath.setAttribute('fill', isSelected
@@ -428,7 +428,7 @@ function buildCircle() {
   svg.appendChild(ct);
 }
 
-// ââ Selection logic âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Selection logic ───────────────────────────────────────────────────────────
 function selectKey(key) {
   selectedKey = (selectedKey === key) ? null : key;
   buildCircle();
@@ -492,7 +492,7 @@ function updatePanel() {
   });
 }
 
-// ââ Init ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Init ──────────────────────────────────────────────────────────────────────
 buildCircle();
 </script>
 </body>
