@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CQM">
   <link rel="apple-touch-icon" href="/icons/icon.svg">
-  <title>CQM - Más</title>
+  <title>CQM - MÃ¡s</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -19,7 +19,7 @@
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
-      padding-bottom: calc(94px + env(safe-area-inset-bottom, 12px));
+      padding-bottom: calc(82px + env(safe-area-inset-bottom, 12px));
     }
     header {
       background: #0d1626;
@@ -86,48 +86,6 @@
     .app-logo span { color: #3b82f6; }
     .app-version { font-size: 0.75rem; color: #4a5568; margin-bottom: 0.75rem; }
     .app-desc { font-size: 0.8rem; color: #4a5568; line-height: 1.6; }
-    .bottom-nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      z-index: 1000;
-      padding: 0 12px calc(env(safe-area-inset-bottom, 12px) + 20px);
-      background: transparent;
-      pointer-events: none;
-    }
-    .nav-row {
-      display: flex;
-      align-items: stretch;
-      height: 62px;
-      padding: 0 6px;
-      background: rgba(10, 15, 28, 0.95);
-      backdrop-filter: blur(28px) saturate(180%);
-      -webkit-backdrop-filter: blur(28px) saturate(180%);
-      border: 1px solid rgba(59,130,246,0.18);
-      border-radius: 22px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(255,255,255,0.05) inset;
-      pointer-events: all;
-    }
-    .nav-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      padding: 0 4px;
-      text-decoration: none;
-      border-radius: 16px;
-      margin: 6px 3px;
-      transition: background 0.15s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .nav-item i { font-size: 1.45rem; color: #5a6a7a; line-height: 1; display: block; transition: color 0.15s; }
-    .nav-item span { font-size: 0.62rem; color: #5a6a7a; letter-spacing: 0.3px; white-space: nowrap; font-weight: 500; transition: color 0.15s; }
-    .nav-item.active { background: rgba(59,130,246,0.15); }
-    .nav-item.active i { color: #60a5fa; }
-    .nav-item.active span { color: #60a5fa; font-weight: 700; }
-    .nav-item.active span { color: #3b82f6; }
-
     /* Install button item */
     .install-item {
       display: flex;
@@ -219,21 +177,13 @@
       -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
       border-bottom: 1px solid rgba(59,130,246,0.15) !important;
     }
-    /* Barra de transposición */
+    /* Barra de transposiciÃ³n */
     .transpose-bar {
       background: rgba(10, 18, 35, 0.72) !important;
       backdrop-filter: blur(14px) !important;
       -webkit-backdrop-filter: blur(14px) !important;
       border-bottom: 1px solid rgba(59,130,246,0.12) !important;
-    }
-    /* Nav inferior */
-    .bottom-nav {
-      background: rgba(8, 15, 28, 0.80) !important;
-      backdrop-filter: blur(18px) saturate(160%) !important;
-      -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
-      border-top: 1px solid rgba(59,130,246,0.13) !important;
-    }
-    /* Barra de búsqueda */
+    }/* Barra de bÃºsqueda */
     .search-bar {
       background: rgba(10, 18, 38, 0.70) !important;
       backdrop-filter: blur(12px) !important;
@@ -252,7 +202,7 @@
       background: rgba(20, 35, 60, 0.70) !important;
       border-color: rgba(59,130,246,0.25) !important;
     }
-    /* Secciones de canción — mantienen borde de color, se vuelven translúcidas */
+    /* Secciones de canciÃ³n â mantienen borde de color, se vuelven translÃºcidas */
     .section {
       backdrop-filter: blur(8px) !important;
       -webkit-backdrop-filter: blur(8px) !important;
@@ -272,13 +222,13 @@
       -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
       border: 1px solid rgba(59,130,246,0.18) !important;
     }
-    /* FAB (paginación Opción A) */
+    /* FAB (paginaciÃ³n OpciÃ³n A) */
     .fab {
       backdrop-filter: blur(8px) !important;
       -webkit-backdrop-filter: blur(8px) !important;
       box-shadow: 0 4px 20px rgba(59,130,246,0.35) !important;
     }
-    /* Indicador de página */
+    /* Indicador de pÃ¡gina */
     .page-indicator {
       background: rgba(13, 22, 38, 0.75) !important;
       backdrop-filter: blur(10px) !important;
@@ -291,7 +241,7 @@
       backdrop-filter: blur(12px) !important;
       -webkit-backdrop-filter: blur(12px) !important;
     }
-    /* Inputs en modales y búsqueda */
+    /* Inputs en modales y bÃºsqueda */
     .search-input-wrap, .modal-input {
       background: rgba(20, 32, 55, 0.60) !important;
       border: 1px solid rgba(59,130,246,0.15) !important;
@@ -302,7 +252,7 @@
       backdrop-filter: blur(6px) !important;
       -webkit-backdrop-filter: blur(6px) !important;
     }
-    /* Tarjetas genéricas de setlist / medley */
+    /* Tarjetas genÃ©ricas de setlist / medley */
     .setlist-item, .medley-item, .group-item {
       background: rgba(13, 22, 38, 0.55) !important;
       backdrop-filter: blur(10px) !important;
@@ -322,14 +272,54 @@
       -webkit-backdrop-filter: blur(10px) !important;
       border-bottom: 1px solid rgba(59,130,246,0.10) !important;
     }
-    /* Barra "guardar alineación" */
+    /* Barra "guardar alineaciÃ³n" */
     .save-align-bar {
       background: rgba(13, 22, 38, 0.85) !important;
       backdrop-filter: blur(14px) !important;
       -webkit-backdrop-filter: blur(14px) !important;
     }
     /* ===== FIN GLASSMORPHISM ===== */
-</style>
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 0 12px calc(env(safe-area-inset-bottom, 12px) + 8px);
+      background: transparent;
+      pointer-events: none;
+    }
+    .nav-row {
+      display: flex;
+      align-items: stretch;
+      height: 62px;
+      padding: 0 6px;
+      background: rgba(10, 15, 28, 0.95);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(59,130,246,0.18);
+      border-radius: 22px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(255,255,255,0.05) inset;
+      pointer-events: all;
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 0 4px;
+      text-decoration: none;
+      border-radius: 16px;
+      margin: 6px 3px;
+      transition: background 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-item i { font-size: 1.45rem; color: #5a6a7a; line-height: 1; display: block; transition: color 0.15s; }
+    .nav-item span { font-size: 0.62rem; color: #5a6a7a; letter-spacing: 0.3px; white-space: nowrap; font-weight: 500; transition: color 0.15s; }
+    .nav-item.active { background: rgba(59,130,246,0.15); }
+    .nav-item.active i { color: #60a5fa; }
+    .nav-item.active span { color: #60a5fa; font-weight: 700; }
+  </style>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -348,14 +338,14 @@
   </header>
 
   <div class="news-card">
-    <div class="news-tag">🎸 Novedad</div>
-    <div class="news-title">ChartQuick ya está disponible — Tu songbook digital para músicos en vivo</div>
+    <div class="news-tag">ð¸ Novedad</div>
+    <div class="news-title">ChartQuick ya estÃ¡ disponible â Tu songbook digital para mÃºsicos en vivo</div>
     <div class="news-date">Junio 2026</div>
   </div>
 
-  <div class="section-label">Aplicación</div>
+  <div class="section-label">AplicaciÃ³n</div>
   <button class="install-item" id="more-install-btn">
-    <div class="install-icon">📱</div>
+    <div class="install-icon">ð±</div>
     <div class="install-info">
       <div class="install-name">Instalar CQM</div>
       <div class="install-sub">Agrega CQM a tu pantalla de inicio</div>
@@ -363,17 +353,36 @@
     <i class="ti ti-chevron-right social-arrow"></i>
   </button>
 
-<a class="social-item" href="/medley-builder.html">
-  <div class="social-icon"><i class="ti ti-layers-intersect" style="color:#3b82f6"></i></div>
-  <div class="social-info">
-    <div class="social-name">Medley Builder</div>
-    <div class="social-handle">Combina secciones de canciones</div>
-  </div>
-  <i class="ti ti-chevron-right social-arrow"></i>
-</a>
+  <div class="section-label">Herramientas</div>
 
+  <a class="social-item" href="/tuner.html">
+    <div class="social-icon"><i class="ti ti-antenna" style="color:#22c55e"></i></div>
+    <div class="social-info">
+      <div class="social-name">Afinador</div>
+      <div class="social-handle">Afina tu instrumento con el micrÃ³fono</div>
+    </div>
+    <i class="ti ti-chevron-right social-arrow"></i>
+  </a>
 
-  <div class="section-label">Síguenos</div>
+  <a class="social-item" href="/circle-of-fifths.html">
+    <div class="social-icon"><i class="ti ti-circle-dotted" style="color:#a855f7"></i></div>
+    <div class="social-info">
+      <div class="social-name">CÃ­rculo de quintas</div>
+      <div class="social-handle">Tonalidades y relaciones entre acordes</div>
+    </div>
+    <i class="ti ti-chevron-right social-arrow"></i>
+  </a>
+
+  <a class="social-item" href="/nashville-guide.html">
+    <div class="social-icon"><i class="ti ti-hash" style="color:#f97316"></i></div>
+    <div class="social-info">
+      <div class="social-name">GuÃ­a Nashville</div>
+      <div class="social-handle">Aprende el sistema de cifrado Nashville</div>
+    </div>
+    <i class="ti ti-chevron-right social-arrow"></i>
+  </a>
+
+  <div class="section-label">SÃ­guenos</div>
 
   <a class="social-item" href="https://instagram.com/musishens" target="_blank">
     <div class="social-icon"><i class="ti ti-brand-instagram" style="color:#a855f7"></i></div>
@@ -413,7 +422,7 @@
 
   <div class="app-info">
     <div class="app-logo">Chart<span>Quick</span></div>
-    <div class="app-version">v1.0 — by Musishens</div>
+    <div class="app-version">v1.0 â by Musishens</div>
     <div class="app-desc">Tu songbook digital para tocar en vivo. Acordes, cifrado Nashville, transpose y setlists en un solo lugar.</div>
   </div>
 
@@ -422,44 +431,44 @@
     <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
     <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
     <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medleys</span></a>
-    <a class="nav-item active" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
+    <a class="nav-item active" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>MÃ¡s</span></a>
   </div>
 </nav>
 
-  <!-- ── PWA Install Overlay ── -->
+  <!-- ââ PWA Install Overlay ââ -->
   <div id="ob-overlay-more">
     <div id="ob-modal-more">
 
       <!-- Main content -->
       <div id="pwa-main-more">
-        <div style="font-size:2.5rem;margin-bottom:0.5rem">📱</div>
+        <div style="font-size:2.5rem;margin-bottom:0.5rem">ð±</div>
         <div class="ob-title-m">Instala CQM</div>
-        <div class="ob-desc-m">Agrega CQM a la pantalla principal de tu teléfono para acceder rápidamente a tus canciones y setlists durante ensayos y servicios.</div>
+        <div class="ob-desc-m">Agrega CQM a la pantalla principal de tu telÃ©fono para acceder rÃ¡pidamente a tus canciones y setlists durante ensayos y servicios.</div>
         <button class="ob-btn-m" id="more-install-confirm-btn">Instalar CQM</button>
         <button class="ob-skip-m" id="more-close-btn">Cerrar</button>
       </div>
 
       <!-- iPhone instructions -->
       <div id="pwa-ios-more" style="display:none">
-        <div class="ob-title-m">Cómo instalar en iPhone</div>
+        <div class="ob-title-m">CÃ³mo instalar en iPhone</div>
         <div class="pwa-steps-m">
           <div class="pwa-step-m">
             <div class="pwa-step-num-m">1</div>
-            <div class="pwa-step-text-m">Toca el botón <strong>Compartir</strong> (□↑) en Safari, o el ícono <strong>⋯</strong> (más opciones)</div>
-            <div class="pwa-step-icon-m">□↑</div>
+            <div class="pwa-step-text-m">Toca el botÃ³n <strong>Compartir</strong> (â¡â) en Safari, o el Ã­cono <strong>â¯</strong> (mÃ¡s opciones)</div>
+            <div class="pwa-step-icon-m">â¡â</div>
           </div>
           <div class="pwa-step-m">
             <div class="pwa-step-num-m">2</div>
             <div class="pwa-step-text-m">Selecciona <strong>"Agregar a pantalla de inicio"</strong></div>
-            <div class="pwa-step-icon-m">＋</div>
+            <div class="pwa-step-icon-m">ï¼</div>
           </div>
           <div class="pwa-step-m">
             <div class="pwa-step-num-m">3</div>
             <div class="pwa-step-text-m">Toca <strong>Agregar</strong> para confirmar</div>
-            <div class="pwa-step-icon-m">✓</div>
+            <div class="pwa-step-icon-m">â</div>
           </div>
         </div>
-        <button class="ob-btn-m" id="more-ios-ok-btn">Entendido ✓</button>
+        <button class="ob-btn-m" id="more-ios-ok-btn">Entendido â</button>
       </div>
 
     </div>
