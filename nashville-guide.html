@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#080c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CQM - GuÃ­a Nashville</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: linear-gradient(135deg, #060b18 0%, #0b1628 35%, #0d0c20 65%, #13082a 100%) fixed;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(249,115,22,0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+body > * { position: relative; z-index: 1; }
+header {
+  background: rgba(8,15,28,0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(249,115,22,0.2);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.back-btn {
+  background: none; border: none;
+  color: #f97316; font-size: 1.3rem;
+  cursor: pointer; padding: 4px;
+  display: flex; align-items: center;
+}
+.header-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #f97316, #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem;
+}
+
+/* Number chips row */
+.numbers-hero {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.num-chip {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: 800;
+}
+.n1 { background: rgba(249,115,22,0.3); border: 1px solid rgba(249,115,22,0.6); color: #fed7aa; }
+.n2 { background: rgba(100,116,139,0.2); border: 1px solid rgba(100,116,139,0.4); color: #94a3b8; }
+.n3 { background: rgba(100,116,139,0.2); border: 1px solid rgba(100,116,139,0.4); color: #94a3b8; }
+.n4 { background: rgba(168,85,247,0.2); border: 1px solid rgba(168,85,247,0.4); color: #d8b4fe; }
+.n5 { background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; }
+.n6 { background: rgba(100,116,139,0.2); border: 1px solid rgba(100,116,139,0.4); color: #94a3b8; }
+.n7 { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
+
+/* Key selector */
+.key-selector {
+  background: rgba(15,25,50,0.6);
+  border: 1px solid rgba(249,115,22,0.2);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+.key-selector label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.4);
+  display: block;
+  margin-bottom: 0.6rem;
+}
+.key-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.35rem;
+}
+.key-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.1rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  font-family: inherit;
+}
+.key-btn:active { transform: scale(0.92); }
+.key-btn.active {
+  background: rgba(249,115,22,0.3);
+  border-color: rgba(249,115,22,0.6);
+  color: #fed7aa;
+}
+
+/* Chord table */
+.chord-table-wrap {
+  background: rgba(15,25,50,0.6);
+  border: 1px solid rgba(249,115,22,0.15);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+}
+.chord-table-wrap h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 0.75rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th {
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+td {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.5rem 0.2rem;
+}
+.th-num { color: rgba(255,255,255,0.4); font-weight: 500; }
+.td-1 { color: #fed7aa; }
+.td-2 { color: #94a3b8; }
+.td-3 { color: #94a3b8; }
+.td-4 { color: #d8b4fe; }
+.td-5 { color: #fca5a5; }
+.td-6 { color: #94a3b8; }
+.td-7 { color: #93c5fd; }
+.td-type { font-size: 0.7rem; color: rgba(255,255,255,0.35); font-weight: 400; }
+
+/* Concepts */
+.concept-card {
+  background: rgba(15,25,50,0.5);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.concept-card h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f97316;
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.concept-card p {
+  font-size: 0.83rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.6;
+}
+.concept-card .example {
+  margin-top: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(249,115,22,0.1);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: #fed7aa;
+  font-family: monospace;
+}
+
+/* Progressions */
+.prog-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+.prog-item {
+  background: rgba(15,25,50,0.5);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.prog-nums {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f97316;
+  min-width: 90px;
+  font-family: monospace;
+}
+.prog-name {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.5);
+}
+.prog-chords-preview {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.3);
+  margin-top: 2px;
+  font-family: monospace;
+}
+
+/* Bottom nav */
+nav.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  background: rgba(8,15,28,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(59,130,246,0.15);
+  padding: 0.5rem 0 0.75rem;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px; padding: 0.3rem 1rem;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none; font-size: 0.65rem;
+  font-weight: 500; letter-spacing: 0.03em;
+  transition: color 0.2s;
+}
+.nav-item i { font-size: 1.4rem; }
+.nav-item.active { color: #f97316; }
+
+.section-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 0.75rem;
+  margin-top: 0.25rem;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i></button>
+  <span class="header-title"># GuÃ­a Nashville</span>
+</header>
+
+<div class="container">
+
+  <!-- Hero numbers -->
+  <div class="numbers-hero">
+    <div class="num-chip n1">1</div>
+    <div class="num-chip n2">2</div>
+    <div class="num-chip n3">3</div>
+    <div class="num-chip n4">4</div>
+    <div class="num-chip n5">5</div>
+    <div class="num-chip n6">6</div>
+    <div class="num-chip n7">7</div>
+  </div>
+
+  <!-- Key selector -->
+  <div class="key-selector">
+    <label>Selecciona una tonalidad</label>
+    <div class="key-grid" id="key-grid"></div>
+  </div>
+
+  <!-- Chord table -->
+  <div class="chord-table-wrap">
+    <h3>Acordes de <span id="table-key-label">C Mayor</span></h3>
+    <table>
+      <thead>
+        <tr>
+          <th class="th-num">#</th>
+          <th class="th-num">1</th>
+          <th class="th-num">2</th>
+          <th class="th-num">3</th>
+          <th class="th-num">4</th>
+          <th class="th-num">5</th>
+          <th class="th-num">6</th>
+          <th class="th-num">7</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-type">Tipo</td>
+          <td class="td-type">may</td>
+          <td class="td-type">men</td>
+          <td class="td-type">men</td>
+          <td class="td-type">may</td>
+          <td class="td-type">may</td>
+          <td class="td-type">men</td>
+          <td class="td-type">dim</td>
+        </tr>
+        <tr id="chord-row">
+          <td class="td-type">Acorde</td>
+          <td class="td-1" id="c1">â</td>
+          <td class="td-2" id="c2">â</td>
+          <td class="td-3" id="c3">â</td>
+          <td class="td-4" id="c4">â</td>
+          <td class="td-5" id="c5">â</td>
+          <td class="td-6" id="c6">â</td>
+          <td class="td-7" id="c7">â</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Common progressions -->
+  <p class="section-title">Progresiones comunes</p>
+  <div class="prog-list" id="prog-list"></div>
+
+  <!-- Concepts -->
+  <p class="section-title">Conceptos clave</p>
+
+  <div class="concept-card">
+    <h3><i class="ti ti-hash"></i> Â¿QuÃ© es el sistema Nashville?</h3>
+    <p>Reemplaza los nombres de acordes con nÃºmeros (1â7) que representan cada grado de la escala. Funciona en cualquier tonalidad â el <strong style="color:#f97316">1</strong> siempre es el acorde tÃ³nico, el <strong style="color:#fca5a5">5</strong> siempre es el dominante.</p>
+    <div class="example">En Do: 1=C  2=Dm  5=G<br>En Sol: 1=G  2=Am  5=D</div>
+  </div>
+
+  <div class="concept-card">
+    <h3><i class="ti ti-music"></i> Grados importantes</h3>
+    <p>
+      <strong style="color:#fed7aa">1 (TÃ³nica)</strong> â Centro de reposo. La canciÃ³n "llega a casa" aquÃ­.<br><br>
+      <strong style="color:#d8b4fe">4 (Subdominante)</strong> â TensiÃ³n suave. Aleja del tÃ³nico.<br><br>
+      <strong style="color:#fca5a5">5 (Dominante)</strong> â TensiÃ³n mÃ¡xima. Quiere resolver al 1.<br><br>
+      <strong style="color:#93c5fd">6 (Relativa menor)</strong> â El "lado oscuro" de la tonalidad.
+    </p>
+  </div>
+
+  <div class="concept-card">
+    <h3><i class="ti ti-pencil"></i> Modificadores</h3>
+    <p>Se aÃ±aden superÃ­ndices o sufijos al nÃºmero:</p>
+    <div class="example">
+      5â·  â acorde de sÃ©ptima dominante<br>
+      1^  â acorde mayor con sÃ©ptima mayor<br>
+      6-  â acorde menor (tambiÃ©n escrito 6m)<br>
+      #4  â cuarto grado sostenido (Lydian)<br>
+      b7  â sÃ©ptimo grado bemol (Mixolydian)
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <h3><i class="ti ti-arrows-exchange"></i> Transportar es trivial</h3>
+    <p>Una hoja Nashville sirve para cualquier cantante. Solo cambias la tonalidad de referencia â los nÃºmeros no cambian.</p>
+    <div class="example">1 5 6 4 â Do: C G Am F<br>1 5 6 4 â Re: D A Bm G<br>1 5 6 4 â Sol: G D Em C</div>
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+  <a href="/index.html" class="nav-item"><i class="ti ti-home"></i><span>Inicio</span></a>
+  <a href="/search.html" class="nav-item"><i class="ti ti-search"></i><span>Buscar</span></a>
+  <a href="/medley.html" class="nav-item"><i class="ti ti-list-numbers"></i><span>Medley</span></a>
+  <a href="/profile.html" class="nav-item"><i class="ti ti-user"></i><span>Perfil</span></a>
+  <a href="/more.html" class="nav-item active"><i class="ti ti-dots"></i><span>MÃ¡s</span></a>
+</nav>
+
+<script>
+const KEYS = ['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+const CHORDS = {
+  'C':  ['C','Dm','Em','F','G','Am','Bdim'],
+  'Db': ['Db','Ebm','Fm','Gb','Ab','Bbm','Cdim'],
+  'D':  ['D','Em','F#m','G','A','Bm','C#dim'],
+  'Eb': ['Eb','Fm','Gm','Ab','Bb','Cm','Ddim'],
+  'E':  ['E','F#m','G#m','A','B','C#m','D#dim'],
+  'F':  ['F','Gm','Am','Bb','C','Dm','Edim'],
+  'F#': ['F#','G#m','A#m','B','C#','D#m','E#dim'],
+  'G':  ['G','Am','Bm','C','D','Em','F#dim'],
+  'Ab': ['Ab','Bbm','Cm','Db','Eb','Fm','Gdim'],
+  'A':  ['A','Bm','C#m','D','E','F#m','G#dim'],
+  'Bb': ['Bb','Cm','Dm','Eb','F','Gm','Adim'],
+  'B':  ['B','C#m','D#m','E','F#','G#m','A#dim'],
+};
+
+const PROGRESSIONS = [
+  { nums: '1 â 5 â 6 â 4', name: 'La mÃ¡s popular del mundo', genre: 'Pop / Rock' },
+  { nums: '1 â 4 â 5',     name: 'Blues clÃ¡sico', genre: 'Blues / Country' },
+  { nums: '1 â 6 â 4 â 5', name: 'Doo-wop / 50s', genre: 'Oldies / Pop' },
+  { nums: '2 â 5 â 1',     name: 'Cadencia jazz', genre: 'Jazz' },
+  { nums: '1 â 5 â 6 â 3 â 4', name: 'Canon de Pachelbel', genre: 'ClÃ¡sico / Pop' },
+  { nums: '6 â 4 â 1 â 5', name: 'Modo menor relativo', genre: 'Pop / Rock' },
+  { nums: '1 â 4 â 1 â 5', name: 'Country bÃ¡sico', genre: 'Country' },
+  { nums: '1 â 3 â 4 â 5', name: 'Rock clÃ¡sico', genre: 'Rock' },
+];
+
+let currentKey = 'C';
+
+// Build key grid
+const grid = document.getElementById('key-grid');
+KEYS.forEach(k => {
+  const btn = document.createElement('button');
+  btn.className = 'key-btn' + (k === currentKey ? ' active' : '');
+  btn.textContent = k;
+  btn.addEventListener('click', () => selectKey(k));
+  grid.appendChild(btn);
+});
+
+function selectKey(k) {
+  currentKey = k;
+  // Update buttons
+  grid.querySelectorAll('.key-btn').forEach((b, i) => {
+    b.classList.toggle('active', KEYS[i] === k);
+  });
+  updateTable();
+  updateProgressions();
+}
+
+function updateTable() {
+  const chords = CHORDS[currentKey];
+  document.getElementById('table-key-label').textContent = currentKey + ' Mayor';
+  for (let i = 1; i <= 7; i++) {
+    document.getElementById('c' + i).textContent = chords[i - 1];
+  }
+}
+
+function updateProgressions() {
+  const chords = CHORDS[currentKey];
+  const list = document.getElementById('prog-list');
+  list.innerHTML = '';
+
+  // Map number string to chord names
+  function numsToChordsStr(nums) {
+    return nums.split(' â ').map(n => {
+      const idx = parseInt(n.trim()) - 1;
+      return isNaN(idx) ? n : (chords[idx] || n);
+    }).join(' â ');
+  }
+
+  PROGRESSIONS.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'prog-item';
+    div.innerHTML = `
+      <div>
+        <div class="prog-nums">${p.nums}</div>
+        <div class="prog-chords-preview">${numsToChordsStr(p.nums)}</div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="prog-name">${p.name}</div>
+        <div class="prog-name" style="color:rgba(249,115,22,0.6);font-size:0.72rem;margin-top:2px">${p.genre}</div>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// Init
+updateTable();
+updateProgressions();
+</script>
+</body>
+</html>
