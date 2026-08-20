@@ -260,16 +260,16 @@ header {
 
 <div class="tuner-body">
   <div class="note-display" id="note-display">
-    <div class="note-name" id="note-name">â</div>
+    <div class="note-name" id="note-name">—</div>
     <div class="note-octave" id="note-octave"></div>
     <div class="freq-display" id="freq-display"></div>
   </div>
 
   <div class="meter-wrap">
     <div class="meter-labels">
-      <span>â­ Bemol</span>
+      <span>♭ Bemol</span>
       <span>Afinado</span>
-      <span>Sostenido â¯</span>
+      <span>Sostenido ♯</span>
     </div>
     <div class="meter-track">
       <div class="meter-center"></div>
@@ -278,7 +278,7 @@ header {
   </div>
 
   <div class="tune-status" id="tune-status"></div>
-  <div class="cents-display" id="cents-display">â</div>
+  <div class="cents-display" id="cents-display">—</div>
 
   <button class="listen-btn" id="listen-btn" onclick="toggleListening()">
     <i class="ti ti-microphone" id="listen-icon"></i>
@@ -286,37 +286,37 @@ header {
   <div class="listen-label" id="listen-label">Toca para activar</div>
 
   <div class="strings-card">
-    <div class="strings-title">Referencia rÃ¡pida</div>
+    <div class="strings-title">Referencia rápida</div>
     <div class="strings-grid">
       <div class="string-item" onclick="playRef(82.41, 'E2')">
         <div class="string-note">E2</div>
         <div class="string-freq">82.4 Hz</div>
-        <div class="string-name">6Âª cuerda</div>
+        <div class="string-name">6ª cuerda</div>
       </div>
       <div class="string-item" onclick="playRef(110, 'A2')">
         <div class="string-note">A2</div>
         <div class="string-freq">110 Hz</div>
-        <div class="string-name">5Âª cuerda</div>
+        <div class="string-name">5ª cuerda</div>
       </div>
       <div class="string-item" onclick="playRef(146.83, 'D3')">
         <div class="string-note">D3</div>
         <div class="string-freq">146.8 Hz</div>
-        <div class="string-name">4Âª cuerda</div>
+        <div class="string-name">4ª cuerda</div>
       </div>
       <div class="string-item" onclick="playRef(196, 'G3')">
         <div class="string-note">G3</div>
         <div class="string-freq">196 Hz</div>
-        <div class="string-name">3Âª cuerda</div>
+        <div class="string-name">3ª cuerda</div>
       </div>
       <div class="string-item" onclick="playRef(246.94, 'B3')">
         <div class="string-note">B3</div>
         <div class="string-freq">246.9 Hz</div>
-        <div class="string-name">2Âª cuerda</div>
+        <div class="string-name">2ª cuerda</div>
       </div>
       <div class="string-item" onclick="playRef(329.63, 'E4')">
         <div class="string-note">E4</div>
         <div class="string-freq">329.6 Hz</div>
-        <div class="string-name">1Âª cuerda</div>
+        <div class="string-name">1ª cuerda</div>
       </div>
     </div>
   </div>
@@ -327,7 +327,7 @@ header {
     <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
     <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
     <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medleys</span></a>
-    <a class="nav-item active" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>MÃ¡s</span></a>
+    <a class="nav-item active" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
   </div>
 </nav>
 
@@ -377,12 +377,12 @@ function autoCorrelate(buf, sampleRate) {
 
 function updateUI(freq) {
   if (freq < 20 || freq > 5000) {
-    document.getElementById('note-name').textContent = 'â';
+    document.getElementById('note-name').textContent = '—';
     document.getElementById('note-octave').textContent = '';
     document.getElementById('freq-display').textContent = '';
     document.getElementById('tune-status').textContent = '';
     document.getElementById('tune-status').className = 'tune-status';
-    document.getElementById('cents-display').textContent = 'â';
+    document.getElementById('cents-display').textContent = '—';
     document.getElementById('needle').style.left = '50%';
     document.getElementById('needle').className = 'meter-needle';
     document.getElementById('note-display').className = 'note-display';
@@ -397,9 +397,9 @@ function updateUI(freq) {
   const clamped = Math.max(2, Math.min(98, pct));
   document.getElementById('needle').style.left = clamped + '%';
 
-  let state = 'in-tune', status = 'â Afinado';
-  if (cents < -8) { state = 'flat'; status = 'â­ Sube un poco'; }
-  else if (cents > 8) { state = 'sharp'; status = 'â¯ Baja un poco'; }
+  let state = 'in-tune', status = '✓ Afinado';
+  if (cents < -8) { state = 'flat'; status = '♭ Sube un poco'; }
+  else if (cents > 8) { state = 'sharp'; status = '♯ Baja un poco'; }
 
   document.getElementById('tune-status').textContent = status;
   document.getElementById('tune-status').className = 'tune-status ' + state;
@@ -428,7 +428,7 @@ async function startListening() {
     document.getElementById('listen-label').textContent = 'Toca para detener';
     loop();
   } catch (e) {
-    alert('No se pudo acceder al micrÃ³fono. Verifica los permisos.');
+    alert('No se pudo acceder al micrófono. Verifica los permisos.');
   }
 }
 
