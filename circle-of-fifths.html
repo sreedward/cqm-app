@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#080c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CQM - CÃ­rculo de Quintas</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: linear-gradient(135deg, #060b18 0%, #0b1628 35%, #0d0c20 65%, #13082a 100%) fixed;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(59,130,246,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.10) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+body > * { position: relative; z-index: 1; }
+header {
+  background: rgba(8,15,28,0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(59,130,246,0.15);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.back-btn {
+  background: none; border: none;
+  color: #3b82f6; font-size: 1.3rem;
+  cursor: pointer; padding: 4px;
+  display: flex; align-items: center;
+}
+.header-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #a855f7, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem;
+}
+/* Circle */
+.circle-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0.5rem 0 1.25rem;
+  touch-action: none;
+}
+#cof-svg { max-width: 340px; width: 100%; }
+
+/* Info panel */
+.info-panel {
+  background: rgba(15,25,50,0.6);
+  border: 1px solid rgba(168,85,247,0.2);
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  min-height: 120px;
+  transition: all 0.3s;
+}
+.info-panel.hidden { opacity: 0.4; }
+.key-name {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #a855f7, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.25rem;
+}
+.key-name-minor {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 1rem;
+}
+.chords-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.chord-chip {
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.chord-I   { background: rgba(168,85,247,0.25); border: 1px solid rgba(168,85,247,0.5); color: #d8b4fe; }
+.chord-II  { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
+.chord-III { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
+.chord-IV  { background: rgba(168,85,247,0.25); border: 1px solid rgba(168,85,247,0.5); color: #d8b4fe; }
+.chord-V   { background: rgba(239,68,68,0.2);   border: 1px solid rgba(239,68,68,0.4);  color: #fca5a5; }
+.chord-VI  { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
+.chord-VII { background: rgba(100,116,139,0.2); border: 1px solid rgba(100,116,139,0.4); color: #94a3b8; }
+.chord-num {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+/* Legend */
+.legend {
+  background: rgba(15,25,50,0.5);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+.legend h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 0.75rem;
+}
+.legend-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.7);
+}
+.legend-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Relationships section */
+.section-card {
+  background: rgba(15,25,50,0.5);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+.section-card h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 0.75rem;
+}
+.rel-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.rel-chip {
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.rel-chip:active { transform: scale(0.93); }
+.rel-dominant   { background: rgba(239,68,68,0.2);  border: 1px solid rgba(239,68,68,0.4);  color: #fca5a5; }
+.rel-subdominant{ background: rgba(168,85,247,0.2); border: 1px solid rgba(168,85,247,0.4); color: #d8b4fe; }
+ .rel-relative   { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.35); color: #86efac; }
+.rel-parallel   { background: rgba(251,191,36,0.15);border: 1px solid rgba(251,191,36,0.35);color: #fde68a; }
+
+.hint {
+  text-align: center;
+  color: rgba(255,255,255,0.3);
+  font-size: 0.78rem;
+  margin-top: 0.5rem;
+}
+
+/* Bottom nav placeholder */
+nav.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  background: rgba(8,15,28,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(59,130,246,0.15);
+  padding: 0.5rem 0 0.75rem;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px; padding: 0.3rem 1rem;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none; font-size: 0.65rem;
+  font-weight: 500; letter-spacing: 0.03em;
+  transition: color 0.2s;
+}
+.nav-item i { font-size: 1.4rem; }
+.nav-item.active { color: #3b82f6; }
+</style>
+</head>
+<body>
+<header>
+  <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i></button>
+  <span class="header-title">CÃ­rculo de Quintas</span>
+</header>
+
+<div class="container">
+  <p class="hint" style="margin-bottom:1rem;">Toca una tonalidad para ver sus acordes</p>
+
+  <div class="circle-wrap">
+    <svg id="cof-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow-purple">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-blue">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- Built by JS -->
+    </svg>
+  </div>
+
+  <div class="info-panel hidden" id="info-panel">
+    <div class="key-name" id="key-name">â</div>
+    <div class="key-name-minor" id="key-minor">Relativa menor: â</div>
+    <div class="chords-row" id="chords-row"></div>
+  </div>
+
+  <div class="section-card" id="rel-section" style="display:none">
+    <h3>Tonalidades relacionadas</h3>
+    <div class="rel-row" id="rel-row"></div>
+  </div>
+
+  <div class="legend">
+    <h3>Leyenda</h3>
+    <div class="legend-grid">
+      <div class="legend-item"><div class="legend-dot" style="background:#a855f7"></div>Mayor (externo)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Menor (interno)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(239,68,68,0.7)"></div>Dominante (V)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(34,197,94,0.7)"></div>Relativa</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h3>Â¿CÃ³mo funciona?</h3>
+    <p style="font-size:0.85rem;color:rgba(255,255,255,0.65);line-height:1.6;">
+      Cada paso en sentido horario sube una quinta (7 semitonos). Las tonalidades vecinas comparten 6 de 7 notas â son fÃ¡ciles de modular. El anillo externo muestra las tonalidades <strong style="color:#d8b4fe">mayores</strong> y el interno las <strong style="color:#93c5fd">menores</strong> relativas.
+    </p>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="/index.html" class="nav-item"><i class="ti ti-home"></i><span>Inicio</span></a>
+  <a href="/search.html" class="nav-item"><i class="ti ti-search"></i><span>Buscar</span></a>
+  <a href="/medley.html" class="nav-item"><i class="ti ti-list-numbers"></i><span>Medley</span></a>
+  <a href="/profile.html" class="nav-item"><i class="ti ti-user"></i><span>Perfil</span></a>
+  <a href="/more.html" class="nav-item active"><i class="ti ti-dots"></i><span>MÃ¡s</span></a>
+</nav>
+
+<script>
+// ââ Data ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+const MAJOR_KEYS = ['C','G','D','A','E','B','F#/Gb','Db','Ab','Eb','Bb','F'];
+const MINOR_KEYS = ['Am','Em','Bm','F#m','C#m','G#m','D#m/Ebm','Bbm','Fm','Cm','Gm','Dm'];
+
+// Chords in each major key: [I, IIm, IIIm, IV, V, VIm, VIIdim]
+const CHORDS = {
+  'C':     ['C','Dm','Em','F','G','Am','Bdim'],
+  'G':     ['G','Am','Bm','C','D','Em','F#dim'],
+  'D':     ['D','Em','F#m','G','A','Bm','C#dim'],
+  'A':     ['A','Bm','C#m','D','E','F#m','G#dim'],
+  'E':     ['E','F#m','G#m','A','B','C#m','D#dim'],
+  'B':     ['B','C#m','D#m','E','F#','G#m','A#dim'],
+  'F#/Gb': ['F#','G#m','A#m','B','C#','D#m','E#dim'],
+  'Db':    ['Db','Ebm','Fm','Gb','Ab','Bbm','Cdim'],
+  'Ab':    ['Ab','Bbm','Cm','Db','Eb','Fm','Gdim'],
+  'Eb':    ['Eb','Fm','Gm','Ab','Bb','Cm','Ddim'],
+  'Bb':    ['Bb','Cm','Dm','Eb','F','Gm','Adim'],
+  'F':     ['F','Gm','Am','Bb','C','Dm','Edim'],
+};
+const CHORD_CLASSES = ['I','II','III','IV','V','VI','VII'];
+const CHORD_LABELS  = ['I','IIm','IIIm','IV','V','VIm','VIIdim'];
+
+// ââ SVG builder âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const CX = 200, CY = 200;
+const R_OUTER = 155, R_INNER = 105, R_MIN = 62;
+const N = 12;
+const SLICE = (2 * Math.PI) / N;
+
+let selectedKey = null;
+
+function polarToXY(angle, r) {
+  return [CX + r * Math.sin(angle), CY - r * Math.cos(angle)];
+}
+
+function makeArcPath(startAngle, endAngle, rOuter, rInner) {
+  const gap = 0.025;
+  const sa = startAngle + gap, ea = endAngle - gap;
+  const [x1, y1] = polarToXY(sa, rOuter);
+  const [x2, y2] = polarToXY(ea, rOuter);
+  const [x3, y3] = polarToXY(ea, rInner);
+  const [x4, y4] = polarToXY(sa, rInner);
+  const large = (ea - sa) > Math.PI ? 1 : 0;
+  return `M ${x1} ${y1} A ${rOuter} ${rOuter} 0 ${large} 1 ${x2} ${y2} L ${x3} ${y3} A ${rInner} ${rInner} 0 ${large} 0 ${x4} ${y4} Z`;
+}
+
+function buildCircle() {
+  const svg = document.getElementById('cof-svg');
+  // Clear
+  while (svg.lastChild) svg.removeChild(svg.lastChild);
+
+  // Re-add defs
+  const defs = document.createElementNS(SVG_NS, 'defs');
+  defs.innerHTML = `
+    <filter id="glow-sel"><feGaussianBlur stdDeviation="5" result="cb"/><feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <radialGradient id="bg-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(59,130,246,0.05)"/>
+      <stop offset="100%" stop-color="rgba(8,12,24,0.0)"/>
+    </radialGradient>
+  `;
+  svg.appendChild(defs);
+
+  // Background circle
+  const bgCircle = document.createElementNS(SVG_NS, 'circle');
+  bgCircle.setAttribute('cx', CX); bgCircle.setAttribute('cy', CY); bgCircle.setAttribute('r', R_OUTER + 10);
+  bgCircle.setAttribute('fill', 'url(#bg-grad)'); bgCircle.setAttribute('stroke', 'rgba(59,130,246,0.1)'); bgCircle.setAttribute('stroke-width', '1');
+  svg.appendChild(bgCircle);
+
+  for (let i = 0; i < N; i++) {
+    const angle = i * SLICE;
+    const majorKey = MAJOR_KEYS[i];
+    const minorKey = MINOR_KEYS[i];
+    const isSelected = selectedKey === majorKey;
+
+    // ââ Outer arc (major) ââ
+    const outerPath = document.createElementNS(SVG_NS, 'path');
+    outerPath.setAttribute('d', makeArcPath(angle, angle + SLICE, R_OUTER, R_INNER));
+    outerPath.setAttribute('fill', isSelected
+      ? 'rgba(168,85,247,0.55)'
+      : 'rgba(168,85,247,0.12)');
+    outerPath.setAttribute('stroke', isSelected ? 'rgba(168,85,247,0.9)' : 'rgba(168,85,247,0.3)');
+    outerPath.setAttribute('stroke-width', isSelected ? '2' : '1');
+    if (isSelected) outerPath.setAttribute('filter', 'url(#glow-sel)');
+    outerPath.style.cursor = 'pointer';
+    outerPath.style.transition = 'fill 0.2s';
+    outerPath.addEventListener('click', () => selectKey(majorKey));
+    svg.appendChild(outerPath);
+
+    // Major key label
+    const [tlx, tly] = polarToXY(angle + SLICE / 2, (R_OUTER + R_INNER) / 2);
+    const majorText = document.createElementNS(SVG_NS, 'text');
+    majorText.setAttribute('x', tlx); majorText.setAttribute('y', tly);
+    majorText.setAttribute('text-anchor', 'middle'); majorText.setAttribute('dominant-baseline', 'middle');
+    majorText.setAttribute('fill', isSelected ? '#fff' : 'rgba(255,255,255,0.85)');
+    majorText.setAttribute('font-size', majorKey.length > 2 ? '11' : '14');
+    majorText.setAttribute('font-weight', '700');
+    majorText.setAttribute('font-family', '-apple-system, sans-serif');
+    majorText.style.cursor = 'pointer';
+    majorText.style.pointerEvents = 'none';
+    majorText.textContent = majorKey;
+    svg.appendChild(majorText);
+
+    // ââ Inner arc (minor) ââ
+    const innerPath = document.createElementNS(SVG_NS, 'path');
+    innerPath.setAttribute('d', makeArcPath(angle, angle + SLICE, R_INNER, R_MIN));
+    innerPath.setAttribute('fill', isSelected
+      ? 'rgba(59,130,246,0.4)'
+      : 'rgba(59,130,246,0.08)');
+    innerPath.setAttribute('stroke', isSelected ? 'rgba(59,130,246,0.8)' : 'rgba(59,130,246,0.25)');
+    innerPath.setAttribute('stroke-width', '1');
+    innerPath.style.cursor = 'pointer';
+    innerPath.addEventListener('click', () => selectKey(majorKey));
+    svg.appendChild(innerPath);
+
+    // Minor key label
+    const [mix, miy] = polarToXY(angle + SLICE / 2, (R_INNER + R_MIN) / 2);
+    const minorText = document.createElementNS(SVG_NS, 'text');
+    minorText.setAttribute('x', mix); minorText.setAttribute('y', miy);
+    minorText.setAttribute('text-anchor', 'middle'); minorText.setAttribute('dominant-baseline', 'middle');
+    minorText.setAttribute('fill', 'rgba(147,197,253,0.8)');
+    minorText.setAttribute('font-size', minorKey.length > 3 ? '9' : '11');
+    minorText.setAttribute('font-weight', '600');
+    minorText.setAttribute('font-family', '-apple-system, sans-serif');
+    minorText.style.pointerEvents = 'none';
+    minorText.textContent = minorKey;
+    svg.appendChild(minorText);
+  }
+
+  // Center circle
+  const center = document.createElementNS(SVG_NS, 'circle');
+  center.setAttribute('cx', CX); center.setAttribute('cy', CY); center.setAttribute('r', R_MIN - 4);
+  center.setAttribute('fill', 'rgba(8,12,24,0.9)');
+  center.setAttribute('stroke', 'rgba(168,85,247,0.2)');
+  center.setAttribute('stroke-width', '1');
+  svg.appendChild(center);
+
+  // Center text
+  const ct = document.createElementNS(SVG_NS, 'text');
+  ct.setAttribute('x', CX); ct.setAttribute('y', CY);
+  ct.setAttribute('text-anchor', 'middle'); ct.setAttribute('dominant-baseline', 'middle');
+  ct.setAttribute('fill', 'rgba(255,255,255,0.3)');
+  ct.setAttribute('font-size', '11');
+  ct.setAttribute('font-family', '-apple-system, sans-serif');
+  ct.textContent = selectedKey ? selectedKey : '5ths';
+  svg.appendChild(ct);
+}
+
+// ââ Selection logic âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+function selectKey(key) {
+  selectedKey = (selectedKey === key) ? null : key;
+  buildCircle();
+  updatePanel();
+}
+
+function updatePanel() {
+  const panel = document.getElementById('info-panel');
+  const relSection = document.getElementById('rel-section');
+
+  if (!selectedKey) {
+    panel.classList.add('hidden');
+    relSection.style.display = 'none';
+    return;
+  }
+
+  panel.classList.remove('hidden');
+  relSection.style.display = '';
+
+  const idx = MAJOR_KEYS.indexOf(selectedKey);
+  const minor = MINOR_KEYS[idx];
+  const chords = CHORDS[selectedKey];
+
+  document.getElementById('key-name').textContent = selectedKey + ' Mayor';
+  document.getElementById('key-minor').textContent = 'Relativa menor: ' + minor;
+
+  // Chord chips
+  const row = document.getElementById('chords-row');
+  row.innerHTML = '';
+  chords.forEach((ch, i) => {
+    const chip = document.createElement('div');
+    chip.className = `chord-chip chord-${CHORD_CLASSES[i]}`;
+    chip.innerHTML = `<span class="chord-num">${CHORD_LABELS[i]}</span> ${ch}`;
+    row.appendChild(chip);
+  });
+
+  // Relationships
+  const dominant   = MAJOR_KEYS[(idx + 1) % 12]; // clockwise
+  const subdominant= MAJOR_KEYS[(idx + 11) % 12]; // counter
+  const relative   = minor;
+  const parallel   = selectedKey.replace(/\/.*/, '') + 'm'; // rough
+
+  const relRow = document.getElementById('rel-row');
+  relRow.innerHTML = '';
+
+  const rels = [
+    { label: 'Dominante: ' + dominant,    cls: 'rel-dominant',    key: dominant },
+    { label: 'Subdominante: ' + subdominant, cls: 'rel-subdominant', key: subdominant },
+    { label: 'Relativa: ' + relative,     cls: 'rel-relative',    key: null },
+  ];
+
+  rels.forEach(r => {
+    const chip = document.createElement('div');
+    chip.className = 'rel-chip ' + r.cls;
+    chip.textContent = r.label;
+    if (r.key) {
+      chip.addEventListener('click', () => selectKey(r.key));
+      chip.title = 'Ir a ' + r.key;
+    }
+    relRow.appendChild(chip);
+  });
+}
+
+// ââ Init ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+buildCircle();
+</script>
+</body>
+</html>
