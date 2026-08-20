@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#080c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CQM - Afinador</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: linear-gradient(135deg, #060b18 0%, #0b1628 35%, #0d0c20 65%, #13082a 100%) fixed;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(59,130,246,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.10) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+body > * { position: relative; z-index: 1; }
+header {
+  background: rgba(8,15,28,0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(59,130,246,0.15);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.back-btn {
+  background: none; border: none;
+  color: #3b82f6; font-size: 1.3rem;
+  cursor: pointer; padding: 4px;
+  display: flex; align-items: center;
+}
+.header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; }
+
+/* Main tuner area */
+.tuner-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.25rem;
+}
+
+/* Big note display */
+.note-display {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(13,22,38,0.7);
+  border: 3px solid #1e2d45;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.3s;
+  backdrop-filter: blur(12px);
+}
+.note-display.in-tune { border-color: #22c55e; box-shadow: 0 0 30px rgba(34,197,94,0.3); }
+.note-display.sharp { border-color: #f97316; box-shadow: 0 0 30px rgba(249,115,22,0.2); }
+.note-display.flat { border-color: #3b82f6; box-shadow: 0 0 30px rgba(59,130,246,0.2); }
+.note-name {
+  font-size: 4rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  line-height: 1;
+}
+.note-octave {
+  font-size: 1.2rem;
+  color: #4a5568;
+  margin-top: 2px;
+}
+.freq-display {
+  font-size: 0.8rem;
+  color: #4a5568;
+  margin-top: 4px;
+}
+
+/* Cents meter */
+.meter-wrap {
+  width: 100%;
+  max-width: 340px;
+  margin-bottom: 1.5rem;
+}
+.meter-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: #4a5568;
+  margin-bottom: 6px;
+  padding: 0 4px;
+}
+.meter-track {
+  position: relative;
+  height: 12px;
+  background: rgba(30,45,69,0.6);
+  border-radius: 6px;
+  overflow: visible;
+}
+.meter-center {
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  width: 2px;
+  height: 16px;
+  background: #4a5568;
+  transform: translateX(-50%);
+}
+.meter-needle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #4a5568;
+  transform: translate(-50%, -50%);
+  transition: left 0.1s ease, background 0.3s;
+}
+.meter-needle.in-tune { background: #22c55e; }
+.meter-needle.sharp { background: #f97316; }
+.meter-needle.flat { background: #3b82f6; }
+
+.tune-status {
+  font-size: 0.85rem;
+  color: #4a5568;
+  margin-bottom: 0.5rem;
+  height: 1.2em;
+  font-weight: 500;
+}
+.tune-status.in-tune { color: #22c55e; }
+.tune-status.sharp { color: #f97316; }
+.tune-status.flat { color: #3b82f6; }
+
+.cents-display {
+  font-size: 0.75rem;
+  color: #4a5568;
+  margin-bottom: 1.5rem;
+}
+
+/* Start/stop button */
+.listen-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: none;
+  color: #fff;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  transition: background 0.2s, transform 0.1s;
+  box-shadow: 0 4px 20px rgba(59,130,246,0.35);
+}
+.listen-btn.active { background: #ef4444; box-shadow: 0 4px 20px rgba(239,68,68,0.35); }
+.listen-btn:active { transform: scale(0.95); }
+.listen-label { font-size: 0.75rem; color: #4a5568; margin-bottom: 2rem; }
+
+/* Reference strings */
+.strings-card {
+  width: 100%;
+  max-width: 340px;
+  background: rgba(13,22,38,0.6);
+  border: 1px solid rgba(59,130,246,0.12);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  backdrop-filter: blur(10px);
+}
+.strings-title {
+  font-size: 0.7rem;
+  color: #4a5568;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+.strings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.string-item {
+  background: rgba(30,45,69,0.5);
+  border-radius: 8px;
+  padding: 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+.string-item:active { opacity: 0.7; }
+.string-item.active { border-color: #3b82f6; background: rgba(59,130,246,0.1); }
+.string-note { font-size: 1rem; font-weight: 700; color: #e2e8f0; }
+.string-freq { font-size: 0.65rem; color: #4a5568; margin-top: 2px; }
+.string-name { font-size: 0.6rem; color: #4a5568; }
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 0 12px calc(env(safe-area-inset-bottom, 12px) + 8px);
+}
+.nav-row {
+  display: flex;
+  align-items: stretch;
+  height: 62px;
+  padding: 0 6px;
+  background: rgba(10,15,28,0.95);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(59,130,246,0.18);
+  border-radius: 22px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-decoration: none;
+  border-radius: 16px;
+  margin: 6px 3px;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-item i { font-size: 1.45rem; color: #5a6a7a; }
+.nav-item span { font-size: 0.62rem; color: #5a6a7a; font-weight: 500; }
+.nav-item.active { background: rgba(59,130,246,0.15); }
+.nav-item.active i { color: #60a5fa; }
+.nav-item.active span { color: #60a5fa; font-weight: 700; }
+</style>
+</head>
+<body>
+<header>
+  <button class="back-btn" onclick="stopListening(); history.back()">
+    <i class="ti ti-arrow-left"></i>
+  </button>
+  <div class="header-title">Afinador</div>
+</header>
+
+<div class="tuner-body">
+  <div class="note-display" id="note-display">
+    <div class="note-name" id="note-name">â</div>
+    <div class="note-octave" id="note-octave"></div>
+    <div class="freq-display" id="freq-display"></div>
+  </div>
+
+  <div class="meter-wrap">
+    <div class="meter-labels">
+      <span>â­ Bemol</span>
+      <span>Afinado</span>
+      <span>Sostenido â¯</span>
+    </div>
+    <div class="meter-track">
+      <div class="meter-center"></div>
+      <div class="meter-needle" id="needle"></div>
+    </div>
+  </div>
+
+  <div class="tune-status" id="tune-status"></div>
+  <div class="cents-display" id="cents-display">â</div>
+
+  <button class="listen-btn" id="listen-btn" onclick="toggleListening()">
+    <i class="ti ti-microphone" id="listen-icon"></i>
+  </button>
+  <div class="listen-label" id="listen-label">Toca para activar</div>
+
+  <div class="strings-card">
+    <div class="strings-title">Referencia rÃ¡pida</div>
+    <div class="strings-grid">
+      <div class="string-item" onclick="playRef(82.41, 'E2')">
+        <div class="string-note">E2</div>
+        <div class="string-freq">82.4 Hz</div>
+        <div class="string-name">6Âª cuerda</div>
+      </div>
+      <div class="string-item" onclick="playRef(110, 'A2')">
+        <div class="string-note">A2</div>
+        <div class="string-freq">110 Hz</div>
+        <div class="string-name">5Âª cuerda</div>
+      </div>
+      <div class="string-item" onclick="playRef(146.83, 'D3')">
+        <div class="string-note">D3</div>
+        <div class="string-freq">146.8 Hz</div>
+        <div class="string-name">4Âª cuerda</div>
+      </div>
+      <div class="string-item" onclick="playRef(196, 'G3')">
+        <div class="string-note">G3</div>
+        <div class="string-freq">196 Hz</div>
+        <div class="string-name">3Âª cuerda</div>
+      </div>
+      <div class="string-item" onclick="playRef(246.94, 'B3')">
+        <div class="string-note">B3</div>
+        <div class="string-freq">246.9 Hz</div>
+        <div class="string-name">2Âª cuerda</div>
+      </div>
+      <div class="string-item" onclick="playRef(329.63, 'E4')">
+        <div class="string-note">E4</div>
+        <div class="string-freq">329.6 Hz</div>
+        <div class="string-name">1Âª cuerda</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="nav-row">
+    <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
+    <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
+    <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medleys</span></a>
+    <a class="nav-item active" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>MÃ¡s</span></a>
+  </div>
+</nav>
+
+<script>
+const NOTE_STRINGS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+let audioCtx = null, analyser = null, stream = null, rafId = null;
+let listening = false;
+const buf = new Float32Array(2048);
+
+function freqToInfo(freq) {
+  const noteNum = 12 * Math.log2(freq / 440) + 69;
+  const rounded = Math.round(noteNum);
+  const cents = Math.round((noteNum - rounded) * 100);
+  const octave = Math.floor(rounded / 12) - 1;
+  return { note: NOTE_STRINGS[((rounded % 12) + 12) % 12], octave, cents, freq };
+}
+
+function autoCorrelate(buf, sampleRate) {
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / SIZE);
+  if (rms < 0.008) return -1;
+
+  let r1 = 0, r2 = SIZE - 1;
+  for (let i = 0; i < SIZE / 2; i++) { if (Math.abs(buf[i]) < 0.2) { r1 = i; break; } }
+  for (let i = 1; i < SIZE / 2; i++) { if (Math.abs(buf[SIZE - i]) < 0.2) { r2 = SIZE - i; break; } }
+  const trimmed = buf.slice(r1, r2);
+  const len = trimmed.length;
+  const c = new Float32Array(len);
+  for (let i = 0; i < len; i++)
+    for (let j = 0; j < len - i; j++)
+      c[i] += trimmed[j] * trimmed[j + i];
+
+  let d = 0;
+  while (d < len - 1 && c[d] > c[d + 1]) d++;
+  let maxVal = -1, maxPos = -1;
+  for (let i = d; i < len; i++) { if (c[i] > maxVal) { maxVal = c[i]; maxPos = i; } }
+  if (maxPos < 1 || maxPos >= len - 1) return -1;
+
+  const x1 = c[maxPos - 1], x2 = c[maxPos], x3 = c[maxPos + 1];
+  const a = (x1 + x3 - 2 * x2) / 2;
+  const b = (x3 - x1) / 2;
+  const T0 = a ? maxPos - b / (2 * a) : maxPos;
+  return sampleRate / T0;
+}
+
+function updateUI(freq) {
+  if (freq < 20 || freq > 5000) {
+    document.getElementById('note-name').textContent = 'â';
+    document.getElementById('note-octave').textContent = '';
+    document.getElementById('freq-display').textContent = '';
+    document.getElementById('tune-status').textContent = '';
+    document.getElementById('tune-status').className = 'tune-status';
+    document.getElementById('cents-display').textContent = 'â';
+    document.getElementById('needle').style.left = '50%';
+    document.getElementById('needle').className = 'meter-needle';
+    document.getElementById('note-display').className = 'note-display';
+    return;
+  }
+  const { note, octave, cents } = freqToInfo(freq);
+  document.getElementById('note-name').textContent = note;
+  document.getElementById('note-octave').textContent = octave;
+  document.getElementById('freq-display').textContent = freq.toFixed(1) + ' Hz';
+
+  const pct = 50 + (cents / 50) * 48; // map -50..+50 cents to 2%..98%
+  const clamped = Math.max(2, Math.min(98, pct));
+  document.getElementById('needle').style.left = clamped + '%';
+
+  let state = 'in-tune', status = 'â Afinado';
+  if (cents < -8) { state = 'flat'; status = 'â­ Sube un poco'; }
+  else if (cents > 8) { state = 'sharp'; status = 'â¯ Baja un poco'; }
+
+  document.getElementById('tune-status').textContent = status;
+  document.getElementById('tune-status').className = 'tune-status ' + state;
+  document.getElementById('needle').className = 'meter-needle ' + state;
+  document.getElementById('note-display').className = 'note-display ' + state;
+  document.getElementById('cents-display').textContent = (cents >= 0 ? '+' : '') + cents + ' cents';
+}
+
+function loop() {
+  analyser.getFloatTimeDomainData(buf);
+  const freq = autoCorrelate(buf, audioCtx.sampleRate);
+  updateUI(freq < 0 ? 0 : freq);
+  rafId = requestAnimationFrame(loop);
+}
+
+async function startListening() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    audioCtx.createMediaStreamSource(stream).connect(analyser);
+    listening = true;
+    document.getElementById('listen-btn').classList.add('active');
+    document.getElementById('listen-icon').className = 'ti ti-player-stop';
+    document.getElementById('listen-label').textContent = 'Toca para detener';
+    loop();
+  } catch (e) {
+    alert('No se pudo acceder al micrÃ³fono. Verifica los permisos.');
+  }
+}
+
+function stopListening() {
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  if (audioCtx) { audioCtx.close(); audioCtx = null; }
+  listening = false;
+  document.getElementById('listen-btn').classList.remove('active');
+  document.getElementById('listen-icon').className = 'ti ti-microphone';
+  document.getElementById('listen-label').textContent = 'Toca para activar';
+  updateUI(0);
+}
+
+function toggleListening() {
+  if (listening) stopListening(); else startListening();
+}
+
+// Play reference tone
+function playRef(freq, label) {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.3, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2);
+  osc.start(); osc.stop(ctx.currentTime + 2);
+}
+</script>
+</body>
+</html>
