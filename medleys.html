@@ -511,8 +511,9 @@ function cerrarCtx() {
 }
 
 function ctxEditar() {
+  const id = ctxMedleyId
   cerrarCtx()
-  if (ctxMedleyId) window.location.href = `/medley-builder.html?id=${encodeURIComponent(ctxMedleyId)}`
+  if (id) window.location.href = `/medley-builder.html?id=${encodeURIComponent(id)}`
 }
 
 function ctxCambiarFoto() {
@@ -521,17 +522,28 @@ function ctxCambiarFoto() {
   abrirCambiarFoto(id)
 }
 
-async function ctxEliminar() {
+ansync function ctxEliminar() {
   const id = ctxMedleyId
   cerrarCtx()
   if (!id) return
   const m = allMedleys.find(x => x.id === id)
-  if (!confirm(`¿Eliminar "${m?.name || 'este medley'}"?`)) return
-  const { error } = await _sb.from('medleys').delete().eq('id', id)
-  if (error) { showToast('Error al eliminar', true); return }
+  if (!confirm(`¼Eliminar "${m?.name || 'este medley'}"?`)) return
+
+  // Optimistic update: quitar de la UI de inmediato
+  const snapshot = allMedleys
   allMedleys = allMedleys.filter(x => x.id !== id)
   aplicarFiltro()
   actualizarSubtitulo()
+
+  const { error } = await _sb.from('medleys').delete().eq('id', id)
+  if (error) {
+    // Revertir si falló
+    allMedleys = snapshot
+    aplicarFiltro()
+    actualizarSubtitulo()
+    showToast('Error al eliminar', true)
+    return
+  }
   showToast('✓ Medley eliminado')
 }
 
@@ -544,7 +556,7 @@ function abrirCambiarFoto(id) {
   document.getElementById('cover-file-input').click()
 }
 
-async function onCoverSelected(e) {
+ansync function onCoverSelected(e) {
   const file = e.target.files[0]
   if (!file || !coverTargetId) return
   e.target.value = ''
