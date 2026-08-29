@@ -414,23 +414,73 @@ function renderTrack() {
 
 function initTrackDrag() {
   const list = document.getElementById('track-list');
-  let dragIdx = null;
+  let dragSrcIdx = null;
+  let touchDragEl = null;
+
+  function onTouchMove(e) {
+    if (dragSrcIdx === null || !touchDragEl) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    list.querySelectorAll('.track-item').forEach(it => {
+      it.style.outline = '';
+      const r = it.getBoundingClientRect();
+      if (touch.clientY >= r.top && touch.clientY <= r.bottom && it !== touchDragEl) {
+        it.style.outline = '1.5px solid #3b82f6';
+      }
+    });
+  }
+
+  function onTouchEnd(e) {
+    if (dragSrcIdx === null) return;
+    const touch = e.changedTouches[0];
+    list.querySelectorAll('.track-item').forEach(it => it.style.outline = '');
+    if (touchDragEl) touchDragEl.style.opacity = '1';
+    let tIdx = null;
+    list.querySelectorAll('.track-item').forEach(it => {
+      const r = it.getBoundingClientRect();
+      if (touch.clientY >= r.top && touch.clientY <= r.bottom && it !== touchDragEl) {
+        tIdx = parseInt(it.dataset.idx);
+      }
+    });
+    if (tIdx !== null && tIdx !== dragSrcIdx) {
+      const moved = track.splice(dragSrcIdx, 1)[0];
+      track.splice(tIdx, 0, moved);
+      renderTrack();
+    }
+    dragSrcIdx = null;
+    touchDragEl = null;
+    document.removeEventListener('touchmove', onTouchMove);
+    document.removeEventListener('touchend', onTouchEnd);
+  }
+
   list.querySelectorAll('.track-item').forEach(item => {
     item.addEventListener('dragstart', e => {
-      dragIdx = parseInt(item.dataset.idx);
+      dragSrcIdx = parseInt(item.dataset.idx);
       item.style.opacity = '0.4';
       e.dataTransfer.effectAllowed = 'move';
     });
-    item.addEventListener('dragend', () => { item.style.opacity = '1'; });
-    item.addEventListener('dragover', e => { e.preventDefault(); });
+    item.addEventListener('dragend', () => { item.style.opacity = '1'; dragSrcIdx = null; });
+    item.addEventListener('dragover', e => e.preventDefault());
     item.addEventListener('drop', e => {
       e.preventDefault();
-      const targetIdx = parseInt(item.dataset.idx);
-      if (dragIdx === null || dragIdx === targetIdx) return;
-      const moved = track.splice(dragIdx, 1)[0];
-      track.splice(targetIdx, 0, moved);
+      const tIdx = parseInt(item.dataset.idx);
+      if (dragSrcIdx === null || dragSrcIdx === tIdx) return;
+      const moved = track.splice(dragSrcIdx, 1)[0];
+      track.splice(tIdx, 0, moved);
       renderTrack();
     });
+
+    const handle = item.querySelector('.track-handle');
+    if (handle) {
+      handle.addEventListener('touchstart', e => {
+        e.preventDefault();
+        dragSrcIdx = parseInt(item.dataset.idx);
+        touchDragEl = item;
+        item.style.opacity = '0.5';
+        document.addEventListener('touchmove', onTouchMove, { passive: false });
+        document.addEventListener('touchend', onTouchEnd);
+      }, { passive: false });
+    }
   });
 }
 
