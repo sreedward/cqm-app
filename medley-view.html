@@ -316,6 +316,7 @@ let notesCache    = {}
 let currentUserId = null
 let keySheetSongKey = null
 let scrollObserver = null
+let scrollingTimer = null
 
 const params   = new URLSearchParams(window.location.search)
 const medleyId = params.get('id')
@@ -568,9 +569,16 @@ function setupScrollSpy() {
 }
 
 function scrollToSec(idx) {
+  // Marcar pill inmediatamente
   document.querySelectorAll('.pill').forEach((p, i) => p.classList.toggle('active-pill', i === idx))
   const el = document.getElementById(`sec-${idx}`)
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  if (!el) return
+  // Pausar el observer durante el scroll para que no sobreescriba el pill activo
+  if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null }
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  // Reconectar el observer después de que termine la animación (~700ms)
+  clearTimeout(scrollingTimer)
+  scrollingTimer = setTimeout(() => setupScrollSpy(), 800)
 }
 
 function setCifrado(tipo) {
