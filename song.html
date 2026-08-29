@@ -615,7 +615,10 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede ajustar aco
       pagesContainer.innerHTML = chunks.length
         ? chunks.map((chunk, idx) => `<div class="page${idx === currentPage - 1 ? ' active' : ''}" id="page-${idx + 1}">${chunk.map(renderSeccion).join('')}</div>`).join('')
         : '<div class="page active" id="page-1"><div class="loading">Sin secciones.</div></div>'
-      document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`
+      document.getElementById('page-indicator').textContent = currentPage + ' / ' + totalPages
+      const fabNav = document.getElementById('fab-nav')
+      if (fabNav) fabNav.classList.toggle('show', totalPages > 1)
+      updateFabNav()
       const fabNav = document.getElementById('fab-nav')
       if (fabNav) fabNav.classList.toggle('show', totalPages > 1)
       updateFabNav()
@@ -728,14 +731,32 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede cambiar la 
       renderAll()
     }
 
-    function togglePage() {
-      currentPage = currentPage < totalPages ? currentPage + 1 : 1
+    function updateFabNav() {
+      const prev = document.getElementById('fab-prev')
+      const next = document.getElementById('fab-next')
+      if (prev) prev.classList.toggle('hidden', currentPage === 1)
+      if (next) next.classList.toggle('hidden', currentPage === totalPages)
+      const pi = document.getElementById('page-indicator')
+      if (pi) pi.textContent = currentPage + ' / ' + totalPages
+    }
+
+    function nextPage() {
+      if (currentPage >= totalPages) return
+      currentPage++
       document.querySelectorAll('#pages-container .page').forEach((el, idx) => {
         el.classList.toggle('active', idx === currentPage - 1)
       })
-      document.getElementById('fab-icon').className = currentPage < totalPages ? 'ti ti-arrow-down' : 'ti ti-arrow-up'
-      document.getElementById('fab-text').textContent = currentPage < totalPages ? 'Siguiente' : 'Anterior'
-      document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`
+      updateFabNav()
+      window.scrollTo(0, 0)
+    }
+
+    function prevPage() {
+      if (currentPage <= 1) return
+      currentPage--
+      document.querySelectorAll('#pages-container .page').forEach((el, idx) => {
+        el.classList.toggle('active', idx === currentPage - 1)
+      })
+      updateFabNav()
       window.scrollTo(0, 0)
     }
 
