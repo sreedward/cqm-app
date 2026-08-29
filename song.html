@@ -82,7 +82,10 @@
 .chord-qual { font-size: 0.83em; font-weight: 700; position: relative; top: -0.35em; line-height: 1; letter-spacing: 0; white-space: nowrap; margin-left: 0.05em; }
 .chord-slash { font-size: 0.9em; opacity: 0.7; margin: 0 0.05em; }
     .lyrics { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
-    .fab { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #3b82f6; color: #fff; border: none; border-radius: 20px; padding: 0.7rem 1.75rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; z-index: 20; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .fab-nav { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); display: none; gap: 8px; z-index: 20; }
+    .fab-nav.show { display: flex; }
+    .fab { background: #3b82f6; color: #fff; border: none; border-radius: 20px; padding: 0.7rem 1.75rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .fab.hidden { visibility: hidden; pointer-events: none; }
     .page-indicator { position: fixed; bottom: 1.5rem; right: 1.25rem; background: #0d1626; border: 1px solid #1e2d45; color: #4a5568; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; z-index: 20; }
     .setlist-nav { position: fixed; bottom: 4rem; left: 0; right: 0; display: none; justify-content: space-between; padding: 0 1.25rem; z-index: 19; }
     .setlist-nav.show { display: flex; }
@@ -282,10 +285,16 @@
     <button class="nav-song-btn next" id="next-btn" onclick="irACancion(1)">Siguiente <i class="ti ti-arrow-right"></i></button>
   </div>
 
-  <button class="fab" id="fab" onclick="togglePage()">
-    <i class="ti ti-arrow-down" id="fab-icon"></i>
-    <span id="fab-text">Siguiente</span>
-  </button>
+  <div class="fab-nav" id="fab-nav">
+    <button class="fab fab-prev hidden" id="fab-prev" onclick="prevPage()">
+      <i class="ti ti-arrow-left"></i>
+      <span>Anterior</span>
+    </button>
+    <button class="fab fab-next" id="fab-next" onclick="nextPage()">
+      <span>Siguiente</span>
+      <i class="ti ti-arrow-right"></i>
+    </button>
+  </div>
   <div class="page-indicator" id="page-indicator">1 / 1</div>
   <div class="save-align-bar" id="save-align-bar">
     <span>Ajustando acordes</span>
@@ -607,7 +616,9 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede ajustar aco
         ? chunks.map((chunk, idx) => `<div class="page${idx === currentPage - 1 ? ' active' : ''}" id="page-${idx + 1}">${chunk.map(renderSeccion).join('')}</div>`).join('')
         : '<div class="page active" id="page-1"><div class="loading">Sin secciones.</div></div>'
       document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`
-      document.getElementById('fab').style.display = totalPages > 1 ? 'flex' : 'none'
+      const fabNav = document.getElementById('fab-nav')
+      if (fabNav) fabNav.classList.toggle('show', totalPages > 1)
+      updateFabNav()
       renderNotasUI()
     }
 let  notesCache = {};
