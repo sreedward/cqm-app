@@ -522,12 +522,12 @@ function ctxCambiarFoto() {
   abrirCambiarFoto(id)
 }
 
-ansync function ctxEliminar() {
+async function ctxEliminar() {
   const id = ctxMedleyId
   cerrarCtx()
   if (!id) return
   const m = allMedleys.find(x => x.id === id)
-  if (!confirm(`¼Eliminar "${m?.name || 'este medley'}"?`)) return
+  if (!confirm(`¿Eliminar "${m?.name || 'este medley'}"?`)) return
 
   // Optimistic update: quitar de la UI de inmediato
   const snapshot = allMedleys
@@ -556,7 +556,7 @@ function abrirCambiarFoto(id) {
   document.getElementById('cover-file-input').click()
 }
 
-ansync function onCoverSelected(e) {
+async function onCoverSelected(e) {
   const file = e.target.files[0]
   if (!file || !coverTargetId) return
   e.target.value = ''
