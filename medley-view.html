@@ -315,6 +315,7 @@ let cifrado       = 'americano'
 let notesCache    = {}
 let currentUserId = null
 let keySheetSongKey = null
+let scrollObserver = null
 
 const params   = new URLSearchParams(window.location.search)
 const medleyId = params.get('id')
@@ -549,23 +550,25 @@ function seleccionarKey(noteIdx) {
 }
 
 function setupScrollSpy() {
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const idx = parseInt(entry.target.id.replace('sec-', ''))
-        document.querySelectorAll('.pill').forEach((p, i) => p.classList.toggle('active-pill', i === idx))
-        const ap = document.getElementById(`pill-${idx}`)
-        if (ap) ap.scrollIntoView({ inline: 'center', behavior: 'smooth' })
-      }
-    })
-  }, { root: null, rootMargin: '-30% 0px -60% 0px', threshold: 0 })
+  if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null }
+  scrollObserver = new IntersectionObserver(entries => {
+    const intersecting = entries.filter(e => e.isIntersecting)
+    if (!intersecting.length) return
+    intersecting.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+    const entry = intersecting[0]
+    const idx = parseInt(entry.target.id.replace('sec-', ''))
+    document.querySelectorAll('.pill').forEach((p, i) => p.classList.toggle('active-pill', i === idx))
+    const ap = document.getElementById(`pill-${idx}`)
+    if (ap) ap.scrollIntoView({ inline: 'nearest', behavior: 'auto' })
+  }, { root: null, rootMargin: '-10% 0px -55% 0px', threshold: 0 })
   allSections.forEach((_, i) => {
     const el = document.getElementById(`sec-${i}`)
-    if (el) obs.observe(el)
+    if (el) scrollObserver.observe(el)
   })
 }
 
 function scrollToSec(idx) {
+  document.querySelectorAll('.pill').forEach((p, i) => p.classList.toggle('active-pill', i === idx))
   const el = document.getElementById(`sec-${idx}`)
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
