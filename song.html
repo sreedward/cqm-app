@@ -95,9 +95,10 @@
     .loading { text-align: center; color: #4a5568; padding: 3rem; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; display: none; align-items: flex-end; justify-content: center; }
     .modal-overlay.show { display: flex; }
-    .modal { background: #0d1626; border: 1px solid #1e2d45; border-radius: 16px 16px 0 0; padding: 1.5rem; width: 100%; max-width: 480px; }
-    .modal h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; color: #e2e8f0; }
-    .modal-cancel { width: 100%; background: #1e2d45; border: none; border-radius: 8px; color: #888; padding: 0.75rem; font-size: 0.9rem; cursor: pointer; margin-top: 1rem; }
+    .modal { background: #0d1626; border: 1px solid #1e2d45; border-radius: 16px 16px 0 0; padding: 1.5rem; width: 100%; max-width: 480px; max-height: 75vh; display: flex; flex-direction: column; }
+    .modal h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; color: #e2e8f0; flex-shrink: 0; }
+    #setlist-opciones { overflow-y: auto; flex: 1; }
+    .modal-cancel { width: 100%; background: #1e2d45; border: none; border-radius: 8px; color: #888; padding: 0.75rem; font-size: 0.9rem; cursor: pointer; margin-top: 1rem; flex-shrink: 0; }
     .setlist-opcion { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #1e2d45; cursor: pointer; }
     .setlist-opcion:last-child { border-bottom: none; }
     .opcion-name { font-size: 0.9rem; color: #e2e8f0; }
@@ -615,7 +616,7 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede ajustar aco
       pagesContainer.innerHTML = chunks.length
         ? chunks.map((chunk, idx) => `<div class="page${idx === currentPage - 1 ? ' active' : ''}" id="page-${idx + 1}">${chunk.map(renderSeccion).join('')}</div>`).join('')
         : '<div class="page active" id="page-1"><div class="loading">Sin secciones.</div></div>'
-      document.getElementById('page-indicator').textContent = currentPage + ' / ' + totalPages
+      document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`
       const fabNav = document.getElementById('fab-nav')
       if (fabNav) fabNav.classList.toggle('show', totalPages > 1)
       updateFabNav()
@@ -729,12 +730,9 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede cambiar la 
     }
 
     function updateFabNav() {
-      const prev = document.getElementById('fab-prev')
-      const next = document.getElementById('fab-next')
-      if (prev) prev.classList.toggle('hidden', currentPage === 1)
-      if (next) next.classList.toggle('hidden', currentPage === totalPages)
-      const pi = document.getElementById('page-indicator')
-      if (pi) pi.textContent = currentPage + ' / ' + totalPages
+      document.getElementById('fab-prev').classList.toggle('hidden', currentPage === 1)
+      document.getElementById('fab-next').classList.toggle('hidden', currentPage === totalPages)
+      document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`
     }
 
     function nextPage() {
