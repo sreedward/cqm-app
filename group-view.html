@@ -334,7 +334,7 @@ header {
       </button>
     </div>
     <button class="renew-btn" id="renew-btn" onclick="renovarCodigo()">
-      <i class="ti ti-refresh"></i> Generar nuevo link (si el anterior venciÃ³)
+      <i class="ti ti-refresh"></i> Generar nuevo link (si el anterior venció)
     </button>
   </div>
 
@@ -385,7 +385,7 @@ header {
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title">Salir del grupo</div>
-    <p class="confirm-message">Â¿Seguro que quieres salir? Ya no tendrÃ¡s acceso al contenido del grupo.</p>
+    <p class="confirm-message">¿Seguro que quieres salir? Ya no tendrás acceso al contenido del grupo.</p>
     <div class="modal-btns" style="margin-top:1.25rem">
       <button class="btn-cancel" onclick="cerrarConfirmSalir()">Cancelar</button>
       <button class="btn-danger" onclick="salirDelGrupo()">Salir</button>
@@ -398,7 +398,7 @@ header {
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title">Eliminar grupo</div>
-    <p class="confirm-message">Esto eliminarÃ¡ el grupo para <strong>todos los miembros</strong>. Esta acciÃ³n no se puede deshacer.</p>
+    <p class="confirm-message">Esto eliminará el grupo para <strong>todos los miembros</strong>. Esta acción no se puede deshacer.</p>
     <div class="modal-btns" style="margin-top:1.25rem">
       <button class="btn-cancel" onclick="cerrarConfirmEliminar()">Cancelar</button>
       <button class="btn-danger" onclick="eliminarGrupo()">Eliminar</button>
@@ -483,7 +483,7 @@ function generarCodigo() {
   return code
 }
 
-/* ---- Renovar cÃ³digo ---- */
+/* ---- Renovar código ---- */
 async function renovarCodigo() {
   const btn = document.getElementById('renew-btn')
   btn.disabled = true
@@ -499,15 +499,15 @@ async function renovarCodigo() {
   if (error) {
     showToast('No se pudo renovar el link')
     btn.disabled = false
-    btn.innerHTML = '<i class="ti ti-refresh"></i> Generar nuevo link (si el anterior venciÃ³)'
+    btn.innerHTML = '<i class="ti ti-refresh"></i> Generar nuevo link (si el anterior venció)'
     return
   }
 
   currentGroup.invite_code = newCode
   setInviteLink(newCode)
   btn.disabled = false
-  btn.innerHTML = '<i class="ti ti-refresh"></i> Generar nuevo link (si el anterior venciÃ³)'
-  showToast('Link renovado â ahora cÃ³pialo y compÃ¡rtelo', 'success')
+  btn.innerHTML = '<i class="ti ti-refresh"></i> Generar nuevo link (si el anterior venció)'
+  showToast('Link renovado — ahora cópialo y compártelo', 'success')
 }
 
 /* ---- Copiar link ---- */
@@ -556,7 +556,7 @@ async function cargarMiembros() {
 
   data.forEach(m => {
     const p = profilesById[m.user_id] || {}
-    const name = p.display_name || 'MÃºsico sin nombre'
+    const name = p.display_name || 'Músico sin nombre'
     const initials = name.substring(0, 2).toUpperCase()
     const memberIsLeader = m.user_id === currentGroup.leader_id
     const isSelf = m.user_id === currentUser.id
@@ -626,7 +626,7 @@ async function guardarRoles() {
 /* ---- Quitar miembro ---- */
 async function quitarMiembro(memberId, name) {
   // Use confirm for quick removal - could add a modal if needed
-  if (!confirm(`Â¿Quitar a ${name} del grupo?`)) return
+  if (!confirm(`¿Quitar a ${name} del grupo?`)) return
   const { error } = await _supabase.from('group_members').delete().eq('id', memberId)
   if (error) { showToast('No se pudo quitar al miembro'); return }
   showToast('Miembro eliminado del grupo')
