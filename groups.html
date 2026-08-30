@@ -15,15 +15,30 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-  background: #080c14;
+  background: linear-gradient(135deg, #060b18 0%, #0b1628 35%, #0d0c20 65%, #13082a 100%) fixed;
   color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100vh;
   padding-bottom: 90px;
 }
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(59,130,246,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 10%, rgba(34,197,94,0.06) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+body > * { position: relative; z-index: 1; }
+
 header {
-  background: #0d1626;
-  border-bottom: 1px solid #1e2d45;
+  background: rgba(8, 15, 28, 0.80);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid rgba(59,130,246,0.15);
   padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
@@ -35,266 +50,306 @@ header {
 .back-btn { background: none; border: none; color: #3b82f6; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
 .header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; flex: 1; }
 .new-btn {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
   border: none;
   color: #fff;
-  border-radius: 8px;
-  padding: 0.5rem 0.9rem;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
   font-size: 0.85rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
+  box-shadow: 0 2px 12px rgba(59,130,246,0.30);
 }
+
 .content { padding: 1.25rem; }
-.hint {
-  background: #0d1626;
-  border: 1px solid #1e2d45;
-  border-radius: 12px;
-  padding: 1rem;
-  font-size: 0.8rem;
-  color: #94a3b8;
-  margin-bottom: 1.25rem;
-  line-height: 1.4;
+
+/* Join section */
+.join-section {
+  background: rgba(13, 22, 38, 0.60);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.5rem;
 }
-.join-row { display: flex; gap: 8px; margin-bottom: 1.5rem; }
-.join-row input {
+.join-section-label {
+  font-size: 0.72rem;
+  color: #64748b;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.join-section-label i { font-size: 0.85rem; color: #3b82f6; }
+.join-row { display: flex; gap: 8px; }
+.join-input {
   flex: 1;
-  background: #0d1626;
-  border: 1px solid #1e2d45;
-  border-radius: 8px;
+  background: rgba(8, 15, 28, 0.60);
+  border: 1px solid rgba(59,130,246,0.20);
+  border-radius: 10px;
   padding: 0.7rem 0.85rem;
   color: #fff;
   font-size: 16px;
+  letter-spacing: 2px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s;
 }
-.join-row button {
-  background: #1e2d45;
-  border: none;
+.join-input:focus { border-color: rgba(59,130,246,0.50); }
+.join-input::placeholder { color: #4a5568; letter-spacing: 0; font-weight: 400; }
+.join-btn {
+  background: rgba(59,130,246,0.15);
+  border: 1px solid rgba(59,130,246,0.30);
   color: #3b82f6;
-  border-radius: 8px;
-  padding: 0 1rem;
+  border-radius: 10px;
+  padding: 0 1.1rem;
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.join-btn:hover { background: rgba(59,130,246,0.25); }
+
+/* Groups section */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
 }
 .section-label {
   font-size: 0.7rem;
   color: #4a5568;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  margin-bottom: 0.75rem;
 }
+.section-count {
+  background: rgba(59,130,246,0.15);
+  color: #3b82f6;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+/* Group cards */
 .group-card {
-  background: #0d1626;
-  border: 1px solid #1e2d45;
-  border-radius: 12px;
+  background: rgba(13, 22, 38, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(59,130,246,0.10);
+  border-radius: 14px;
   padding: 1rem;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 13px;
   margin-bottom: 0.75rem;
   cursor: pointer;
   text-decoration: none;
   color: inherit;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
 }
+.group-card:active { transform: scale(0.98); }
+.group-card:hover { background: rgba(20, 35, 60, 0.70); border-color: rgba(59,130,246,0.22); }
+.group-card.leader-card { border-color: rgba(249,115,22,0.20); }
+.group-card.leader-card:hover { border-color: rgba(249,115,22,0.35); }
+
 .group-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  background: #1e2d45;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(30, 45, 69, 0.80);
   color: #a855f7;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   flex-shrink: 0;
 }
+.group-card.leader-card .group-icon { color: #f97316; }
 .group-info { flex: 1; min-width: 0; }
-.group-name { font-size: 0.95rem; color: #e2e8f0; font-weight: 600; }
-.group-role { font-size: 0.75rem; color: #4a5568; margin-top: 2px; }
+.group-name { font-size: 0.95rem; color: #e2e8f0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.group-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+.group-role { font-size: 0.75rem; color: #64748b; }
 .leader-badge {
-  background: #1e2d45;
+  background: rgba(249,115,22,0.15);
   color: #f97316;
-  border-radius: 12px;
-  padding: 2px 8px;
-  font-size: 0.65rem;
+  border: 1px solid rgba(249,115,22,0.25);
+  border-radius: 20px;
+  padding: 1px 7px;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.5px;
 }
-.empty-state { text-align: center; padding: 2rem 1rem; color: #4a5568; font-size: 0.85rem; }
+.member-badge {
+  background: rgba(59,130,246,0.12);
+  color: #60a5fa;
+  border: 1px solid rgba(59,130,246,0.20);
+  border-radius: 20px;
+  padding: 1px 7px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.group-arrow { color: #2d3f5a; font-size: 1rem; flex-shrink: 0; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: #4a5568;
+}
+.empty-state i { font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.4; }
+.empty-state p { font-size: 0.85rem; line-height: 1.5; }
+.empty-state strong { display: block; color: #64748b; margin-bottom: 0.4rem; font-size: 0.9rem; }
+
+/* Bottom nav */
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0;
-  background: #0d1626; border-top: 1px solid #1e2d45;
+  background: rgba(8, 15, 28, 0.80);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-top: 1px solid rgba(59,130,246,0.13);
   display: flex; padding: 8px 0 12px; z-index: 20;
 }
 .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 0; text-decoration: none; }
 .nav-item i { font-size: 1.2rem; color: #4a5568; }
 .nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
-.nav-item.active i { color: #3b82f6; }
-.nav-item.active span { color: #3b82f6; }
+.nav-item.active i, .nav-item.active span { color: #3b82f6; }
 
-    /* ===== GLASSMORPHISM + GRADIENT ===== */
-    body {
-      background: linear-gradient(135deg, #060b18 0%, #0b1628 35%, #0d0c20 65%, #13082a 100%) fixed !important;
-      min-height: 100vh;
-    }
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse at 20% 20%, rgba(59,130,246,0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.10) 0%, transparent 50%),
-        radial-gradient(ellipse at 60% 10%, rgba(34,197,94,0.06) 0%, transparent 40%);
-      pointer-events: none;
-      z-index: 0;
-    }
-    body > * { position: relative; z-index: 1; }
+/* Modal overlay */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  background: rgba(10, 18, 35, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(59,130,246,0.18);
+  border-top: 1px solid rgba(59,130,246,0.25);
+  border-radius: 20px 20px 0 0;
+  padding: 1.5rem 1.25rem;
+  width: 100%;
+  max-width: 480px;
+}
+.modal-handle {
+  width: 36px; height: 4px; background: rgba(255,255,255,0.15);
+  border-radius: 2px; margin: 0 auto 1.25rem;
+}
+.modal-title { font-size: 1.05rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.4rem; }
+.modal-subtitle { font-size: 0.8rem; color: #64748b; margin-bottom: 1.25rem; }
+.modal-input-wrap { margin-bottom: 1rem; }
+.modal-input-label { font-size: 0.72rem; color: #64748b; letter-spacing: 0.5px; margin-bottom: 0.4rem; }
+.modal-input {
+  width: 100%;
+  background: rgba(20, 32, 55, 0.70);
+  border: 1px solid rgba(59,130,246,0.20);
+  border-radius: 10px;
+  padding: 0.8rem 0.9rem;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.modal-input:focus { border-color: rgba(59,130,246,0.50); }
+.modal-input::placeholder { color: #4a5568; }
+.modal-btns { display: flex; gap: 8px; margin-top: 1.25rem; }
+.modal-btns button {
+  flex: 1; padding: 0.85rem; border-radius: 12px; border: none;
+  font-weight: 600; font-size: 0.9rem; cursor: pointer;
+}
+.btn-cancel { background: rgba(30, 45, 69, 0.70); color: #94a3b8; }
+.btn-primary { background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff; box-shadow: 0 2px 12px rgba(59,130,246,0.30); }
 
-    /* Navbar superior */
-    .header, nav.header {
-      background: rgba(8, 15, 28, 0.75) !important;
-      backdrop-filter: blur(16px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-      border-bottom: 1px solid rgba(59,130,246,0.15) !important;
-    }
-    /* Barra de transposición */
-    .transpose-bar {
-      background: rgba(10, 18, 35, 0.72) !important;
-      backdrop-filter: blur(14px) !important;
-      -webkit-backdrop-filter: blur(14px) !important;
-      border-bottom: 1px solid rgba(59,130,246,0.12) !important;
-    }
-    /* Nav inferior */
-    .bottom-nav {
-      background: rgba(8, 15, 28, 0.80) !important;
-      backdrop-filter: blur(18px) saturate(160%) !important;
-      -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
-      border-top: 1px solid rgba(59,130,246,0.13) !important;
-    }
-    /* Barra de búsqueda */
-    .search-bar {
-      background: rgba(10, 18, 38, 0.70) !important;
-      backdrop-filter: blur(12px) !important;
-      -webkit-backdrop-filter: blur(12px) !important;
-      border-bottom: 1px solid rgba(59,130,246,0.10) !important;
-    }
-    /* Tarjetas de canciones */
-    .song-item {
-      background: rgba(13, 22, 38, 0.55) !important;
-      backdrop-filter: blur(10px) !important;
-      -webkit-backdrop-filter: blur(10px) !important;
-      border: 1px solid rgba(59,130,246,0.10) !important;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .song-item:hover, .song-item:active {
-      background: rgba(20, 35, 60, 0.70) !important;
-      border-color: rgba(59,130,246,0.25) !important;
-    }
-    /* Secciones de canción — mantienen borde de color, se vuelven translúcidas */
-    .section {
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-    }
-    .section.intro       { background: rgba(10, 31, 18, 0.55) !important; }
-    .section.verso       { background: rgba(10, 18, 38, 0.55) !important; }
-    .section.pre-coro    { background: rgba(31, 18, 10, 0.55) !important; }
-    .section.coro        { background: rgba(19, 10, 38, 0.55) !important; }
-    .section.vamp        { background: rgba(26, 10, 31, 0.55) !important; }
-    .section.bridge      { background: rgba(31, 26, 10, 0.55) !important; }
-    .section.instrumental{ background: rgba(20, 20, 20, 0.50) !important; }
-    .section.outro       { background: rgba(31, 10, 10, 0.55) !important; }
-    /* Modal / overlay */
-    .modal {
-      background: rgba(10, 18, 35, 0.85) !important;
-      backdrop-filter: blur(20px) saturate(150%) !important;
-      -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
-      border: 1px solid rgba(59,130,246,0.18) !important;
-    }
-    /* FAB (paginación Opción A) */
-    .fab {
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-      box-shadow: 0 4px 20px rgba(59,130,246,0.35) !important;
-    }
-    /* Indicador de página */
-    .page-indicator {
-      background: rgba(13, 22, 38, 0.75) !important;
-      backdrop-filter: blur(10px) !important;
-      -webkit-backdrop-filter: blur(10px) !important;
-      border: 1px solid rgba(59,130,246,0.20) !important;
-    }
-    /* Toast */
-    .toast {
-      background: rgba(13, 22, 38, 0.90) !important;
-      backdrop-filter: blur(12px) !important;
-      -webkit-backdrop-filter: blur(12px) !important;
-    }
-    /* Inputs en modales y búsqueda */
-    .search-input-wrap, .modal-input {
-      background: rgba(20, 32, 55, 0.60) !important;
-      border: 1px solid rgba(59,130,246,0.15) !important;
-    }
-    /* Chips / badges de acordes */
-    .key-display, .cifrado-toggle {
-      background: rgba(30, 45, 69, 0.70) !important;
-      backdrop-filter: blur(6px) !important;
-      -webkit-backdrop-filter: blur(6px) !important;
-    }
-    /* Tarjetas genéricas de setlist / medley */
-    .setlist-item, .medley-item, .group-item {
-      background: rgba(13, 22, 38, 0.55) !important;
-      backdrop-filter: blur(10px) !important;
-      -webkit-backdrop-filter: blur(10px) !important;
-      border: 1px solid rgba(59,130,246,0.10) !important;
-    }
-    /* Banner de grupo */
-    .group-banner {
-      background: rgba(13, 22, 38, 0.60) !important;
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-    }
-    /* Barra de contexto */
-    .context-bar {
-      background: rgba(13, 22, 38, 0.65) !important;
-      backdrop-filter: blur(10px) !important;
-      -webkit-backdrop-filter: blur(10px) !important;
-      border-bottom: 1px solid rgba(59,130,246,0.10) !important;
-    }
-    /* Barra "guardar alineación" */
-    .save-align-bar {
-      background: rgba(13, 22, 38, 0.85) !important;
-      backdrop-filter: blur(14px) !important;
-      -webkit-backdrop-filter: blur(14px) !important;
-    }
-    /* ===== FIN GLASSMORPHISM ===== */
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(13, 22, 38, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.20);
+  border-radius: 12px;
+  padding: 0.7rem 1.2rem;
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
+
 <header>
   <button class="back-btn" onclick="window.location.href='/profile.html'"><i class="ti ti-arrow-left"></i></button>
-  <div class="header-title">Mis Grupos</div>
-  <button class="new-btn" onclick="crearGrupo()"><i class="ti ti-plus"></i> Crear</button>
+  <div class="header-title">Grupos</div>
+  <button class="new-btn" onclick="abrirModalCrear()"><i class="ti ti-plus"></i> Nuevo</button>
 </header>
 
 <div class="content">
-  <div class="hint">Un grupo de alabanza tiene un Leader (quien lo crea) y músicos con roles. Solo el Leader puede crear setlists y medleys dentro del grupo y ajustar tonalidades; los demás miembros ven lo mismo que el Leader.</div>
-
-  <div class="join-row">
-    <input type="text" id="join-code" placeholder="¿Tienes un código de invitación?">
-    <button onclick="unirseConCodigo()">Unirme</button>
+  <!-- Join section -->
+  <div class="join-section">
+    <div class="join-section-label"><i class="ti ti-link"></i> Unirse con cÃ³digo</div>
+    <div class="join-row">
+      <input class="join-input" type="text" id="join-code" placeholder="Ej: XK9M2PQR" maxlength="8" autocomplete="off" autocapitalize="characters"
+        onkeydown="if(event.key==='Enter') unirseConCodigo()">
+      <button class="join-btn" onclick="unirseConCodigo()">Unirme</button>
+    </div>
   </div>
 
-  <div class="section-label">Tus grupos</div>
+  <!-- Groups list -->
+  <div class="section-header">
+    <div class="section-label">Tus grupos</div>
+    <div class="section-count" id="groups-count" style="display:none"></div>
+  </div>
   <div id="groups-list"></div>
 </div>
+
+<!-- Create group modal -->
+<div class="modal-overlay" id="create-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Crear grupo</div>
+    <div class="modal-subtitle">Dale un nombre a tu grupo de alabanza</div>
+    <div class="modal-input-wrap">
+      <div class="modal-input-label">NOMBRE DEL GRUPO</div>
+      <input class="modal-input" type="text" id="new-group-name" placeholder="Ej: Equipo de Alabanza"
+        maxlength="60" autocomplete="off"
+        onkeydown="if(event.key==='Enter') confirmarCrear()">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="cerrarModalCrear()">Cancelar</button>
+      <button class="btn-primary" onclick="confirmarCrear()">Crear grupo</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <nav class="bottom-nav">
   <a class="nav-item" href="/library.html"><i class="ti ti-music"></i><span>Canciones</span></a>
   <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
   <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
-  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
+  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>MÃ¡s</span></a>
 </nav>
 
 <script>
@@ -304,6 +359,15 @@ const _supabase = supabase.createClient(
 )
 
 let currentUser = null
+let toastTimer = null
+
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.classList.add('show')
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => t.classList.remove('show'), duration)
+}
 
 function generarCodigo() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -326,63 +390,93 @@ async function cargarGrupos() {
     .eq('user_id', currentUser.id)
 
   const list = document.getElementById('groups-list')
+  const countEl = document.getElementById('groups-count')
   list.innerHTML = ''
 
   if (error) {
-    list.innerHTML = '<div class="empty-state">No se pudieron cargar tus grupos.</div>'
+    list.innerHTML = '<div class="empty-state"><i class="ti ti-alert-triangle"></i><p>No se pudieron cargar tus grupos.</p></div>'
     return
   }
 
   if (!data || data.length === 0) {
-    list.innerHTML = '<div class="empty-state">Aún no perteneces a ningún grupo. Crea uno o únete con un código de invitación.</div>'
+    countEl.style.display = 'none'
+    list.innerHTML = `
+      <div class="empty-state">
+        <i class="ti ti-users"></i>
+        <strong>AÃºn no tienes grupos</strong>
+        <p>Crea tu propio grupo o Ãºnete con un cÃ³digo de invitaciÃ³n.</p>
+      </div>`
     return
   }
+
+  countEl.style.display = 'inline-block'
+  countEl.textContent = data.length
 
   data.forEach(row => {
     const g = row.groups
     if (!g) return
     const isLeader = g.leader_id === currentUser.id
+    const roles = (row.roles && row.roles.length) ? row.roles.join(', ') : 'Miembro'
+
     const card = document.createElement('a')
-    card.className = 'group-card'
+    card.className = 'group-card' + (isLeader ? ' leader-card' : '')
     card.href = `/group-view.html?id=${g.id}`
     card.innerHTML = `
       <div class="group-icon"><i class="ti ti-users"></i></div>
       <div class="group-info">
         <div class="group-name">${g.name}</div>
-        <div class="group-role">${isLeader ? 'Eres el Leader' : ((row.roles && row.roles.length) ? row.roles.join(', ') : 'Miembro')}</div>
+        <div class="group-meta">
+          <span class="${isLeader ? 'leader-badge' : 'member-badge'}">${isLeader ? 'LEADER' : 'MIEMBRO'}</span>
+          <span class="group-role">${isLeader ? 'Administras este grupo' : roles}</span>
+        </div>
       </div>
-      ${isLeader ? '<span class="leader-badge">LEADER</span>' : ''}
+      <i class="ti ti-chevron-right group-arrow"></i>
     `
     list.appendChild(card)
   })
 }
 
-async function crearGrupo() {
-  const name = prompt('Nombre del grupo de alabanza:')
-  if (!name || !name.trim()) return
+function abrirModalCrear() {
+  document.getElementById('new-group-name').value = ''
+  document.getElementById('create-modal').classList.add('open')
+  setTimeout(() => document.getElementById('new-group-name').focus(), 150)
+}
+
+function cerrarModalCrear() {
+  document.getElementById('create-modal').classList.remove('open')
+}
+
+async function confirmarCrear() {
+  const name = document.getElementById('new-group-name').value.trim()
+  if (!name) { showToast('Escribe un nombre para el grupo'); return }
+
+  const btn = document.querySelector('#create-modal .btn-primary')
+  btn.disabled = true
+  btn.textContent = 'Creando...'
 
   const invite_code = generarCodigo()
 
   const { data: group, error } = await _supabase
     .from('groups')
-    .insert({ name: name.trim(), invite_code, leader_id: currentUser.id })
+    .insert({ name, invite_code, leader_id: currentUser.id })
     .select()
     .single()
 
-  if (error) { alert('No se pudo crear el grupo: ' + error.message); return }
+  if (error) {
+    showToast('No se pudo crear el grupo')
+    btn.disabled = false
+    btn.textContent = 'Crear grupo'
+    return
+  }
 
-  const { error: memberError } = await _supabase
-    .from('group_members')
-    .insert({ group_id: group.id, user_id: currentUser.id, roles: [] })
-
-  if (memberError) { alert('Grupo creado, pero hubo un problema al unirte como Leader: ' + memberError.message) }
-
+  await _supabase.from('group_members').insert({ group_id: group.id, user_id: currentUser.id, roles: [] })
+  cerrarModalCrear()
   window.location.href = `/group-view.html?id=${group.id}`
 }
 
 function unirseConCodigo() {
-  const code = document.getElementById('join-code').value.trim()
-  if (!code) return
+  const code = document.getElementById('join-code').value.trim().toUpperCase()
+  if (!code) { showToast('Ingresa el cÃ³digo de invitaciÃ³n'); return }
   window.location.href = `/join-group.html?code=${encodeURIComponent(code)}`
 }
 
