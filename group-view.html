@@ -15,15 +15,31 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-  background: #080c14;
+  background: linear-gradient(135deg, #060b18 0%, #0b1628 35%, #0d0c20 65%, #13082a 100%) fixed;
   color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100vh;
-  padding-bottom: 90px;
+  padding-bottom: 40px;
 }
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(59,130,246,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 10%, rgba(34,197,94,0.06) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+body > * { position: relative; z-index: 1; }
+
+/* Header */
 header {
-  background: #0d1626;
-  border-bottom: 1px solid #1e2d45;
+  background: rgba(8, 15, 28, 0.80);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid rgba(59,130,246,0.15);
   padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
@@ -32,287 +48,365 @@ header {
   top: 0;
   z-index: 10;
 }
-.back-btn { background: none; border: none; color: #3b82f6; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
-.header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; flex: 1; }
-.icon-btn { background: none; border: none; color: #ef4444; font-size: 1.1rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
+.back-btn {
+  background: none; border: none; color: #3b82f6;
+  font-size: 1.3rem; cursor: pointer; padding: 4px;
+  display: flex; align-items: center; flex-shrink: 0;
+}
+.header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.header-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.icon-btn {
+  background: rgba(30, 45, 69, 0.60);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 8px;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; cursor: pointer; color: #94a3b8;
+  transition: background 0.2s, color 0.2s;
+}
+.icon-btn:hover { background: rgba(59,130,246,0.20); color: #3b82f6; }
+.icon-btn.danger:hover { background: rgba(239,68,68,0.15); color: #ef4444; border-color: rgba(239,68,68,0.25); }
+
 .content { padding: 1.25rem; }
-.card {
-  background: #0d1626;
-  border: 1px solid #1e2d45;
-  border-radius: 12px;
-  padding: 1rem;
+
+/* Group hero (leader banner) */
+.group-hero {
+  background: rgba(13, 22, 38, 0.60);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(249,115,22,0.20);
+  border-radius: 16px;
+  padding: 1.25rem;
   margin-bottom: 1.25rem;
+  display: none;
 }
-.card-title { font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.6rem; font-weight: 600; }
-.link-row { display: flex; gap: 8px; }
-.link-row input {
+.group-hero.visible { display: block; }
+.hero-title {
+  font-size: 0.68rem; color: #f97316; letter-spacing: 1.5px;
+  text-transform: uppercase; font-weight: 700; margin-bottom: 0.85rem;
+  display: flex; align-items: center; gap: 6px;
+}
+.hero-title i { font-size: 0.85rem; }
+
+/* Invite link */
+.invite-label {
+  font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.6rem;
+}
+.invite-row { display: flex; gap: 8px; margin-bottom: 0.75rem; }
+.invite-input {
   flex: 1;
-  background: #080c14;
-  border: 1px solid #1e2d45;
-  border-radius: 8px;
-  padding: 0.6rem 0.7rem;
-  color: #94a3b8;
-  font-size: 16px;
+  background: rgba(8, 15, 28, 0.60);
+  border: 1px solid rgba(59,130,246,0.20);
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  color: #64748b;
+  font-size: 0.78rem;
+  outline: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
-.link-row button {
-  background: #3b82f6;
-  border: none;
-  color: #fff;
-  border-radius: 8px;
-  padding: 0 1rem;
-  font-weight: 600;
-  font-size: 0.85rem;
+.copy-btn {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  border: none; color: #fff; border-radius: 10px;
+  padding: 0 1rem; font-weight: 600; font-size: 0.82rem;
+  cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px;
+  box-shadow: 0 2px 10px rgba(59,130,246,0.30);
+}
+.renew-btn {
+  width: 100%;
+  background: rgba(30, 45, 69, 0.50);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 10px;
+  color: #64748b;
+  font-size: 0.78rem;
+  padding: 0.5rem;
   cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  transition: background 0.2s, color 0.2s;
+}
+.renew-btn:hover { background: rgba(59,130,246,0.12); color: #3b82f6; }
+
+/* Section */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
 }
 .section-label {
   font-size: 0.7rem;
   color: #4a5568;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  margin-bottom: 0.75rem;
 }
+.section-count {
+  background: rgba(59,130,246,0.12);
+  color: #60a5fa;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+/* Member cards */
 .member-card {
-  background: #0d1626;
-  border: 1px solid #1e2d45;
-  border-radius: 12px;
+  background: rgba(13, 22, 38, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(59,130,246,0.10);
+  border-radius: 14px;
   padding: 0.9rem 1rem;
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.65rem;
 }
 .member-avatar {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: #1e2d45; color: #3b82f6;
+  width: 42px; height: 42px; border-radius: 50%;
+  background: rgba(30, 45, 69, 0.80); color: #3b82f6;
   display: flex; align-items: center; justify-content: center;
   font-size: 1rem; font-weight: 700; flex-shrink: 0; overflow: hidden;
+  border: 2px solid rgba(59,130,246,0.15);
 }
 .member-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.member-avatar.leader-avatar { color: #f97316; border-color: rgba(249,115,22,0.25); }
 .member-info { flex: 1; min-width: 0; }
-.member-name { font-size: 0.9rem; color: #e2e8f0; font-weight: 600; }
-.member-roles { font-size: 0.75rem; color: #4a5568; margin-top: 2px; }
-.member-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.member-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.member-name { font-size: 0.9rem; color: #e2e8f0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.leader-tag {
+  background: rgba(249,115,22,0.15);
+  color: #f97316;
+  border: 1px solid rgba(249,115,22,0.25);
+  border-radius: 20px;
+  padding: 1px 6px; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.member-roles { font-size: 0.73rem; color: #4a5568; }
+.member-roles.has-roles { color: #64748b; }
+.member-actions { display: flex; gap: 5px; flex-shrink: 0; }
 .member-actions button {
-  background: #1e2d45; border: none; color: #94a3b8;
+  background: rgba(30, 45, 69, 0.60);
+  border: 1px solid rgba(59,130,246,0.12);
+  color: #64748b;
   border-radius: 8px; width: 32px; height: 32px;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 0.9rem;
+  cursor: pointer; font-size: 0.85rem;
+  transition: background 0.2s, color 0.2s;
 }
-.member-actions button.danger { color: #ef4444; }
-.leader-tag {
-  background: #1e2d45; color: #f97316; border-radius: 12px;
-  padding: 2px 8px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.5px;
-  margin-left: 6px;
-}
+.member-actions button:hover { background: rgba(59,130,246,0.20); color: #3b82f6; }
+.member-actions button.danger:hover { background: rgba(239,68,68,0.15); color: #ef4444; border-color: rgba(239,68,68,0.20); }
+
+/* Leave button */
+.leave-section { margin-top: 2rem; }
 .leave-btn {
-  margin-top: 0.5rem;
   width: 100%;
-  background: #1a0808;
-  border: 1px solid #7f1d1d;
-  border-radius: 10px;
+  background: rgba(26, 8, 8, 0.60);
+  border: 1px solid rgba(127, 29, 29, 0.50);
+  border-radius: 12px;
   color: #ef4444;
   font-size: 0.9rem;
   font-weight: 600;
-  padding: 0.85rem;
+  padding: 0.9rem;
   cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background 0.2s;
 }
+.leave-btn:hover { background: rgba(39, 8, 8, 0.80); }
+
+/* Empty */
 .empty-state { text-align: center; padding: 2rem 1rem; color: #4a5568; font-size: 0.85rem; }
 
+/* Modals */
 .modal-overlay {
   display: none;
-  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-  z-index: 50; align-items: flex-end; justify-content: center;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  align-items: flex-end;
+  justify-content: center;
 }
 .modal-overlay.open { display: flex; }
 .modal-sheet {
-  background: #0d1626; border-top: 1px solid #1e2d45;
-  border-radius: 16px 16px 0 0; padding: 1.25rem; width: 100%; max-width: 480px;
-  max-height: 80vh; overflow-y: auto;
+  background: rgba(10, 18, 35, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(59,130,246,0.18);
+  border-radius: 20px 20px 0 0;
+  padding: 1.5rem 1.25rem;
+  width: 100%; max-width: 480px;
+  max-height: 85vh; overflow-y: auto;
 }
-.modal-title { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: #e2e8f0; }
+.modal-handle {
+  width: 36px; height: 4px; background: rgba(255,255,255,0.15);
+  border-radius: 2px; margin: 0 auto 1.25rem;
+}
+.modal-title { font-size: 1.05rem; font-weight: 700; color: #e2e8f0; margin-bottom: 1rem; }
 .role-option {
   display: flex; align-items: center; gap: 10px;
-  padding: 0.6rem 0.25rem; border-bottom: 1px solid #1e2d45; font-size: 0.9rem;
+  padding: 0.65rem 0.25rem; border-bottom: 1px solid rgba(30, 45, 69, 0.60); font-size: 0.88rem; color: #e2e8f0;
 }
-.role-option input { width: 18px; height: 18px; }
+.role-option:last-child { border-bottom: none; }
+.role-option input { width: 18px; height: 18px; accent-color: #3b82f6; cursor: pointer; }
 .modal-btns { display: flex; gap: 8px; margin-top: 1.25rem; }
 .modal-btns button {
-  flex: 1; padding: 0.8rem; border-radius: 10px; border: none;
+  flex: 1; padding: 0.85rem; border-radius: 12px; border: none;
   font-weight: 600; font-size: 0.9rem; cursor: pointer;
 }
-.modal-btns .cancel { background: #1e2d45; color: #94a3b8; }
-.modal-btns .save { background: #3b82f6; color: #fff; }
+.btn-cancel { background: rgba(30, 45, 69, 0.70); color: #94a3b8; }
+.btn-primary { background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff; }
+.btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
 
-    /* ===== GLASSMORPHISM + GRADIENT ===== */
-    body {
-      background: linear-gradient(135deg, #060b18 0%, #0b1628 35%, #0d0c20 65%, #13082a 100%) fixed !important;
-      min-height: 100vh;
-    }
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse at 20% 20%, rgba(59,130,246,0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.10) 0%, transparent 50%),
-        radial-gradient(ellipse at 60% 10%, rgba(34,197,94,0.06) 0%, transparent 40%);
-      pointer-events: none;
-      z-index: 0;
-    }
-    body > * { position: relative; z-index: 1; }
+/* Rename modal */
+.modal-input {
+  width: 100%;
+  background: rgba(20, 32, 55, 0.70);
+  border: 1px solid rgba(59,130,246,0.20);
+  border-radius: 10px;
+  padding: 0.8rem 0.9rem;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+  margin-bottom: 0;
+}
+.modal-input:focus { border-color: rgba(59,130,246,0.50); }
 
-    /* Navbar superior */
-    .header, nav.header {
-      background: rgba(8, 15, 28, 0.75) !important;
-      backdrop-filter: blur(16px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-      border-bottom: 1px solid rgba(59,130,246,0.15) !important;
-    }
-    /* Barra de transposición */
-    .transpose-bar {
-      background: rgba(10, 18, 35, 0.72) !important;
-      backdrop-filter: blur(14px) !important;
-      -webkit-backdrop-filter: blur(14px) !important;
-      border-bottom: 1px solid rgba(59,130,246,0.12) !important;
-    }
-    /* Nav inferior */
-    .bottom-nav {
-      background: rgba(8, 15, 28, 0.80) !important;
-      backdrop-filter: blur(18px) saturate(160%) !important;
-      -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
-      border-top: 1px solid rgba(59,130,246,0.13) !important;
-    }
-    /* Barra de búsqueda */
-    .search-bar {
-      background: rgba(10, 18, 38, 0.70) !important;
-      backdrop-filter: blur(12px) !important;
-      -webkit-backdrop-filter: blur(12px) !important;
-      border-bottom: 1px solid rgba(59,130,246,0.10) !important;
-    }
-    /* Tarjetas de canciones */
-    .song-item {
-      background: rgba(13, 22, 38, 0.55) !important;
-      backdrop-filter: blur(10px) !important;
-      -webkit-backdrop-filter: blur(10px) !important;
-      border: 1px solid rgba(59,130,246,0.10) !important;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .song-item:hover, .song-item:active {
-      background: rgba(20, 35, 60, 0.70) !important;
-      border-color: rgba(59,130,246,0.25) !important;
-    }
-    /* Secciones de canción — mantienen borde de color, se vuelven translúcidas */
-    .section {
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-    }
-    .section.intro       { background: rgba(10, 31, 18, 0.55) !important; }
-    .section.verso       { background: rgba(10, 18, 38, 0.55) !important; }
-    .section.pre-coro    { background: rgba(31, 18, 10, 0.55) !important; }
-    .section.coro        { background: rgba(19, 10, 38, 0.55) !important; }
-    .section.vamp        { background: rgba(26, 10, 31, 0.55) !important; }
-    .section.bridge      { background: rgba(31, 26, 10, 0.55) !important; }
-    .section.instrumental{ background: rgba(20, 20, 20, 0.50) !important; }
-    .section.outro       { background: rgba(31, 10, 10, 0.55) !important; }
-    /* Modal / overlay */
-    .modal {
-      background: rgba(10, 18, 35, 0.85) !important;
-      backdrop-filter: blur(20px) saturate(150%) !important;
-      -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
-      border: 1px solid rgba(59,130,246,0.18) !important;
-    }
-    /* FAB (paginación Opción A) */
-    .fab {
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-      box-shadow: 0 4px 20px rgba(59,130,246,0.35) !important;
-    }
-    /* Indicador de página */
-    .page-indicator {
-      background: rgba(13, 22, 38, 0.75) !important;
-      backdrop-filter: blur(10px) !important;
-      -webkit-backdrop-filter: blur(10px) !important;
-      border: 1px solid rgba(59,130,246,0.20) !important;
-    }
-    /* Toast */
-    .toast {
-      background: rgba(13, 22, 38, 0.90) !important;
-      backdrop-filter: blur(12px) !important;
-      -webkit-backdrop-filter: blur(12px) !important;
-    }
-    /* Inputs en modales y búsqueda */
-    .search-input-wrap, .modal-input {
-      background: rgba(20, 32, 55, 0.60) !important;
-      border: 1px solid rgba(59,130,246,0.15) !important;
-    }
-    /* Chips / badges de acordes */
-    .key-display, .cifrado-toggle {
-      background: rgba(30, 45, 69, 0.70) !important;
-      backdrop-filter: blur(6px) !important;
-      -webkit-backdrop-filter: blur(6px) !important;
-    }
-    /* Tarjetas genéricas de setlist / medley */
-    .setlist-item, .medley-item, .group-item {
-      background: rgba(13, 22, 38, 0.55) !important;
-      backdrop-filter: blur(10px) !important;
-      -webkit-backdrop-filter: blur(10px) !important;
-      border: 1px solid rgba(59,130,246,0.10) !important;
-    }
-    /* Banner de grupo */
-    .group-banner {
-      background: rgba(13, 22, 38, 0.60) !important;
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-    }
-    /* Barra de contexto */
-    .context-bar {
-      background: rgba(13, 22, 38, 0.65) !important;
-      backdrop-filter: blur(10px) !important;
-      -webkit-backdrop-filter: blur(10px) !important;
-      border-bottom: 1px solid rgba(59,130,246,0.10) !important;
-    }
-    /* Barra "guardar alineación" */
-    .save-align-bar {
-      background: rgba(13, 22, 38, 0.85) !important;
-      backdrop-filter: blur(14px) !important;
-      -webkit-backdrop-filter: blur(14px) !important;
-    }
-    /* ===== FIN GLASSMORPHISM ===== */
+/* Confirm modal */
+.confirm-message {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin-bottom: 0.25rem;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(13, 22, 38, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.20);
+  border-radius: 12px;
+  padding: 0.7rem 1.2rem;
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  z-index: 200;
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+  display: flex; align-items: center; gap: 6px;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: rgba(34,197,94,0.30); }
+.toast.success i { color: #22c55e; }
 </style>
 </head>
 <body>
+
 <header>
   <button class="back-btn" onclick="window.location.href='/groups.html'"><i class="ti ti-arrow-left"></i></button>
-  <div class="header-title" id="group-title">Grupo</div>
-  <button class="icon-btn" id="rename-group-btn" style="display:none;color:#3b82f6" onclick="renombrarGrupo()"><i class="ti ti-pencil"></i></button>
-  <button class="icon-btn" id="delete-group-btn" style="display:none" onclick="eliminarGrupo()"><i class="ti ti-trash"></i></button>
+  <div class="header-title" id="group-title">Cargando...</div>
+  <div class="header-actions">
+    <button class="icon-btn" id="rename-btn" style="display:none" title="Renombrar grupo" onclick="abrirModalRenombrar()">
+      <i class="ti ti-pencil"></i>
+    </button>
+    <button class="icon-btn danger" id="delete-btn" style="display:none" title="Eliminar grupo" onclick="abrirConfirmEliminar()">
+      <i class="ti ti-trash"></i>
+    </button>
+  </div>
 </header>
 
 <div class="content">
-  <div class="card" id="invite-card" style="display:none">
-    <div class="card-title">Link de invitación (compártelo con tu equipo)</div>
-    <div class="link-row">
-      <input type="text" id="invite-link" readonly>
-      <button onclick="copiarLink()">Copiar</button>
+
+  <!-- Leader: Invite hero -->
+  <div class="group-hero" id="invite-hero">
+    <div class="hero-title"><i class="ti ti-crown"></i> Invita a tu equipo</div>
+    <div class="invite-label">Comparte este link para que se unan:</div>
+    <div class="invite-row">
+      <input class="invite-input" type="text" id="invite-link" readonly>
+      <button class="copy-btn" onclick="copiarLink()">
+        <i class="ti ti-copy"></i> Copiar
+      </button>
     </div>
+    <button class="renew-btn" id="renew-btn" onclick="renovarCodigo()">
+      <i class="ti ti-refresh"></i> Generar nuevo link (si el anterior venciÃ³)
+    </button>
   </div>
 
-  <div class="section-label">Miembros</div>
+  <!-- Members list -->
+  <div class="section-header">
+    <div class="section-label">Miembros</div>
+    <div class="section-count" id="member-count" style="display:none"></div>
+  </div>
   <div id="members-list"></div>
 
-  <button class="leave-btn" id="leave-btn" style="display:none" onclick="salirDelGrupo()">Salir del grupo</button>
+  <!-- Leave button (non-leader) -->
+  <div class="leave-section" id="leave-section" style="display:none">
+    <button class="leave-btn" onclick="abrirConfirmSalir()">
+      <i class="ti ti-door-exit"></i> Salir del grupo
+    </button>
+  </div>
 </div>
 
+<!-- Roles modal -->
 <div class="modal-overlay" id="role-modal">
   <div class="modal-sheet">
-    <div class="modal-title">Selecciona los roles</div>
+    <div class="modal-handle"></div>
+    <div class="modal-title">Instrumentos / voz</div>
     <div id="role-options"></div>
     <div class="modal-btns">
-      <button class="cancel" onclick="cerrarModalRoles()">Cancelar</button>
-      <button class="save" onclick="guardarRoles()">Guardar</button>
+      <button class="btn-cancel" onclick="cerrarModalRoles()">Cancelar</button>
+      <button class="btn-primary" onclick="guardarRoles()">Guardar</button>
     </div>
   </div>
 </div>
+
+<!-- Rename modal -->
+<div class="modal-overlay" id="rename-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Renombrar grupo</div>
+    <input class="modal-input" type="text" id="rename-input" placeholder="Nuevo nombre" maxlength="60"
+      onkeydown="if(event.key==='Enter') confirmarRenombrar()">
+    <div class="modal-btns" style="margin-top:1rem">
+      <button class="btn-cancel" onclick="cerrarModalRenombrar()">Cancelar</button>
+      <button class="btn-primary" onclick="confirmarRenombrar()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm salir modal -->
+<div class="modal-overlay" id="confirm-salir-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Salir del grupo</div>
+    <p class="confirm-message">Â¿Seguro que quieres salir? Ya no tendrÃ¡s acceso al contenido del grupo.</p>
+    <div class="modal-btns" style="margin-top:1.25rem">
+      <button class="btn-cancel" onclick="cerrarConfirmSalir()">Cancelar</button>
+      <button class="btn-danger" onclick="salirDelGrupo()">Salir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm eliminar modal -->
+<div class="modal-overlay" id="confirm-eliminar-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Eliminar grupo</div>
+    <p class="confirm-message">Esto eliminarÃ¡ el grupo para <strong>todos los miembros</strong>. Esta acciÃ³n no se puede deshacer.</p>
+    <div class="modal-btns" style="margin-top:1.25rem">
+      <button class="btn-cancel" onclick="cerrarConfirmEliminar()">Cancelar</button>
+      <button class="btn-danger" onclick="eliminarGrupo()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
 const _supabase = supabase.createClient(
@@ -329,7 +423,20 @@ let currentUser = null
 let currentGroup = null
 let isLeader = false
 let editingMemberId = null
+let toastTimer = null
 
+/* ---- Toast ---- */
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast')
+  t.innerHTML = type === 'success'
+    ? `<i class="ti ti-circle-check"></i> ${msg}`
+    : msg
+  t.className = 'toast' + (type ? ' ' + type : '') + ' show'
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800)
+}
+
+/* ---- Init ---- */
 async function init() {
   const { data: { session } } = await _supabase.auth.getSession()
   if (!session) { window.location.href = '/login.html'; return }
@@ -354,17 +461,70 @@ async function init() {
   document.getElementById('group-title').textContent = group.name
 
   if (isLeader) {
-    document.getElementById('rename-group-btn').style.display = 'flex'
-    document.getElementById('delete-group-btn').style.display = 'flex'
-    document.getElementById('invite-card').style.display = 'block'
-    document.getElementById('invite-link').value = `${window.location.origin}/join-group.html?code=${group.invite_code}`
+    document.getElementById('rename-btn').style.display = 'flex'
+    document.getElementById('delete-btn').style.display = 'flex'
+    document.getElementById('invite-hero').classList.add('visible')
+    setInviteLink(group.invite_code)
   } else {
-    document.getElementById('leave-btn').style.display = 'block'
+    document.getElementById('leave-section').style.display = 'block'
   }
 
   await cargarMiembros()
 }
 
+function setInviteLink(code) {
+  document.getElementById('invite-link').value = `${window.location.origin}/join-group.html?code=${code}`
+}
+
+function generarCodigo() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let code = ''
+  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)]
+  return code
+}
+
+/* ---- Renovar cÃ³digo ---- */
+async function renovarCodigo() {
+  const btn = document.getElementById('renew-btn')
+  btn.disabled = true
+  btn.innerHTML = '<i class="ti ti-loader"></i> Generando...'
+
+  const newCode = generarCodigo()
+
+  const { error } = await _supabase
+    .from('groups')
+    .update({ invite_code: newCode })
+    .eq('id', groupId)
+
+  if (error) {
+    showToast('No se pudo renovar el link')
+    btn.disabled = false
+    btn.innerHTML = '<i class="ti ti-refresh"></i> Generar nuevo link (si el anterior venciÃ³)'
+    return
+  }
+
+  currentGroup.invite_code = newCode
+  setInviteLink(newCode)
+  btn.disabled = false
+  btn.innerHTML = '<i class="ti ti-refresh"></i> Generar nuevo link (si el anterior venciÃ³)'
+  showToast('Link renovado â ahora cÃ³pialo y compÃ¡rtelo', 'success')
+}
+
+/* ---- Copiar link ---- */
+async function copiarLink() {
+  const link = document.getElementById('invite-link').value
+  try {
+    await navigator.clipboard.writeText(link)
+    showToast('Link copiado al portapapeles', 'success')
+  } catch {
+    const input = document.getElementById('invite-link')
+    input.select()
+    document.execCommand('copy')
+    showToast('Link copiado', 'success')
+  }
+}
+
+/* ---- Cargar miembros ---- */
 async function cargarMiembros() {
   const { data, error } = await _supabase
     .from('group_members')
@@ -373,12 +533,16 @@ async function cargarMiembros() {
     .order('joined_at', { ascending: true })
 
   const list = document.getElementById('members-list')
+  const countEl = document.getElementById('member-count')
   list.innerHTML = ''
 
   if (error || !data) {
     list.innerHTML = '<div class="empty-state">No se pudieron cargar los miembros.</div>'
     return
   }
+
+  countEl.style.display = 'inline-block'
+  countEl.textContent = data.length
 
   const userIds = data.map(m => m.user_id)
   let profilesById = {}
@@ -392,41 +556,48 @@ async function cargarMiembros() {
 
   data.forEach(m => {
     const p = profilesById[m.user_id] || {}
-    const name = p.display_name || 'Músico sin nombre'
+    const name = p.display_name || 'MÃºsico sin nombre'
     const initials = name.substring(0, 2).toUpperCase()
     const memberIsLeader = m.user_id === currentGroup.leader_id
     const isSelf = m.user_id === currentUser.id
+    const roles = (m.roles && m.roles.length) ? m.roles.join(', ') : 'Sin rol asignado'
 
     const card = document.createElement('div')
     card.className = 'member-card'
 
-    let actions = ''
+    let actionsHtml = ''
     if (isSelf || isLeader) {
-      actions += `<button title="Editar roles" onclick="abrirModalRoles('${m.id}', '${(m.roles||[]).join(',')}')"><i class="ti ti-pencil"></i></button>`
+      actionsHtml += `<button title="Editar roles" onclick="abrirModalRoles('${m.id}', ${JSON.stringify(m.roles||[]).replace(/"/g,"'")})"><i class="ti ti-pencil"></i></button>`
     }
     if (isLeader && !memberIsLeader) {
-      actions += `<button class="danger" title="Quitar del grupo" onclick="quitarMiembro('${m.id}')"><i class="ti ti-x"></i></button>`
+      actionsHtml += `<button class="danger" title="Quitar del grupo" onclick="quitarMiembro('${m.id}', '${name.replace(/'/g,"\\'")}')"><i class="ti ti-user-minus"></i></button>`
     }
 
     card.innerHTML = `
-      <div class="member-avatar">${p.avatar_url ? `<img src="${p.avatar_url}">` : initials}</div>
-      <div class="member-info">
-        <div class="member-name">${name}${memberIsLeader ? '<span class="leader-tag">LEADER</span>' : ''}</div>
-        <div class="member-roles">${(m.roles && m.roles.length) ? m.roles.join(', ') : 'Sin rol asignado'}</div>
+      <div class="member-avatar${memberIsLeader ? ' leader-avatar' : ''}">
+        ${p.avatar_url ? `<img src="${p.avatar_url}" alt="${initials}">` : initials}
       </div>
-      <div class="member-actions">${actions}</div>
+      <div class="member-info">
+        <div class="member-name-row">
+          <div class="member-name">${name}</div>
+          ${memberIsLeader ? '<span class="leader-tag">LEADER</span>' : ''}
+        </div>
+        <div class="member-roles${m.roles && m.roles.length ? ' has-roles' : ''}">${roles}</div>
+      </div>
+      <div class="member-actions">${actionsHtml}</div>
     `
     list.appendChild(card)
   })
 }
 
-function abrirModalRoles(memberId, rolesCsv) {
+/* ---- Roles modal ---- */
+function abrirModalRoles(memberId, rolesArr) {
   editingMemberId = memberId
-  const currentRoles = rolesCsv ? rolesCsv.split(',') : []
-  const container = document.getElementById('role-options')
-  container.innerHTML = ROLE_OPTIONS.map(r => `
+  const currentRoles = Array.isArray(rolesArr) ? rolesArr : (rolesArr ? rolesArr.replace(/'/g,'"') : [])
+  const parsed = Array.isArray(currentRoles) ? currentRoles : JSON.parse(currentRoles)
+  document.getElementById('role-options').innerHTML = ROLE_OPTIONS.map(r => `
     <label class="role-option">
-      <input type="checkbox" value="${r}" ${currentRoles.includes(r) ? 'checked' : ''}>
+      <input type="checkbox" value="${r}" ${parsed.includes(r) ? 'checked' : ''}>
       <span>${r}</span>
     </label>
   `).join('')
@@ -441,63 +612,75 @@ function cerrarModalRoles() {
 async function guardarRoles() {
   if (!editingMemberId) return
   const checked = Array.from(document.querySelectorAll('#role-options input:checked')).map(i => i.value)
-
   const { error } = await _supabase
     .from('group_members')
     .update({ roles: checked })
     .eq('id', editingMemberId)
 
-  if (error) { alert('No se pudieron guardar los roles: ' + error.message); return }
-
+  if (error) { showToast('No se pudieron guardar los roles'); return }
   cerrarModalRoles()
+  showToast('Roles actualizados', 'success')
   await cargarMiembros()
 }
 
-async function quitarMiembro(memberId) {
-  if (!confirm('¿Quitar a este miembro del grupo?')) return
+/* ---- Quitar miembro ---- */
+async function quitarMiembro(memberId, name) {
+  // Use confirm for quick removal - could add a modal if needed
+  if (!confirm(`Â¿Quitar a ${name} del grupo?`)) return
   const { error } = await _supabase.from('group_members').delete().eq('id', memberId)
-  if (error) { alert('No se pudo quitar al miembro: ' + error.message); return }
+  if (error) { showToast('No se pudo quitar al miembro'); return }
+  showToast('Miembro eliminado del grupo')
   await cargarMiembros()
 }
 
+/* ---- Salir modal ---- */
+function abrirConfirmSalir() { document.getElementById('confirm-salir-modal').classList.add('open') }
+function cerrarConfirmSalir() { document.getElementById('confirm-salir-modal').classList.remove('open') }
 async function salirDelGrupo() {
-  if (!confirm('¿Seguro que quieres salir de este grupo?')) return
+  cerrarConfirmSalir()
   const { error } = await _supabase
     .from('group_members')
     .delete()
     .eq('group_id', groupId)
     .eq('user_id', currentUser.id)
-  if (error) { alert('No se pudo salir del grupo: ' + error.message); return }
+  if (error) { showToast('No se pudo salir del grupo'); return }
   window.location.href = '/groups.html'
 }
 
-async function eliminarGrupo() {
-  if (!confirm('Esto eliminará el grupo para todos los miembros. ¿Continuar?')) return
-  const { error } = await _supabase.from('groups').delete().eq('id', groupId)
-  if (error) { alert('No se pudo eliminar el grupo: ' + error.message); return }
-  window.location.href = '/groups.html'
+/* ---- Rename modal ---- */
+function abrirModalRenombrar() {
+  document.getElementById('rename-input').value = currentGroup.name
+  document.getElementById('rename-modal').classList.add('open')
+  setTimeout(() => document.getElementById('rename-input').focus(), 150)
 }
-
-async function renombrarGrupo() {
-  const nuevoNombre = prompt('Nuevo nombre del grupo:', currentGroup.name)
-  if (nuevoNombre === null) return
-  const trimmed = nuevoNombre.trim()
-  if (!trimmed || trimmed === currentGroup.name) return
+function cerrarModalRenombrar() { document.getElementById('rename-modal').classList.remove('open') }
+async function confirmarRenombrar() {
+  const trimmed = document.getElementById('rename-input').value.trim()
+  if (!trimmed || trimmed === currentGroup.name) { cerrarModalRenombrar(); return }
   const { error } = await _supabase.from('groups').update({ name: trimmed }).eq('id', groupId)
-  if (error) { alert('No se pudo renombrar el grupo: ' + error.message); return }
+  if (error) { showToast('No se pudo renombrar el grupo'); return }
   currentGroup.name = trimmed
   document.getElementById('group-title').textContent = trimmed
+  cerrarModalRenombrar()
+  showToast('Nombre actualizado', 'success')
 }
 
-function copiarLink() {
-  const input = document.getElementById('invite-link')
-  navigator.clipboard.writeText(input.value).then(() => {
-    alert('Link copiado. Compártelo con tu equipo.')
-  }).catch(() => {
-    input.select()
-    document.execCommand('copy')
-  })
+/* ---- Eliminar modal ---- */
+function abrirConfirmEliminar() { document.getElementById('confirm-eliminar-modal').classList.add('open') }
+function cerrarConfirmEliminar() { document.getElementById('confirm-eliminar-modal').classList.remove('open') }
+async function eliminarGrupo() {
+  cerrarConfirmEliminar()
+  const { error } = await _supabase.from('groups').delete().eq('id', groupId)
+  if (error) { showToast('No se pudo eliminar el grupo'); return }
+  window.location.href = '/groups.html'
 }
+
+/* ---- Close modals on overlay click ---- */
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open')
+  })
+})
 
 init()
 </script>
