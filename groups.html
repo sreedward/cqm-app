@@ -308,9 +308,9 @@ header {
 <div class="content">
   <!-- Join section -->
   <div class="join-section">
-    <div class="join-section-label"><i class="ti ti-link"></i> Unirse con cÃ³digo</div>
+    <div class="join-section-label"><i class="ti ti-link"></i> Unirse con código</div>
     <div class="join-row">
-      <input class="join-input" type="text" id="join-code" placeholder="Ej: XK9M2PQR" maxlength="8" autocomplete="off" autocapitalize="characters"
+      <input class="join-input" type="text" id="join-code" placeholder="Ej: XK9M2PQR o pega el enlace" maxlength="500" autocomplete="off" autocapitalize="characters"
         onkeydown="if(event.key==='Enter') unirseConCodigo()">
       <button class="join-btn" onclick="unirseConCodigo()">Unirme</button>
     </div>
@@ -349,7 +349,7 @@ header {
   <a class="nav-item" href="/library.html"><i class="ti ti-music"></i><span>Canciones</span></a>
   <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
   <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
-  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>MÃ¡s</span></a>
+  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
 </nav>
 
 <script>
@@ -403,8 +403,8 @@ async function cargarGrupos() {
     list.innerHTML = `
       <div class="empty-state">
         <i class="ti ti-users"></i>
-        <strong>AÃºn no tienes grupos</strong>
-        <p>Crea tu propio grupo o Ãºnete con un cÃ³digo de invitaciÃ³n.</p>
+        <strong>Aún no tienes grupos</strong>
+        <p>Crea tu propio grupo o únete con un código de invitación.</p>
       </div>`
     return
   }
@@ -475,8 +475,15 @@ async function confirmarCrear() {
 }
 
 function unirseConCodigo() {
-  const code = document.getElementById('join-code').value.trim().toUpperCase()
-  if (!code) { showToast('Ingresa el cÃ³digo de invitaciÃ³n'); return }
+  let val = document.getElementById('join-code').value.trim()
+  // If user pasted a full invite URL, extract just the code
+  try {
+    const url = new URL(val)
+    const codeParam = url.searchParams.get('code')
+    if (codeParam) val = codeParam
+  } catch(e) {}
+  const code = val.toUpperCase()
+  if (!code) { showToast('Ingresa el código de invitación'); return }
   window.location.href = `/join-group.html?code=${encodeURIComponent(code)}`
 }
 
