@@ -374,10 +374,30 @@
       <div class="setlist-title" id="setlist-title">Cargando...</div>
       <div class="setlist-date" id="setlist-date"></div>
     </div>
-    <button id="btn-eliminar-setlist" onclick="eliminarSetlist()" style="background:none;border:1px solid #7f1d1d;border-radius:8px;color:#ef4444;padding:5px 10px;font-size:0.8rem;cursor:pointer">
-      <i class="ti ti-trash"></i>
-    </button>
+    <div style="display:flex;gap:6px;flex-shrink:0;">
+      <button id="btn-agregar-cancion" onclick="abrirModalAgregar()" style="background:#3b82f6;border:none;border-radius:8px;color:#fff;padding:5px 10px;font-size:0.8rem;font-weight:600;cursor:pointer;display:none;align-items:center;gap:4px">
+        <i class="ti ti-plus"></i>
+      </button>
+      <button id="btn-eliminar-setlist" onclick="eliminarSetlist()" style="background:none;border:1px solid #7f1d1d;border-radius:8px;color:#ef4444;padding:5px 10px;font-size:0.8rem;cursor:pointer">
+        <i class="ti ti-trash"></i>
+      </button>
+    </div>
   </header>
+
+  <!-- Modal agregar canciones -->
+  <div class="modal-overlay" id="modal-agregar" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:50;display:none;align-items:flex-end;justify-content:center;">
+    <div style="background:rgba(10,18,35,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(59,130,246,0.18);border-radius:20px 20px 0 0;padding:1.25rem;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;">
+      <div style="flex-shrink:0;">
+        <div style="width:36px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 1rem;"></div>
+        <div style="font-size:1rem;font-weight:700;color:#e2e8f0;margin-bottom:0.85rem;">Agregar canción</div>
+        <input id="agregar-search" type="text" placeholder="Buscar canción..." autocomplete="off"
+          style="width:100%;background:rgba(20,32,55,0.70);border:1px solid rgba(59,130,246,0.20);border-radius:10px;padding:0.7rem 0.9rem;color:#e2e8f0;font-size:0.9rem;outline:none;margin-bottom:0.75rem;"
+          oninput="filtrarCanciones(this.value)">
+      </div>
+      <div id="agregar-lista" style="overflow-y:auto;flex:1;"></div>
+      <button onclick="cerrarModalAgregar()" style="width:100%;background:rgba(30,45,69,0.70);border:none;border-radius:10px;color:#94a3b8;padding:0.8rem;font-size:0.9rem;cursor:pointer;margin-top:0.75rem;flex-shrink:0;">Cerrar</button>
+    </div>
+  </div>
 
   <div class="group-banner" id="group-banner" style="display:none"></div>
 <div id="contenido">
@@ -435,6 +455,8 @@ userId = session.user.id
 function actualizarUIPermisos() {
   const btn = document.getElementById('btn-eliminar-setlist')
   if (btn) btn.style.display = isLeader ? '' : 'none'
+  const btnAgregar = document.getElementById('btn-agregar-cancion')
+  if (btnAgregar) btnAgregar.style.display = isLeader ? 'flex' : 'none'
   const banner = document.getElementById('group-banner')
   if (banner) {
     if (groupId && !isLeader) {
@@ -444,6 +466,71 @@ function actualizarUIPermisos() {
       banner.style.display = 'none'
     }
   }
+}
+
+let todasLasCanciones = []
+
+async function abrirModalAgregar() {
+  document.getElementById('modal-agregar').style.display = 'flex'
+  document.getElementById('agregar-search').value = ''
+  const lista = document.getElementById('agregar-lista')
+  lista.innerHTML = '<div style="text-align:center;color:#4a5568;padding:2rem;font-size:0.85rem;">Cargando canciones...</div>'
+
+  if (todasLasCanciones.length === 0) {
+    const { data } = await _supabase.from('Songs').select('id, title, artist, "original key"').order('title')
+    todasLasCanciones = data || []
+  }
+  renderizarCanciones(todasLasCanciones)
+}
+
+function cerrarModalAgregar() {
+  document.getElementById('modal-agregar').style.display = 'none'
+}
+
+function filtrarCanciones(q) {
+  const term = q.toLowerCase()
+  const filtradas = term
+    ? todasLasCanciones.filter(s => s.title.toLowerCase().includes(term) || (s.artist || '').toLowerCase().includes(term))
+    : todasLasCanciones
+  renderizarCanciones(filtradas)
+}
+
+function renderizarCanciones(songs) {
+  const lista = document.getElementById('agregar-lista')
+  const yaEnSetlist = new Set(songsOrdered.map(s => s.id))
+  if (!songs.length) {
+    lista.innerHTML = '<div style="text-align:center;color:#4a5568;padding:2rem;font-size:0.85rem;">Sin resultados</div>'
+    return
+  }
+  lista.innerHTML = songs.map(s => {
+    const yaEsta = yaEnSetlist.has(s.id)
+    return `<div style="display:flex;align-items:center;gap:10px;padding:0.7rem 0;border-bottom:1px solid rgba(30,45,69,0.60);cursor:${yaEsta ? 'default' : 'pointer'}" onclick="${yaEsta ? '' : `agregarCancionAlSetlist(${s.id},'${s.title.replace(/'/g,"\\'")}',this)`}">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:0.88rem;color:${yaEsta ? '#4a5568' : '#e2e8f0'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.title}</div>
+        <div style="font-size:0.73rem;color:#4a5568;">${s.artist || ''}</div>
+      </div>
+      <div style="font-size:0.7rem;font-weight:700;color:#3b82f6;background:rgba(30,45,69,0.80);border-radius:4px;padding:2px 6px;font-family:monospace;flex-shrink:0;">${s['original key'] || '?'}</div>
+      <div style="flex-shrink:0;color:${yaEsta ? '#22c55e' : '#3b82f6'};font-size:1.1rem;">${yaEsta ? '<i class="ti ti-check"></i>' : '<i class="ti ti-plus"></i>'}</div>
+    </div>`
+  }).join('')
+}
+
+async function agregarCancionAlSetlist(songId, titulo, el) {
+  el.onclick = null
+  el.style.opacity = '0.5'
+  const nextOrder = songsOrdered.length > 0 ? Math.max(...songsOrdered.map(s => s.order || 0)) + 1 : 1
+  const { error } = await _supabase.from('setlist_songs').insert({ setlist_id: parseInt(setlistId), song_id: songId, order: nextOrder })
+  if (error) {
+    mostrarToast('Error al agregar')
+    el.onclick = () => agregarCancionAlSetlist(songId, titulo, el)
+    el.style.opacity = '1'
+    return
+  }
+  mostrarToast(`✓ "${titulo}" agregado`)
+  // Actualizar lista en memoria y re-renderizar chips
+  await cargarSetlist()
+  // Re-renderizar el modal con estado actualizado
+  filtrarCanciones(document.getElementById('agregar-search').value)
 }
 async function cargarSetlist() {
       const { data: setlist } = await _supabase
@@ -636,7 +723,7 @@ if (!isLeader) { alert('Solo el lider puede quitar canciones.'); return }
         touchCard.classList.add('dragging')
 
         touchClone = touchCard.cloneNode(true)
-        touchClone.style.cssText = 'position:fixed;left:0;right:0;z-index:9999;opacity:0.85;background:#111c2e;border-radius:8px;pointer-events:none;'
+        touchClone.style.cssText = 'position:fixed;left:0;right:0;z-index:9999;opacity:0.85;background:#111c2e;border-radius: 8px;pointer-events:none;'
         touchClone.style.top = touchCard.getBoundingClientRect().top + 'px'
         document.body.appendChild(touchClone)
         e.preventDefault()
@@ -678,25 +765,21 @@ if (!isLeader) { alert('Solo el lider puede quitar canciones.'); return }
 
     async function guardarOrden() {
 if (!isLeader) { return }
-      // UPDATE bloqueado por RLS  usar DELETE + INSERT para cada canci�n
+      // UPDATE bloqueado por RLS — usar DELETE + INSERT para cada canciÿ�n
       for (let idx = 0; idx < songsOrdered.length; idx++) {
         const song = songsOrdered[idx]
         const { data: current } = await _supabase
           .from('setlist_songs').select('*').eq('id', song.itemId).single()
         if (!current) continue
         await _supabase.from('setlist_songs').delete().eq('id', song.itemId)
-        const { data: inserted } = await _supabase.from('setlist_songs').insert({
-          setlist_id:   current.setlist_id,
-          song_id:      current.song_id,
-          key_override: current.key_override,
-          order:        idx + 1
-        }).select().single()
-        if (inserted) songsOrdered[idx].itemId = inserted.id
-      }
-      mostrarToast('Orden guardado')
-    }
+        const { data: inserted } = await _supabase.from('setlist_sۙ���K�[��\�
+�]\��Y��\��[���]\��Y��ۙ��Y��\��[���ۙ��Y��^W�ݙ\��YN��\��[���^W�ݙ\��YK�ܙ\��Y
+�B�JK��[X�
 
-    init()
-  </script>
-</body>
-</html>
+K��[��J
+B�Y�
+[��\�Y
+H�ۙ��ܙ\�Y�YK�][RYH[��\�Y�Y�B�[���\��\�
+	�ܙ[��X\�Y��B�B��[�]
+
+B���ܚ\��؛�O���[�
