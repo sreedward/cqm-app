@@ -375,7 +375,7 @@
       <div class="setlist-date" id="setlist-date"></div>
     </div>
     <div style="display:flex;gap:6px;flex-shrink:0;">
-      <button id="btn-agregar-cancion" onclick="abrirModalAgregar()" style="background:#3b82f6;border:none;border-radius:8px;color:#fff;padding:5px 10px;font-size:0.8rem;font-weight:600;cursor:pointer;display:none;align-items:center;gap:4px">
+      <button id="btn-agregar-cancion" onclick="abrirModalAgregar()" style="background:#3b82f6;border:none;border-radius:8px;color:#fff;padding:5px 10px;font-size:0.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">
         <i class="ti ti-plus"></i>
       </button>
       <button id="btn-eliminar-setlist" onclick="eliminarSetlist()" style="background:none;border:1px solid #7f1d1d;border-radius:8px;color:#ef4444;padding:5px 10px;font-size:0.8rem;cursor:pointer">
@@ -456,7 +456,7 @@ function actualizarUIPermisos() {
   const btn = document.getElementById('btn-eliminar-setlist')
   if (btn) btn.style.display = isLeader ? '' : 'none'
   const btnAgregar = document.getElementById('btn-agregar-cancion')
-  if (btnAgregar) btnAgregar.style.display = isLeader ? 'flex' : 'none'
+  if (btnAgregar) btnAgregar.style.display = 'flex'
   const banner = document.getElementById('group-banner')
   if (banner) {
     if (groupId && !isLeader) {
@@ -723,7 +723,7 @@ if (!isLeader) { alert('Solo el lider puede quitar canciones.'); return }
         touchCard.classList.add('dragging')
 
         touchClone = touchCard.cloneNode(true)
-        touchClone.style.cssText = 'position:fixed;left:0;right:0;z-index:9999;opacity:0.85;background:#111c2e;border-radius: 8px;pointer-events:none;'
+        touchClone.style.cssText = 'position:fixed;left:0;right:0;z-index:9999;opacity:0.85;background:#111c2e;border-radius:8px;pointer-events:none;'
         touchClone.style.top = touchCard.getBoundingClientRect().top + 'px'
         document.body.appendChild(touchClone)
         e.preventDefault()
@@ -765,21 +765,58 @@ if (!isLeader) { alert('Solo el lider puede quitar canciones.'); return }
 
     async function guardarOrden() {
 if (!isLeader) { return }
-      // UPDATE bloqueado por RLS — usar DELETE + INSERT para cada canciÿ�n
+      // UPDATE bloqueado por RLS  usar DELETE + INSERT para cada canci�n
       for (let idx = 0; idx < songsOrdered.length; idx++) {
         const song = songsOrdered[idx]
         const { data: current } = await _supabase
           .from('setlist_songs').select('*').eq('id', song.itemId).single()
         if (!current) continue
         await _supabase.from('setlist_songs').delete().eq('id', song.itemId)
-        const { data: inserted } = await _supabase.from('setlist_sۙ���K�[��\�
-�]\��Y��\��[���]\��Y��ۙ��Y��\��[���ۙ��Y��^W�ݙ\��YN��\��[���^W�ݙ\��YK�ܙ\��Y
-�B�JK��[X�
+        const { data: inserted } = await _supabase.from('setlist_songs').insert({
+    ).join('')}
+                ${songsOrdered.length > 4 ? `<div style="font-size:0.75rem;color:#4a5568;padding:0.4rem 0">+${songsOrdered.length - 4} más...</div>` : ''}
+              </div>` : ''}
+          </div>`
+      }
 
-K��[��J
-B�Y�
-[��\�Y
-H�ۙ��ܙ\�Y�YK�][RYH[��\�Y�Y�B�[���\��\�
-	�ܙ[��X\�Y��B�B��[�]
+      contenido.innerHTML = html
+    }
 
-B���ܚ\��؛�O���[�
+    function abrirModal() {
+      if (!isLeaderOfCurrent) { return }
+      document.getElementById('modal').classList.add('show')
+      document.getElementById('setlist-date').value = new Date().toISOString().split('T')[0]
+    }
+
+    function cerrarModal() {
+      document.getElementById('modal').classList.remove('show')
+      document.getElementById('setlist-name').value = ''
+    }
+
+    async function crearSetlist() {
+      if (!isLeaderOfCurrent) { alert('Solo el lider del grupo puede crear setlists.'); return }
+      const name = document.getElementById('setlist-name').value.trim()
+      const date = document.getElementById('setlist-date').value
+
+      if (!name) {
+        alert('Por favor ponle un nombre al setlist.')
+        return
+      }
+
+      const { error } = await _supabase
+        .from('setlist')
+        .insert({ name, date, user_id: userId, group_id: currentGroupId })
+
+      if (error) {
+        alert('Error creando setlist: ' + error.message)
+        return
+      }
+
+      cerrarModal()
+      cargarSetlists()
+    }
+
+    init()
+  </script>
+</body>
+</html>
