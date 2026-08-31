@@ -134,10 +134,11 @@
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.7);
-      z-index: 50;
+      z-index: 9999;
       display: none;
       align-items: flex-end;
       justify-content: center;
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 90px);
     }
     .modal-overlay.show { display: flex; }
     .modal {
