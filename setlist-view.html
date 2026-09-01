@@ -773,13 +773,13 @@ if (!isLeader) { return }
         if (!current) continue
         await _supabase.from('setlist_songs').delete().eq('id', song.itemId)
         const { data: inserted } = await _supabase.from('setlist_songs').insert({
-    ).join('')}
-                ${songsOrdered.length > 4 ? `<div style="font-size:0.75rem;color:#4a5568;padding:0.4rem 0">+${songsOrdered.length - 4} más...</div>` : ''}
-              </div>` : ''}
-          </div>`
+          setlist_id: parseInt(setlistId),
+          song_id: song.id,
+          order: idx,
+          key_override: song.keyOverride || null
+        }).select().single()
+        if (inserted?.id) song.itemId = inserted.id
       }
-
-      contenido.innerHTML = html
     }
 
     function abrirModal() {
