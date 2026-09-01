@@ -383,7 +383,7 @@ function goBack() {
   if (!chord || !chord.trim()) return '';
   var t = chord.trim();
   // Handle slash chords (e.g. 5/7, 1/5, Gmaj7/B) — render bass note separately, not as superscript
-  var slash = t-indexOf('/');
+  var slash = t.indexOf('/');
   if (slash !== -1) {
     return styledChord(t.slice(0, slash)) + '<span class="chord-slash">/</span>' + styledChord(t.slice(slash + 1));
   }
