@@ -523,11 +523,7 @@ if (isAdmin) return (sec && sec.chord_offsets) || {}
       const parts = key.split(':')
       const sectionId = Number(parts[0])
       const startOffset = parseFloat(el.dataset.offset) || 0
-      const rect = el.getBoundingClientRect()
-      const naturalLeft = rect.left - startOffset
-      const maxLeft = Math.round(-naturalLeft)
-      const maxRight = Math.round(window.innerWidth - naturalLeft - rect.width)
-      dragState = { el, key, sectionId, startX: e.clientX, startOffset, currentOffset: startOffset, dragging: false, maxLeft, maxRight }
+      dragState = { el, key, sectionId, startX: e.clientX, startOffset, currentOffset: startOffset, dragging: false }
       el.setPointerCapture(e.pointerId)
       el.addEventListener('pointermove', onChordPointerMove)
       el.addEventListener('pointerup', onChordPointerUp)
@@ -551,11 +547,15 @@ if (isAdmin) return (sec && sec.chord_offsets) || {}
         if (Math.abs(delta) < 3) return
         dragState.dragging = true
       }
-      const rawOffset = Math.round(dragState.startOffset + delta)
-      const newOffset = Math.max(dragState.maxLeft, Math.min(dragState.maxRight, rawOffset))
-      dragState.el.style.transform = 'translateX(' + newOffset + 'px)'
-      dragState.el.dataset.offset = newOffset
-      dragState.currentOffset = newOffset
+      const proposedOffset = Math.round(dragState.startOffset + delta)
+      dragState.el.style.transform = 'translateX(' + proposedOffset + 'px)'
+      const r = dragState.el.getBoundingClientRect()
+      let finalOffset = proposedOffset
+      if (r.left < 0) finalOffset += Math.ceil(-r.left)
+      else if (r.right > window.innerWidth) finalOffset -= Math.ceil(r.right - window.innerWidth)
+      if (finalOffset !== proposedOffset) dragState.el.style.transform = 'translateX(' + finalOffset + 'px)'
+      dragState.el.dataset.offset = finalOffset
+      dragState.currentOffset = finalOffset
     }
 
     function onChordPointerUp(e) {
