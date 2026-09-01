@@ -762,9 +762,10 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede cambiar la 
       semitones = (semitones + n + 12) % 12
       const rootIdx = NOTAS.indexOf(originalKey)
       const newIdx = (rootIdx + semitones) % 12
-      document.getElementById('kconst newIdx = (rootIdx + semitones) % 12
       preferFlats = FLAT_KEYS.has(NOTAS_FLAT[newIdx])
-      document.getElementById('key-display').textContent = notaDisplay(newIdx)ementById('save-key-btn'); if (btn) btn.style.display = 'flex' }
+      document.getElementById('key-display').textContent = notaDisplay(newIdx)
+      renderAll()
+      if (setlistId) { const btn = document.getElementById('save-key-btn'); if (btn) btn.style.display = 'flex' }
     }
 
     function setCifrado(tipo) {
@@ -853,16 +854,18 @@ if (setlistId) {
       document.title = song.title
       const rawKey = song['original key'] || 'C'
       originalKey = BEMOLES[rawKey] || rawKey
-      preferFlats = rawKey !== originalKey  // rawKey was a flat (e.g. Eb, Bb)
-      document.getElementById('key-display').textContenpreferFlats = FLAT_KEYS.has(rawKey)  // F, Bb, Eb, Ab, Db, Gb use flat spellinge keyParam through BEMOLES so flat spellings (Bb, Eb) work too
-                      const keyParamNorm = BEMOLES[keyParam] || keyParam
-                      if (NOTAS.includes(keyParamNorm)) {
-                        preferFlats = keyParam !== keyParamNorm  // prefer flats if keyParam was flat
-                        const targetIdx = NOTAS.indexOf(kpreferFlats = FLAT_KEYS.has(NOTAS_FLAT[NOTAS.indexOf(keyParamNorm)])  // determine flat/sharp based on keyKey)
-                        semitones = (targetIdx - originIdx + 12) % 12
-                        document.getElementById('key-display').textContent = keyParam
-                      }
-            }
+      preferFlats = FLAT_KEYS.has(rawKey)
+      document.getElementById('key-display').textContent = rawKey
+      if (keyParam) {
+        const keyParamNorm = BEMOLES[keyParam] || keyParam
+        if (NOTAS.includes(keyParamNorm)) {
+          preferFlats = FLAT_KEYS.has(NOTAS_FLAT[NOTAS.indexOf(keyParamNorm)])
+          const targetIdx = NOTAS.indexOf(keyParamNorm)
+          const originIdx = NOTAS.indexOf(originalKey)
+          semitones = (targetIdx - originIdx + 12) % 12
+          document.getElementById('key-display').textContent = keyParam
+        }
+      }
       // Si ya tiene tono guardado, mostrar botón para poder cambiarlo
       if (setlistId && keyParam) { const btn = document.getElementById('save-key-btn'); if (btn) btn.style.display = 'flex' }
       const { data: secs } = await _supabase.from('sections').select('*').eq('song_id', songId).order('order')
