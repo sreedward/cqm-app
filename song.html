@@ -327,6 +327,7 @@
     const NOTAS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
     const NOTAS_FLAT = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B']
     const BEMOLES = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}
+    const FLAT_KEYS = new Set(['F','Bb','Eb','Ab','Db','Gb'])
     let preferFlats = false
     function notaDisplay(idx) { return preferFlats ? NOTAS_FLAT[idx % 12] : NOTAS[idx % 12] }
     const CALIDAD = ['','m','m','','','m','dim']
@@ -377,8 +378,7 @@ function goBack() {
     }
 
     function traducirAcorde(acorde, overrideCifrado) {
-      const slashIdx = acorde.indexOf('/'); const chordPart = slashIdx === -1 ? acorde : acorde.slice(0, slashIdx); const bassPart = slashIdx === -1 ? '' : acorde.slice(slashIdx + 1); const match = chordPart.match(/^([#b]?)(\d)([#b]?)(M|m)?(sus\d*|add\d*|maj\d*|dism|dim|dis|aug|\d*)?$/); if (!match) return acorde; const sharp = match[1] === '#' || match[3] === '#'; const flat = match[1] === 'b' || match[3] === 'b'; const grado = parseInt(match[2]); const calidadFlag = match[4]; const extra = match[5] || ''; if ((overrideCifrado || cifrado) === 'nashville') return acorde; const intervalos = [0,2,4,5,7,9,11]; const rootIdx = NOTAS.indexOf(originalKey); let intervalo = intervalos[grado - 1] || 0; if (sharp) intervalo += 1; if (flat) intervalo -= 1; const idx = (rootIdx + intervalo + semitones + 120) % 12; const nota = NOTAS[idx]; const calidad = calidadFlag === 'm' ? 'm' : calidadFlag === 'M' ? '' : (CALIDAD[grado - 1] || ''); let bass = ''; if (bassPart) { const bmatch = bassPart.match(/^([#b]?)(\d)([#b]?)$/); if (bmatch) { const bSharp = bmatch[1] === '#' || bmatch[3] === '#'; const bFlat = bmatch[1] === 'b' || bmatch[3] === 'b'; const bGrado = parseInt(bmatch[2]); let bIntervalo = intervalos[bGrado - 1] || 0; if (bSharp) bIntervalo += 1; if (bFlat) bIntervalo -= 1; const bIdx = (rootIdx + bIntervalo + semitones + 120) % 12; bass = '/' + NOTAS[bIdx] } else { bass = '/' + bassPart } } return nota + calidad + extra + bass
-    }
+      const slashIdx = acorde.indexOf('/'); const chordPart = slashIdx === -1 ? acorde : acorde.slice(0, slashIdx); const bassPart = slashIdx === -1 ? '' : acorde.slice(slashIdx + 1); const match = chordPart.match(/^([#b]?)(\d)([#b]?)(M|m)?(sus\d*|add\d*|maj\d*|dism|dim|dis|aug|\d*)?$/); if (!match) return acorde; const sharp = match[1] === '#' || match[3] === '#'; const flat = match[1] === 'b' || match[3] === 'b'; const grado = parseInt(match[2]); const calidadFlag = match[4]; const extra = match[5] || ''; if ((overrideCifrado || cifrado) === 'nashville') return acorde; const intervalos = [0,2,4,5,7,9,11]; const rootIdx = NOTAS.indexOf(originalKey); let intervalo = intervalos[grado - 1] || 0; if (sharp) intervalo += 1; if (flat) intervalo -= 1; const idx = (rootIdx + intervalo + semitones + 120) % 12; const nota = NOTAS[idx]; const calidad = calidadFlag === 'm' ?const nota = notaDisplay(idx); const calidadIDAD[grado - 1] || ''); let bass = ''; if (bassPart) { const bmatch = bassPart.match(/^([#b]?)(\d)([#b]?)$/); if (bmatch) { const bSharp = bmatch[1] === '#' || bmatch[3] === '#'; const bFlat = bmatch[1] === 'b' || bmatch[3] === 'b'; const bGrado = parseInt(bmatch[2]); let bIntervalo = intervalos[bGrado - 1] || 0; if (bSharp) bIntervalo += 1; if (bFlat) bIntervalo -= 1; const bIdx = (rootIdx + bIntervalo + semitones + 120) % 12; bass = '/' + NOTAS[bIdx] } else { bass = '/' + bassPart } } return nbass = '/' + notaDisplay(bIdx) } else  }
 
     function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
 
@@ -761,9 +761,9 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede cambiar la 
       semitones = (semitones + n + 12) % 12
       const rootIdx = NOTAS.indexOf(originalKey)
       const newIdx = (rootIdx + semitones) % 12
-      document.getElementById('key-display').textContent = notaDisplay(newIdx)
-      renderAll()
-            if (setlistId) { const btn = document.getElementById('save-key-btn'); if (btn) btn.style.display = 'flex' }
+      document.getElementById('kconst newIdx = (rootIdx + semitones) % 12
+      preferFlats = FLAT_KEYS.has(NOTAS_FLAT[newIdx])
+      document.getElementById('key-display').textContent = notaDisplay(newIdx)ementById('save-key-btn'); if (btn) btn.style.display = 'flex' }
     }
 
     function setCifrado(tipo) {
@@ -853,14 +853,11 @@ if (setlistId) {
       const rawKey = song['original key'] || 'C'
       originalKey = BEMOLES[rawKey] || rawKey
       preferFlats = rawKey !== originalKey  // rawKey was a flat (e.g. Eb, Bb)
-      document.getElementById('key-display').textContent = rawKey
-            if (keyParam) {
-                      // Normalize keyParam through BEMOLES so flat spellings (Bb, Eb) work too
+      document.getElementById('key-display').textContenpreferFlats = FLAT_KEYS.has(rawKey)  // F, Bb, Eb, Ab, Db, Gb use flat spellinge keyParam through BEMOLES so flat spellings (Bb, Eb) work too
                       const keyParamNorm = BEMOLES[keyParam] || keyParam
                       if (NOTAS.includes(keyParamNorm)) {
                         preferFlats = keyParam !== keyParamNorm  // prefer flats if keyParam was flat
-                        const targetIdx = NOTAS.indexOf(keyParamNorm)
-                        const originIdx = NOTAS.indexOf(originalKey)
+                        const targetIdx = NOTAS.indexOf(kpreferFlats = FLAT_KEYS.has(NOTAS_FLAT[NOTAS.indexOf(keyParamNorm)])  // determine flat/sharp based on keyKey)
                         semitones = (targetIdx - originIdx + 12) % 12
                         document.getElementById('key-display').textContent = keyParam
                       }
