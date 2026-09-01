@@ -56,6 +56,7 @@
     .save-align-bar.show { display: flex; }
     .save-align-btn { background: #f59e0b; border: none; color: #0d1626; border-radius: 14px; padding: 0.4rem 0.9rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
     .reset-align-btn { background: none; border: none; color: #4a5568; font-size: 0.78rem; cursor: pointer; text-decoration: underline; }
+    .reset-align-btn.original-btn { color: #f87171; }
     .page { display: none; padding: 1rem 1.25rem 2rem; }
     .page.active { display: block; }
     .section { border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.85rem; }
@@ -299,6 +300,7 @@
   <div class="page-indicator" id="page-indicator">1 / 1</div>
   <div class="save-align-bar" id="save-align-bar">
     <span>Ajustando acordes</span>
+    <button class="reset-align-btn original-btn" onclick="volverAOriginal()">↺ Original</button>
     <button class="reset-align-btn" onclick="descartarAlineacion()">Descartar</button>
     <button class="save-align-btn" onclick="guardarAlineacion()">Guardar</button>
   </div>
@@ -381,7 +383,7 @@ function goBack() {
   if (!chord || !chord.trim()) return '';
   var t = chord.trim();
   // Handle slash chords (e.g. 5/7, 1/5, Gmaj7/B) — render bass note separately, not as superscript
-  var slash = t.indexOf('/');
+  var slash = t-indexOf('/');
   if (slash !== -1) {
     return styledChord(t.slice(0, slash)) + '<span class="chord-slash">/</span>' + styledChord(t.slice(slash + 1));
   }
@@ -488,8 +490,13 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede ajustar aco
       document.body.classList.toggle('align-mode', alignMode)
       const btn = document.getElementById('align-btn')
       if (btn) btn.classList.toggle('active', alignMode)
-      if (!alignMode) {
-        document.getElementById('save-align-bar').classList.remove('show')
+      const bar = document.getElementById('save-align-bar')
+      if (alignMode) {
+        const barLabel = bar.querySelector('span')
+        if (barLabel) barLabel.textContent = isAdmin ? 'Ajustando acordes (para todos)' : 'Ajustando acordes (solo para ti)'
+        bar.classList.add('show')
+      } else {
+        bar.classList.remove('show')
       }
     }
 
@@ -516,7 +523,11 @@ if (isAdmin) return (sec && sec.chord_offsets) || {}
       const parts = key.split(':')
       const sectionId = Number(parts[0])
       const startOffset = parseFloat(el.dataset.offset) || 0
-      dragState = { el, key, sectionId, startX: e.clientX, startOffset, currentOffset: startOffset, dragging: false }
+      const rect = el.getBoundingClientRect()
+      const naturalLeft = rect.left - startOffset
+      const maxLeft = Math.round(-naturalLeft)
+      const maxRight = Math.round(window.innerWidth - naturalLeft - rect.width)
+      dragState = { el, key, sectionId, startX: e.clientX, startOffset, currentOffset: startOffset, dragging: false, maxLeft, maxRight }
       el.setPointerCapture(e.pointerId)
       el.addEventListener('pointermove', onChordPointerMove)
       el.addEventListener('pointerup', onChordPointerUp)
@@ -540,7 +551,8 @@ if (isAdmin) return (sec && sec.chord_offsets) || {}
         if (Math.abs(delta) < 3) return
         dragState.dragging = true
       }
-      const newOffset = Math.round(dragState.startOffset + delta)
+      const rawOffset = Math.round(dragState.startOffset + delta)
+      const newOffset = Math.max(dragState.maxLeft, Math.min(dragState.maxRight, rawOffset))
       dragState.el.style.transform = 'translateX(' + newOffset + 'px)'
       dragState.el.dataset.offset = newOffset
       dragState.currentOffset = newOffset
@@ -596,6 +608,35 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede ajustar aco
       modifiedSections = {}
       document.getElementById('save-align-bar').classList.remove('show')
       renderAll()
+    }
+
+    async function volverAOriginal() {
+      if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede ajustar acordes del grupo'); return }
+      modifiedSections = {}
+      for (const sec of sections) {
+        const hasGroupOffset = groupId && Object.keys(groupOffsets[sec.id] || {}).length > 0
+        const hasAdminOffset = isAdmin && Object.keys((sec.chord_offsets) || {}).length > 0
+        const hasPersonalOffset = !groupId && !isAdmin && Object.keys(personalOffsets[sec.id] || {}).length > 0
+        if (groupId) {
+          if (hasGroupOffset) {
+            await _supabase.from('group_chord_offsets').upsert({ group_id: groupId, section_id: sec.id, offsets: {}, updated_at: new Date().toISOString() }, { onConflict: 'group_id,section_id' })
+          }
+          groupOffsets[sec.id] = {}
+        } else if (isAdmin) {
+          if (hasAdminOffset) {
+            await _supabase.from('sections').update({ chord_offsets: {} }).eq('id', sec.id)
+            sec.chord_offsets = {}
+          }
+        } else {
+          if (hasPersonalOffset) {
+            await _supabase.from('user_chord_offsets').upsert({ user_id: currentUserId, section_id: sec.id, offsets: {}, updated_at: new Date().toISOString() }, { onConflict: 'user_id,section_id' })
+          }
+          personalOffsets[sec.id] = {}
+        }
+      }
+      document.getElementById('save-align-bar').classList.remove('show')
+      renderAll()
+      mostrarToast('Acordes en posición original')
     }
 
     function renderSeccion(sec) {
