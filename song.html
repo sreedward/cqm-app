@@ -345,7 +345,9 @@
         let isAdmin = false
 let groupId = null
 let isLeaderOfGroup = true
+let leaderId = null
 let groupOffsets = {}
+let leaderNotesCache = {}
         let personalOffsets = {}
 
     const params = new URLSearchParams(window.location.search)
@@ -674,6 +676,11 @@ let  notesCache = {};
       const { data } = await _supabase.from('song_notes').select('section_id, content').eq('user_id', currentUserId)
       notesCache = {};
       (data || []).forEach(n => { notesCache[n.section_id] = n.content })
+      leaderNotesCache = {}
+      if (groupId && leaderId && !isLeaderOfGroup) {
+        const { data: ldata } = await _supabase.from('song_notes').select('section_id, content').eq('user_id', leaderId)
+        ;(ldata || []).forEach(n => { leaderNotesCache[n.section_id] = n.content })
+      }
     }
 
     function inyectarEstiloNotas() {
@@ -689,6 +696,10 @@ let  notesCache = {};
       .mynote-status { font-size:0.65rem; color:#4ade80; opacity:0; transition:opacity 0.4s ease; white-space:nowrap; }
       .mynote-status.show { opacity:1; }
       .mynote-status.saving { color:#8b9cb5; }
+      .leader-note-box { display:flex; flex-direction:column; align-items:flex-end; flex-shrink:0; margin-right:4px; }
+      .leader-note { font-size:0.7rem; color:#fbbf24; background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.3); border-radius:5px; padding:2px 7px; max-width:200px; word-break:break-word; line-height:1.4; }
+      .leader-note:empty { display:none; }
+      .leader-badge { font-size:0.65rem; color:#94a3b8; cursor:default; }
       `
       document.head.appendChild(style)
     }
@@ -704,9 +715,29 @@ let  notesCache = {};
 
         const box = document.createElement('div')
         box.className = 'mynote-box'
+
+        if (groupId && !isLeaderOfGroup) {
+          const lbox = document.createElement('div')
+          lbox.className = 'leader-note-box'
+          lbox.setAttribute('data-lsid', sid)
+          const lspan = document.createElement('div')
+          lspan.className = 'leader-note'
+          lspan.textContent = leaderNotesCache[sid] || ''
+          lbox.appendChild(lspan)
+          box.appendChild(lbox)
+        }
+
+        if (groupId && isLeaderOfGroup) {
+          const badge = document.createElement('span')
+          badge.className = 'leader-badge'
+          badge.title = 'Tu nota es visible para todos los miembros del grupo'
+          badge.textContent = '👥'
+          box.appendChild(badge)
+        }
+
         const ta = document.createElement('textarea')
         ta.className = 'mynote-ta'
-        ta.placeholder = '✏️ Mi nota...'
+        ta.placeholder = (groupId && isLeaderOfGroup) ? '✏️ Nota del grupo...' : '✏️ Mi nota...'
         ta.value = existing
         const status = document.createElement('div')
         status.className = 'mynote-status'
@@ -821,6 +852,7 @@ if (setlistId) {
   if (groupId) {
     const { data: _grp } = await _supabase.from('groups').select('leader_id').eq('id', groupId).single()
     isLeaderOfGroup = _grp ? _grp.leader_id === currentUserId : false
+    leaderId = _grp ? _grp.leader_id : null
   } else {
     isLeaderOfGroup = true
   }
