@@ -342,10 +342,41 @@ function transposeChord(chord, shift) {
   return result
 }
 
-function procesarToken(token) {
+function traducirNashville(token, songKey, shift) {
+  const INTERVALOS = [0,2,4,5,7,9,11]
+  const CALIDAD_DEF = ['','m','m','','','m','dim']
+  const slashIdx = token.indexOf('/')
+  const chordPart = slashIdx === -1 ? token : token.slice(0, slashIdx)
+  const bassPart  = slashIdx === -1 ? '' : token.slice(slashIdx + 1)
+  const m = chordPart.match(/^([#b]?)(\d)([#b]?)(m|M)?(sus\d*|add\d*|maj\d*|dim|aug|\d*)?$/)
+  if (!m) return token
+  const sharp = m[1]==='#'||m[3]==='#', flat = m[1]==='b'||m[3]==='b'
+  const grado = parseInt(m[2]), quality = m[4], extra = m[5] || ''
+  const rootIdx = noteToIdx(BEMOLES[songKey] || songKey)
+  if (rootIdx === -1) return token
+  let intv = INTERVALOS[grado - 1] || 0
+  if (sharp) intv += 1; if (flat) intv -= 1
+  const idx = (rootIdx + intv + shift + 120) % 12
+  const nota = NOTAS[idx]
+  const calidad = quality === 'm' ? 'm' : quality === 'M' ? '' : (CALIDAD_DEF[grado-1] || '')
+  let bass = ''
+  if (bassPart) {
+    const bm = bassPart.match(/^([#b]?)(\d)([#b]?)$/)
+    if (bm) {
+      const bs = bm[1]==='#'||bm[3]==='#', bf = bm[1]==='b'||bm[3]==='b'
+      let bi = INTERVALOS[parseInt(bm[2])-1] || 0
+      if (bs) bi += 1; if (bf) bi -= 1
+      bass = '/' + NOTAS[(rootIdx + bi + shift + 120) % 12]
+    } else bass = '/' + bassPart
+  }
+  return nota + calidad + extra + bass
+}
+
+function procesarToken(token, songKey, shift) {
   if (!token.trim()) return token
   if (cifrado === 'nashville') return token
-  return transposeChord(token, semitones)
+  const conv = traducirNashville(token, songKey, shift)
+  return conv !== token ? conv : transposeChord(token, shift)
 }
 
 function escHtml(s) {
@@ -358,7 +389,7 @@ function currentKeyForSong(songOrigKey) {
   return NOTAS_ES[(idx + semitones + 120) % 12]
 }
 
-function procesarLinea(line) {
+function procesarLinea(line, songKey, shift) {
   if (!line || !line.trim()) return ''
   const hasBracket = line.indexOf('[') !== -1
   if (!hasBracket) {
@@ -370,7 +401,7 @@ function procesarLinea(line) {
   let pendingChord = null
   for (const tok of parts) {
     if (tok.startsWith('[') && tok.endsWith(']')) {
-      pendingChord = procesarToken(tok.slice(1, -1).trim())
+      pendingChord = procesarToken(tok.slice(1, -1).trim(), songKey, shift)
     } else {
       const words = tok.split(' ')
       for (let wi = 0; wi < words.length; wi++) {
@@ -422,7 +453,7 @@ function renderAll() {
         </div>`
     }
     const lines = (sec.content || '').split('\n')
-    const linesHTML = lines.map(procesarLinea).filter(Boolean).join('')
+    const linesHTML = lines.map(l => procesarLinea(l, sec.songKey, semitones)).filter(Boolean).join('')
     const hasNote = !!notesCache[sec.id]
     scrollHTML += `
       <div class="sec-card ${css}" id="sec-${i}">
