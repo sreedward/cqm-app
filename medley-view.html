@@ -600,14 +600,16 @@ function setupScrollSpy() {
 }
 
 function scrollToSec(idx) {
-  // Marcar pill inmediatamente
   document.querySelectorAll('.pill').forEach((p, i) => p.classList.toggle('active-pill', i === idx))
   const el = document.getElementById(`sec-${idx}`)
   if (!el) return
-  // Pausar el observer durante el scroll para que no sobreescriba el pill activo
   if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null }
-  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  // Reconectar el observer después de que termine la animación (~700ms)
+  // Compensar la altura de los elementos sticky (header + sec-index)
+  const headerEl = document.querySelector('header')
+  const secIdxEl = document.getElementById('sec-index')
+  const offset = (headerEl ? headerEl.offsetHeight : 0) + (secIdxEl ? secIdxEl.offsetHeight : 0) + 8
+  const top = el.getBoundingClientRect().top + window.scrollY - offset
+  window.scrollTo({ top, behavior: 'smooth' })
   clearTimeout(scrollingTimer)
   scrollingTimer = setTimeout(() => setupScrollSpy(), 800)
 }
