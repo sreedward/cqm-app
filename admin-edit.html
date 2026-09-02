@@ -117,6 +117,9 @@
     .section.bridge      { background: rgba(31, 26, 10, 0.55) !important; }
     .section.instrumental{ background: rgba(20, 20, 20, 0.50) !important; }
     .section.outro       { background: rgba(31, 10, 10, 0.55) !important; }
+    .section.turnaround  { background: rgba(31, 10, 18, 0.55) !important; }
+    .section.solo        { background: rgba(15, 31, 10, 0.55) !important; }
+    .section.refrain     { background: rgba(13, 10, 31, 0.55) !important; }
     /* Modal / overlay */
     .modal {
       background: rgba(10, 18, 35, 0.85) !important;
@@ -204,7 +207,7 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
     )
 
-const TIPOS = ['intro','verso','pre-coro','coro','vamp','bridge','instrumental','outro','tag']
+const TIPOS = ['intro','verso','pre-coro','coro','vamp','bridge','turnaround','refrain','solo','instrumental','outro','tag']
 const NUMEROS = ['1','1m','1M','17','2','2m','2M','27','3','3m','3M','37','4','4m','4M','47','5','5m','5M','57','6','6m','6M','67','7','7m','7M','77'    ]
     const params = new URLSearchParams(window.location.search)
     const songId = params.get('id')
