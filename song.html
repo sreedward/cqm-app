@@ -685,9 +685,10 @@ let  notesCache = {};
       const { data } = await _supabase.from('song_notes').select('section_id, content').eq('user_id', currentUserId)
       notesCache = {};
       (data || []).forEach(n => { notesCache[n.section_id] = n.content })
+      // In group context: load shared group notes (readable by all members)
       leaderNotesCache = {}
-      if (groupId && leaderId && !isLeaderOfGroup) {
-        const { data: ldata } = await _supabase.from('song_notes').select('section_id, content').eq('user_id', leaderId)
+      if (groupId) {
+        const { data: ldata } = await _supabase.from('group_section_notes').select('section_id, content').eq('group_id', groupId)
         ;(ldata || []).forEach(n => { leaderNotesCache[n.section_id] = n.content })
       }
     }
@@ -720,7 +721,8 @@ let  notesCache = {};
         const sid = secEl.getAttribute('data-sid')
         const label = secEl.querySelector('.section-label')
         if (!label || label.querySelector('.mynote-ta')) return
-        const existing = notesCache[sid] || ''
+        // Leader in group context reads from shared group table; members read personal notes
+        const existing = (groupId && isLeaderOfGroup) ? (leaderNotesCache[sid] || '') : (notesCache[sid] || '')
 
         const box = document.createElement('div')
         box.className = 'mynote-box'
@@ -765,8 +767,20 @@ let  notesCache = {};
     }
 
     async function guardarNota(sectionId, content, status) {
-      notesCache[sectionId] = content
-      await _supabase.from('song_notes').upsert({ user_id: currentUserId, section_id: parseInt(sectionId, 10), content, updated_at: new Date().toISOString() }, { onConflict: 'user_id,section_id' })
+      if (groupId && isLeaderOfGroup) {
+        leaderNotesCache[sectionId] = content
+        await _supabase.from('group_section_notes').upsert(
+          { group_id: groupId, section_id: parseInt(sectionId, 10), content, updated_at: new Date().toISOString() },
+          { onConflict: 'group_id,section_id' }
+        )
+        document.querySelectorAll('[data-lsid="' + sectionId + '"] .leader-note').forEach(el => { el.textContent = content })
+      } else {
+        notesCache[sectionId] = content
+        await _supabase.from('song_notes').upsert(
+          { user_id: currentUserId, section_id: parseInt(sectionId, 10), content, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id,section_id' }
+        )
+      }
       status.textContent = 'Guardado ✓'
       status.classList.remove('saving')
       setTimeout(() => status.classList.remove('show'), 1600)
