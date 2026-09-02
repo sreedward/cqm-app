@@ -681,16 +681,12 @@ let  notesCache = {};
       const style = document.createElement('style')
       style.id = 'mynote-style'
       style.textContent = `
-      .section-label { display:flex; align-items:center; justify-content:space-between; }
-      .mynote-btn { background:none; border:1px solid #2a3b57; color:#8b9cb5; border-radius:12px; font-size:0.7rem; padding:2px 9px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; font-family:inherit; letter-spacing:0.02em; opacity:0.85; }
-      .mynote-btn:hover { opacity:1; border-color:#3b82f6; color:#3b82f6; }
-      .mynote-dot { width:6px; height:6px; border-radius:50%; background:#3b82f6; display:none; }
-      .mynote-dot.show { display:inline-block; }
-      .mynote-box { margin-top:0.5rem; margin-bottom:0.5rem; padding:0.6rem 0.75rem; background:rgba(59,130,246,0.06); border:1px dashed #2a3b57; border-radius:8px; display:none; }
-      .mynote-box.open { display:block; }
-      .mynote-box textarea { width:100%; background:transparent; border:none; color:#cdd6e3; font-size:0.85rem; font-family:inherit; resize:none; outline:none; min-height:40px; }
-      .mynote-hint { font-size:0.68rem; color:#5b6b85; margin-top:0.25rem; }
-      .mynote-status { font-size:0.68rem; color:#4ade80; opacity:0; transition:opacity 0.4s ease; margin-top:0.25rem; }
+      .section-label { display:flex; align-items:center; justify-content:space-between; gap:0.5rem; }
+      .mynote-box { display:flex; align-items:center; gap:4px; flex-shrink:0; }
+      .mynote-ta { background:rgba(59,130,246,0.07); border:1px dashed #2a3b57; border-radius:6px; color:#cdd6e3; font-size:0.75rem; font-family:inherit; resize:none; outline:none; width:130px; height:22px; padding:2px 7px; line-height:1.4; transition:height 0.2s ease, width 0.2s ease, border-color 0.2s ease; overflow:hidden; }
+      .mynote-ta:focus { border-color:#3b82f6; height:54px; width:180px; overflow:auto; }
+      .mynote-ta::placeholder { color:#4a5568; font-size:0.7rem; }
+      .mynote-status { font-size:0.65rem; color:#4ade80; opacity:0; transition:opacity 0.4s ease; white-space:nowrap; }
       .mynote-status.show { opacity:1; }
       .mynote-status.saving { color:#8b9cb5; }
       `
@@ -703,50 +699,36 @@ let  notesCache = {};
       document.querySelectorAll('.section[data-sid]').forEach(secEl => {
         const sid = secEl.getAttribute('data-sid')
         const label = secEl.querySelector('.section-label')
-        if (!label || label.querySelector('.mynote-btn')) return
+        if (!label || label.querySelector('.mynote-ta')) return
         const existing = notesCache[sid] || ''
-
-        const btn = document.createElement('button')
-        btn.className = 'mynote-btn'
-        btn.innerHTML = '\u270F\uFE0F Mi nota <span class="mynote-dot"></span>'
-        if (existing.trim()) btn.querySelector('.mynote-dot').classList.add('show')
 
         const box = document.createElement('div')
         box.className = 'mynote-box'
         const ta = document.createElement('textarea')
-        ta.placeholder = 'Escribe tu nota personal aqui... (solo tu la ves)'
+        ta.className = 'mynote-ta'
+        ta.placeholder = '✏️ Mi nota...'
         ta.value = existing
-        const hint = document.createElement('div')
-        hint.className = 'mynote-hint'
-        hint.textContent = 'Privada \u00b7 solo visible para ti'
         const status = document.createElement('div')
         status.className = 'mynote-status'
         box.appendChild(ta)
-        box.appendChild(hint)
         box.appendChild(status)
-
-        btn.addEventListener('click', () => box.classList.toggle('open'))
+        label.appendChild(box)
 
         let saveTimer = null
         ta.addEventListener('input', () => {
           clearTimeout(saveTimer)
           status.textContent = 'Guardando...'
           status.classList.add('show', 'saving')
-          saveTimer = setTimeout(() => guardarNota(sid, ta.value, status, btn), 700)
+          saveTimer = setTimeout(() => guardarNota(sid, ta.value, status), 700)
         })
-
-        label.appendChild(btn)
-        secEl.insertBefore(box, label.nextSibling)
       })
     }
 
-    async function guardarNota(sectionId, content, status, btn) {
+    async function guardarNota(sectionId, content, status) {
       notesCache[sectionId] = content
       await _supabase.from('song_notes').upsert({ user_id: currentUserId, section_id: parseInt(sectionId, 10), content, updated_at: new Date().toISOString() }, { onConflict: 'user_id,section_id' })
-      status.textContent = 'Guardado \u2713'
+      status.textContent = 'Guardado ✓'
       status.classList.remove('saving')
-      const dot = btn.querySelector('.mynote-dot')
-      if (dot) dot.classList.toggle('show', content.trim().length > 0)
       setTimeout(() => status.classList.remove('show'), 1600)
     }
     
