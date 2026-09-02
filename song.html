@@ -769,23 +769,24 @@ let  notesCache = {};
     async function guardarNota(sectionId, content, status) {
       if (groupId && isLeaderOfGroup) {
         leaderNotesCache[sectionId] = content
-        await _supabase.from('group_section_notes').upsert(
+        const { error: gErr } = await _supabase.from('group_section_notes').upsert(
           { group_id: groupId, section_id: parseInt(sectionId, 10), content, updated_at: new Date().toISOString() },
           { onConflict: 'group_id,section_id' }
         )
+        if (gErr) { console.error('Error guardando nota de grupo:', gErr); status.textContent = 'Error ✗'; status.classList.remove('saving'); return }
         document.querySelectorAll('[data-lsid="' + sectionId + '"] .leader-note').forEach(el => { el.textContent = content })
       } else {
         notesCache[sectionId] = content
-        await _supabase.from('song_notes').upsert(
+        const { error: pErr } = await _supabase.from('song_notes').upsert(
           { user_id: currentUserId, section_id: parseInt(sectionId, 10), content, updated_at: new Date().toISOString() },
           { onConflict: 'user_id,section_id' }
         )
+        if (pErr) { console.error('Error guardando nota personal:', pErr); status.textContent = 'Error ✗'; status.classList.remove('saving'); return }
       }
       status.textContent = 'Guardado ✓'
       status.classList.remove('saving')
       setTimeout(() => status.classList.remove('show'), 1600)
     }
-    
     async function cargarOffsetsUsuario() {
       if (!currentUserId || isAdmin) return
       const { data } = await _supabase.from('user_chord_offsets').select('section_id, offsets').eq('user_id', currentUserId)
