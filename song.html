@@ -218,6 +218,20 @@
       backdrop-filter: blur(12px) !important;
       -webkit-backdrop-filter: blur(12px) !important;
     }
+    /* View mode menu */
+    .view-menu-wrap { position: relative; }
+    .view-menu-btn { background: none; border: 1px solid #1e2d45; border-radius: 8px; color: #4a5568; font-size: 1rem; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .view-menu-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+    .view-menu-dropdown { position: absolute; top: calc(100% + 6px); right: 0; background: #0d1626; border: 1px solid #1e2d45; border-radius: 10px; padding: 0.35rem 0; min-width: 148px; z-index: 50; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+    .view-menu-dropdown.hidden { display: none; }
+    .view-menu-option { display: flex; align-items: center; gap: 8px; padding: 0.6rem 1rem; font-size: 0.82rem; color: #94a3b8; cursor: pointer; }
+    .view-menu-option:hover { background: rgba(59,130,246,0.08); color: #e2e8f0; }
+    .view-menu-option.active { color: #3b82f6; }
+    .view-menu-option.active::after { content: '✓'; margin-left: auto; font-size: 0.75rem; }
+    /* Scroll mode: single page, no fixed height */
+    body.scroll-mode .page.active { display: block; }
+    body.scroll-mode #fab-nav { display: none !important; }
+    body.scroll-mode #page-indicator { display: none !important; }
     /* Inputs en modales y búsqueda */
     .search-input-wrap, .modal-input {
       background: rgba(20, 32, 55, 0.60) !important;
@@ -275,6 +289,13 @@
     </div>
     <button class="add-setlist-btn" onclick="abrirModalSetlist()"><i class="ti ti-plus"></i> Setlist</button>
       <button class="add-setlist-btn" id="save-key-btn" onclick="guardarTonalidad()" style="display:none"><i class="ti ti-device-floppy"></i> Guardar tono</button>
+    <div class="view-menu-wrap" id="view-menu-wrap">
+      <button class="view-menu-btn" id="view-menu-btn" onclick="toggleViewMenu()"><i class="ti ti-dots-vertical"></i></button>
+      <div class="view-menu-dropdown hidden" id="view-menu-dropdown">
+        <div class="view-menu-option" id="opt-sections" onclick="setViewMode('sections')"><i class="ti ti-layout-list"></i> Secciones</div>
+        <div class="view-menu-option" id="opt-scroll" onclick="setViewMode('scroll')"><i class="ti ti-file-text"></i> Scroll</div>
+      </div>
+    </div>
   </header>
 
   <div class="transpose-bar">
@@ -358,6 +379,30 @@ let leaderId = null
 let groupOffsets = {}
 let leaderNotesCache = {}
         let personalOffsets = {}
+
+    let viewMode = localStorage.getItem('songViewMode') || 'sections'
+
+    function toggleViewMenu() {
+      const dd = document.getElementById('view-menu-dropdown')
+      dd.classList.toggle('hidden')
+    }
+
+    function setViewMode(mode) {
+      viewMode = mode
+      localStorage.setItem('songViewMode', mode)
+      document.getElementById('opt-sections').classList.toggle('active', mode === 'sections')
+      document.getElementById('opt-scroll').classList.toggle('active', mode === 'scroll')
+      document.getElementById('view-menu-dropdown').classList.add('hidden')
+      renderAll()
+    }
+
+    document.addEventListener('click', e => {
+      const btn = document.getElementById('view-menu-btn')
+      const dd = document.getElementById('view-menu-dropdown')
+      if (dd && !dd.classList.contains('hidden') && btn && !btn.contains(e.target) && !dd.contains(e.target)) {
+        dd.classList.add('hidden')
+      }
+    })
 
     const params = new URLSearchParams(window.location.search)
     const songId = params.get('id')
@@ -630,7 +675,7 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede ajustar aco
       modifiedSections = {}
       for (const sec of sections) {
         const hasGroupOffset = groupId && Object.keys(groupOffsets[sec.id] || {}).length > 0
-        const hasAdminOffset = isAdmin && Object.keys((sec.chord_offsets) || {}).length > 0
+        const hasAdminOffset = isAdmin && Object.keys((sec.chord_offsets) || {}).length  > 0
         const hasPersonalOffset = !groupId && !isAdmin && Object.keys(personalOffsets[sec.id] || {}).length > 0
         if (groupId) {
           if (hasGroupOffset) {
@@ -664,18 +709,29 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede ajustar aco
 
     function renderAll() {
       const pagesContainer = document.getElementById('pages-container')
-      const PAGE_SIZE = 4
-      const chunks = []
-      for (let i = 0; i < sections.length; i += PAGE_SIZE) chunks.push(sections.slice(i, i + PAGE_SIZE))
-      totalPages = chunks.length || 1
-      if (currentPage > totalPages) currentPage = totalPages
-      pagesContainer.innerHTML = chunks.length
-        ? chunks.map((chunk, idx) => `<div class="page${idx === currentPage - 1 ? ' active' : ''}" id="page-${idx + 1}">${chunk.map(renderSeccion).join('')}</div>`).join('')
-        : '<div class="page active" id="page-1"><div class="loading">Sin secciones.</div></div>'
-      document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`
       const fabNav = document.getElementById('fab-nav')
-      if (fabNav) fabNav.classList.toggle('show', totalPages > 1)
-      updateFabNav()
+      const indicator = document.getElementById('page-indicator')
+      if (viewMode === 'scroll') {
+        document.body.classList.add('scroll-mode')
+        pagesContainer.innerHTML = sections.length
+          ? `<div class="page active" id="page-1">${sections.map(renderSeccion).join('')}</div>`
+          : '<div class="page active" id="page-1"><div class="loading">Sin secciones.</div></div>'
+        totalPages = 1
+        currentPage = 1
+      } else {
+        document.body.classList.remove('scroll-mode')
+        const PAGE_SIZE = 4
+        const chunks = []
+        for (let i = 0; i < sections.length; i += PAGE_SIZE) chunks.push(sections.slice(i, i + PAGE_SIZE))
+        totalPages = chunks.length || 1
+        if (currentPage > totalPages) currentPage = totalPages
+        pagesContainer.innerHTML = chunks.length
+          ? chunks.map((chunk, idx) => `<div class="page${idx === currentPage - 1 ? ' active' : ''}" id="page-${idx + 1}">${chunk.map(renderSeccion).join('')}</div>`).join('')
+          : '<div class="page active" id="page-1"><div class="loading">Sin secciones.</div></div>'
+        if (indicator) { indicator.style.display = ''; indicator.textContent = `${currentPage} / ${totalPages}` }
+        if (fabNav) fabNav.classList.toggle('show', totalPages > 1)
+        updateFabNav()
+      }
       renderNotasUI()
     }
 let  notesCache = {};
@@ -702,7 +758,7 @@ let  notesCache = {};
       .mynote-box { display:flex; flex-direction:column; align-items:flex-end; gap:2px; flex-shrink:0; }
       .mynote-row { display:flex; align-items:center; gap:3px; }
       .mynote-ta { background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.08); border-radius:0; color:#94a3b8; font-size:0.7rem; font-family:inherit; resize:none; outline:none; width:90px; height:18px; padding:1px 3px; line-height:1.4; transition:all 0.2s ease; overflow:hidden; }
-      .mynote-ta:focus { border-bottom-color:#3b82f6; color:#cbd5e1; height:44px; width:140px; overflow:auto; }
+      .mynote-ta:focus { border-bottom-color:#3b82f6; color:#cbd5e1; height:44x; width:140px; overflow:auto; }
       .mynote-ta::placeholder { color:#374151; font-size:0.65rem; }
       .mynote-status { font-size:0.6rem; color:#22c55e; opacity:0; transition:opacity 0.4s ease; }
       .mynote-status.show { opacity:1; }
@@ -727,7 +783,7 @@ let  notesCache = {};
         const box = document.createElement('div')
         box.className = 'mynote-box'
 
-        // Row 1: textarea + leader badge + save status
+        // Row 1: badge (leader only) + textarea + save status
         const row = document.createElement('div')
         row.className = 'mynote-row'
         if (groupId && isLeaderOfGroup) {
@@ -760,7 +816,7 @@ let  notesCache = {};
         let saveTimer = null
         ta.addEventListener('input', () => {
           clearTimeout(saveTimer)
-          status.textContent = '·'
+          status.textContent = 'Guardando...'
           status.classList.add('show', 'saving')
           saveTimer = setTimeout(() => guardarNota(sid, ta.value, status), 700)
         })
@@ -775,7 +831,7 @@ let  notesCache = {};
           { onConflict: 'group_id,section_id' }
         )
         if (gErr) { console.error('Error guardando nota de grupo:', gErr); status.textContent = 'Error ✗'; status.classList.remove('saving'); return }
-        document.querySelectorAll('[data-lsid="' + sectionId + '"] .leader-note').forEach(el => { el.textContent = content })
+        document.querySelectorAll('.leader-note[data-lsid="' + sectionId + '"]').forEach(el => { el.textContent = content })
       } else {
         notesCache[sectionId] = content
         const { error: pErr } = await _supabase.from('song_notes').upsert(
@@ -911,7 +967,9 @@ if (setlistId) {
       sections = secs || []
       await cargarNotasUsuario()
       await cargarOffsetsUsuario()
-await cargarOffsetsGrupo()
+      await cargarOffsetsGrupo()
+      document.getElementById('opt-sections').classList.toggle('active', viewMode === 'sections')
+      document.getElementById('opt-scroll').classList.toggle('active', viewMode === 'scroll')
       renderAll()
       if (setlistSongs.length > 0) {
         document.getElementById('setlist-nav').classList.add('show')
