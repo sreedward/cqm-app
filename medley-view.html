@@ -591,7 +591,13 @@ function setupScrollSpy() {
     const idx = parseInt(entry.target.id.replace('sec-', ''))
     document.querySelectorAll('.pill').forEach((p, i) => p.classList.toggle('active-pill', i === idx))
     const ap = document.getElementById(`pill-${idx}`)
-    if (ap) ap.scrollIntoView({ inline: 'nearest', behavior: 'auto' })
+    if (ap) {
+      const container = document.getElementById('sec-index')
+      if (container) {
+        const left = ap.offsetLeft - (container.offsetWidth - ap.offsetWidth) / 2
+        container.scrollTo({ left: Math.max(0, left), behavior: 'auto' })
+      }
+    }
   }, { root: null, rootMargin: '-10% 0px -55% 0px', threshold: 0 })
   allSections.forEach((_, i) => {
     const el = document.getElementById(`sec-${i}`)
@@ -611,7 +617,7 @@ function scrollToSec(idx) {
   const top = el.getBoundingClientRect().top + window.scrollY - offset
   window.scrollTo({ top, behavior: 'smooth' })
   clearTimeout(scrollingTimer)
-  scrollingTimer = setTimeout(() => setupScrollSpy(), 800)
+  scrollingTimer = setTimeout(() => setupScrollSpy(), 1200)
 }
 
 function setCifrado(tipo) {
