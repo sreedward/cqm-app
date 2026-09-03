@@ -356,7 +356,7 @@
 
     const NOTAS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
     const NOTAS_FLAT = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B']
-    const BEMOLES = {'Db":'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}
+    const BEMOLES = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}
     const FLAT_KEYS = new Set(['F','Bb','Eb','Ab','Db','Gb'])
     let preferFlats = false
     function notaDisplay(idx) { return preferFlats ? NOTAS_FLAT[idx % 12] : NOTAS[idx % 12] }
