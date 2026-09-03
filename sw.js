@@ -1,7 +1,7 @@
 // CQM Service Worker - PWA
-const CACHE_VERSION = 'v2';
-const STATIC_CACHE = 'cqm-static-v2';
-const DYNAMIC_CACHE = 'cqm-dynamic-v2';
+const CACHE_VERSION = 'v3';
+const STATIC_CACHE = 'cqm-static-v3';
+const DYNAMIC_CACHE = 'cqm-dynamic-v3';
 
 const STATIC_ASSETS = [
   '/',
