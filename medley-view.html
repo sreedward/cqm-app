@@ -214,45 +214,39 @@ header {
 .note-save-btn { color: #4ade80; border-color: #4ade80; }
 .note-cancel-btn { color: #8b9cb5; border-color: #475569; }
 
-/* ── Key sheet ── */
-.sheet-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+/* ── Key dropdown ── */
+.key-dropdown-backdrop {
+  position: fixed; inset: 0;
   z-index: 100; display: none;
 }
-.sheet-backdrop.open { display: block; }
-.key-sheet {
-  position: fixed; bottom: 0; left: 0; right: 0;
+.key-dropdown-backdrop.open { display: block; }
+.key-dropdown {
+  position: fixed;
   background: rgba(8,18,40,0.97);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(59,130,246,0.2);
-  border-radius: 16px 16px 0 0;
-  padding: 1rem;
-  z-index: 101; transform: translateY(100%);
-  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  border: 1px solid rgba(59,130,246,0.25);
+  border-radius: 10px;
+  padding: 0.5rem;
+  z-index: 101; display: none;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+  min-width: 192px;
 }
-.key-sheet.open { transform: translateY(0); }
-.key-sheet-title {
-  font-size: 0.75rem; font-weight: 700; color: #94a3b8;
-  text-align: center; margin-bottom: 0.85rem; letter-spacing: 0.5px;
+.key-dropdown.open { display: block; }
+.key-dropdown-title {
+  font-size: 0.65rem; font-weight: 700; color: #475569;
+  text-align: center; margin-bottom: 0.4rem; letter-spacing: 0.5px; text-transform: uppercase;
 }
 .key-grid {
-  display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.45rem;
-  margin-bottom: 0.75rem;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.3rem;
 }
 .key-opt {
   background: rgba(30,45,70,0.7); border: 1px solid #1e2d45;
-  border-radius: 8px; color: #94a3b8; font-size: 0.82rem; font-weight: 700;
-  font-family: monospace; padding: 10px 4px; text-align: center;
+  border-radius: 7px; color: #94a3b8; font-size: 0.8rem; font-weight: 700;
+  font-family: monospace; padding: 8px 4px; text-align: center;
   cursor: pointer; transition: all 0.15s;
 }
 .key-opt:hover { background: rgba(59,130,246,0.2); color: #e2e8f0; border-color: rgba(59,130,246,0.4); }
 .key-opt.selected { background: #3b82f6; color: #fff; border-color: #3b82f6; }
-.key-cancel-btn {
-  width: 100%; background: rgba(30,45,70,0.5); border: 1px solid #1e2d45;
-  border-radius: 10px; color: #64748b; font-size: 0.8rem; padding: 10px;
-  cursor: pointer; font-family: inherit;
-}
-
 .loading { text-align: center; color: #475569; padding: 3rem; font-size: 0.9rem; }
 </style>
 <script>
@@ -284,12 +278,11 @@ if ('serviceWorker' in navigator) {
   <div class="loading">Cargando medley...</div>
 </div>
 
-<!-- Key picker bottom sheet -->
-<div class="sheet-backdrop" id="sheet-backdrop" onclick="cerrarKeySheet()"></div>
-<div class="key-sheet" id="key-sheet">
-  <div class="key-sheet-title" id="key-sheet-title">Tonalidad</div>
+<!-- Key picker dropdown -->
+<div class="key-dropdown-backdrop" id="sheet-backdrop" onclick="cerrarKeySheet()"></div>
+<div class="key-dropdown" id="key-sheet">
+  <div class="key-dropdown-title" id="key-sheet-title">Tonalidad</div>
   <div class="key-grid" id="key-grid"></div>
-  <button class="key-cancel-btn" onclick="cerrarKeySheet()">Cancelar</button>
 </div>
 
 <script>
@@ -548,18 +541,29 @@ async function eliminarNota(secId, idx) {
   renderNotaContent(secId, idx)
 }
 
-function abrirKeySheet(songOrigKey) {
+function abrirKeySheet(songOrigKey, btn) {
   keySheetSongKey = songOrigKey
   const curKey = currentKeyForSong(songOrigKey)
-  document.getElementById('key-sheet-title').textContent = 'Tonalidad · ' + curKey
+  document.getElementById('key-sheet-title').textContent = curKey
   let gridHTML = ''
   NOTAS.forEach((n, i) => {
     const sel = n === curKey ? ' selected' : ''
     gridHTML += `<button class="key-opt${sel}" onclick="seleccionarKey(${i})">${n}</button>`
   })
   document.getElementById('key-grid').innerHTML = gridHTML
+  const dropdown = document.getElementById('key-sheet')
+  if (btn) {
+    const rect = btn.getBoundingClientRect()
+    const dropW = 200
+    let left = rect.right - dropW
+    if (left < 8) left = 8
+    if (left + dropW > window.innerWidth - 8) left = window.innerWidth - dropW - 8
+    let top = rect.bottom + 6
+    dropdown.style.left = left + 'px'
+    dropdown.style.top = top + 'px'
+  }
   document.getElementById('sheet-backdrop').classList.add('open')
-  document.getElementById('key-sheet').classList.add('open')
+  dropdown.classList.add('open')
 }
 
 function cerrarKeySheet() {
