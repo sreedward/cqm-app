@@ -386,7 +386,7 @@ function escHtml(s) {
 function currentKeyForSong(songOrigKey) {
   const idx = noteToIdx(BEMOLES[songOrigKey] || songOrigKey)
   if (idx === -1) return songOrigKey
-  return NOTAS_ES[(idx + semitones + 120) % 12]
+  return NOTAS[(idx + semitones + 120) % 12]
 }
 
 function procesarLinea(line, songKey, shift) {
@@ -553,8 +553,7 @@ function abrirKeySheet(songOrigKey) {
   const curKey = currentKeyForSong(songOrigKey)
   document.getElementById('key-sheet-title').textContent = 'Tonalidad · ' + curKey
   let gridHTML = ''
-  const NOTAS_ES = ['Do','Do#','Re','Re#','Mi','Fa','Fa#','Sol','Sol#','La','La#','Si']
-  NOTAS_ES.forEach((n, i) => {
+  NOTAS.forEach((n, i) => {
     const sel = n === curKey ? ' selected' : ''
     gridHTML += `<button class="key-opt${sel}" onclick="seleccionarKey(${i})">${n}</button>`
   })
