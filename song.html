@@ -39,7 +39,7 @@
     .song-artist { font-size: 0.75rem; color: #4a5568; }
     .add-setlist-btn { background: none; border: 1px solid #1e2d45; border-radius: 8px; color: #4a5568; font-size: 0.72rem; padding: 5px 10px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
     .add-setlist-btn:hover { border-color: #3b82f6; color: #3b82f6; }
-    .transpose-bar { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; row-gap: 0.5rem; position: sticky !important; top: 0 !important; z-index: 9 !important; }
+    .transpose-bar { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; row-gap: 0.5rem; position: sticky; top: var(--header-h, 57px); z-index: 9; }
     .t-label { font-size: 0.75rem; color: #4a5568; }
     .t-btn { background: #1e2d45; border: none; color: #e2e8f0; border-radius: 6px; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .t-btn:hover { background: #3b82f6; }
@@ -289,6 +289,13 @@
     </div>
     <button class="add-setlist-btn" onclick="abrirModalSetlist()"><i class="ti ti-plus"></i> Setlist</button>
       <button class="add-setlist-btn" id="save-key-btn" onclick="guardarTonalidad()" style="display:none"><i class="ti ti-device-floppy"></i> Guardar tono</button>
+    <div class="view-menu-wrap" id="view-menu-wrap">
+      <button class="view-menu-btn" id="view-menu-btn" onclick="toggleViewMenu()"><i class="ti ti-dots-vertical"></i></button>
+      <div class="view-menu-dropdown hidden" id="view-menu-dropdown">
+        <div class="view-menu-option" id="opt-sections" onclick="setViewMode('sections')"><i class="ti ti-layout-list"></i> Secciones</div>
+        <div class="view-menu-option" id="opt-scroll" onclick="setViewMode('scroll')"><i class="ti ti-file-text"></i> Scroll</div>
+      </div>
+    </div>
   </header>
 
   <div class="transpose-bar">
@@ -303,13 +310,6 @@
     <button class="align-btn" id="align-btn" onclick="toggleAlignMode()" title="Ajustar posición de acordes">
       <i class="ti ti-arrows-horizontal"></i><span>Ajustar acordes</span>
     </button>
-    <div class="view-menu-wrap" id="view-menu-wrap" style="margin-left:auto">
-      <button class="view-menu-btn" id="view-menu-btn" onclick="toggleViewMenu()"><i class="ti ti-dots-vertical"></i></button>
-      <div class="view-menu-dropdown hidden" id="view-menu-dropdown">
-        <div class="view-menu-option" id="opt-sections" onclick="setViewMode('sections')"><i class="ti ti-layout-list"></i> Secciones</div>
-        <div class="view-menu-option" id="opt-scroll" onclick="setViewMode('scroll')"><i class="ti ti-file-text"></i> Scroll</div>
-      </div>
-    </div>
   </div>
 
   <div class="group-banner" id="group-banner"></div>
@@ -351,13 +351,13 @@
   <script>
     const _supabase = supabase.createClient(
       'https://kzqnsbztfyhyyageuboz.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM9NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
     )
 
     const NOTAS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
     const NOTAS_FLAT = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B']
     const BEMOLES = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}
-    const FLATK_KEYS = new Set(['F','Bb','Eb','Ab','Db','Gb'])
+    const FLAT_KEYS = new Set(['F','Bb','Eb','Ab','Db','Gb'])
     let preferFlats = false
     function notaDisplay(idx) { return preferFlats ? NOTAS_FLAT[idx % 12] : NOTAS[idx % 12] }
     const CALIDAD = ['','m','m','','','m','dim']
@@ -435,7 +435,7 @@ function goBack() {
       const newKey    = keysArr[newIndex] || ''
       const itemsArr  = itemIdsParam ? itemIdsParam.split(',') : []
       const newItemId = itemsArr[newIndex] || ''
-      window.location.href = '/song.html?id=' + newSongId + '&setlist=' + setlistId + '&index=' + newIndex + '&songs='+ setlistSongs.join(',') + '&itemids=' + encodeURIComponent(itemIdsParam) + '&itemid=' + encodeURIComponent(newItemId) + '&keys=' + encodeURIComponent(keysParam) + '&key=' + encodeURIComponent(newKey)
+      window.location.href = '/song.html?id=' + newSongId + '&setlist=' + setlistId + '&index=' + newIndex + '&songs=' + setlistSongs.join(',') + '&itemids=' + encodeURIComponent(itemIdsParam) + '&itemid=' + encodeURIComponent(newItemId) + '&keys=' + encodeURIComponent(keysParam) + '&key=' + encodeURIComponent(newKey)
     }
 
     function traducirAcorde(acorde, overrideCifrado) {
@@ -650,7 +650,7 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede ajustar aco
       for (const id of ids) {
         const offsets = modifiedSections[id]
         if (groupId) {
-  const { error } = await _supabase.from('group_chord_offsetr').upsert({ group_id: groupId, section_id: Number(id), offsets, updated_at: new Date().toISOString() }, { onConflict: 'group_id,section_id' })
+  const { error } = await _supabase.from('group_chord_offsets').upsert({ group_id: groupId, section_id: Number(id), offsets, updated_at: new Date().toISOString() }, { onConflict: 'group_id,section_id' })
   if (error) { mostrarToast('Error al guardar: ' + error.message); return }
   groupOffsets[Number(id)] = offsets
 } else if (isAdmin) {
@@ -680,7 +680,7 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede ajustar aco
       modifiedSections = {}
       for (const sec of sections) {
         const hasGroupOffset = groupId && Object.keys(groupOffsets[sec.id] || {}).length > 0
-        const hasAdminOffset = isAdmin && Object.keys((sec.chord_offsets) || {}).length && 0
+        const hasAdminOffset = isAdmin && Object.keys((sec.chord_offsets) || {}).length > 0
         const hasPersonalOffset = !groupId && !isAdmin && Object.keys(personalOffsets[sec.id] || {}).length > 0
         if (groupId) {
           if (hasGroupOffset) {
@@ -762,32 +762,183 @@ let  notesCache = {};
       .section-label { display:flex; align-items:center; justify-content:space-between; gap:0.5rem; }
       .mynote-box { display:flex; flex-direction:column; align-items:flex-end; gap:2px; flex-shrink:0; }
       .mynote-row { display:flex; align-items:center; gap:3px; }
-      .mynote-ta { background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.08); border-radius:0; color:#95�͈�쁙��еͥ�����ɕ�쁙��е������饹��ɥ��ɕͥ�鹽��쁽�ѱ���鹽���ݥ�Ѡ�����쁡��������������������������쁱�����������ĸ���Ʌ�ͥѥ��酱�����́��͔쁽ٕə���顥������(��������幽є�ф陽��́쁉�ɑ�ȵ���ѽ��������͈�ɘ�쁍����荍��Ք�쁡�����������ݥ�Ѡ������쁽ٕə�����Ѽ��(��������幽є�ф������������ȁ쁍�����������쁙��еͥ������ɕ���(��������幽є��х��́쁙��еͥ�����ɕ�쁍������Ɍ�Ք쁽����������Ʌ�ͥѥ������������́��͔��(��������幽є��х��̹͡�܁쁽����������(��������幽є��х��̹ͅ٥���쁍�����و������(������������ȵ��є�쁙��еͥ������ɕ�쁍���������ٌ쁙��е��屔�х���쁵��ݥ�Ѡ�������ݽɐ��ɕ���ɕ���ݽɐ쁱�����������ĸ��ѕ�е������ɥ�����(������������ȵ��є镵���쁑������鹽����(������������ȵ������쁙��еͥ�����ɕ�쁍�����و����쁍��ͽ�鑕��ձ���(�������(���������յ��й�����������
-�������屔�(�����((�����չ�ѥ���ɕ����9�х�U$����(��������������ɕ��U͕�%���ɕ��ɸ(��������啍х��ѥ��9�х̠�(���������յ��й�Օ��M����ѽ������͕�ѥ��m��ф�ͥ�t����������͕�������(������������Ёͥ���͕��������ɥ��є����ф�ͥ���(������������Ё�������͕����Օ��M����ѽȠ��͕�ѥ����������(�����������������������������Օ��M����ѽȠ���幽є�ф����ɕ��ɸ(�����������1����ȁ����ɽ������ѕ�Ёɕ��́�ɽ��͡�ɕ���ɽ���х���쁵�����́ɕ������ͽ������ѕ�(������������Ё���ѥ���􀡝ɽ��%�������1�����=�ɽ�������������9�ѕ�
-����mͥ�t��������耡��ѕ�
-����mͥ�t�������((������������Ё����􁑽�յ��й�ɕ�ѕ�����Р���؜�(����������ํ����9����􀝵幽є�����((�����������I�܀�聉�����������ȁ���䤀��ѕ�хɕ����ٔͅ��х���(������������Ёɽ܀􁑽�յ��й�ɕ�ѕ�����Р���؜�(��������ɽܹ�����9����􀝵幽є�ɽܜ(�������������ɽ��%�������1�����=�ɽ�����(��������������Ё������􁑽�յ��й�ɕ�ѕ�����Р�������(���������������������9����􀝱����ȵ������(����������������ѥѱ���9�ф�٥ͥ������Ʉ�ѽ��́��́�����ɽ̜(����������������ѕ��
-��ѕ�Ѐ��~F��(����������ɽܹ������
-�����������(���������(������������Ёф�􁑽�յ��й�ɕ�ѕ�����Р�ѕ�хɕ���(��������ф������9����􀝵幽є�ф�(��������ф�����������Ȁ􀡝ɽ��%�������1�����=�ɽ���������ф���������������耝�����ф����(��������ф�م�Ք����ѥ��(������������Ё�х��̀􁑽�յ��й�ɕ�ѕ�����Р���؜�(���������х��̹�����9����􀝵幽є��х��̜(��������ɽܹ������
-�����ф�(��������ɽܹ������
-������х��̤(����������ๅ�����
-�����ɽܤ((�����������I�܀�聱����ȁ��є�����܀�������́���䰁ɕ�������(�������������ɽ��%��������1�����=�ɽ�����(��������������Ё������􁑽�յ��й�ɕ�ѕ�����Р���؜�(���������������������9����􀝱����ȵ��є�(����������������͕���ɥ��є����ф��ͥ����ͥ��(����������������ѕ��
-��ѕ�Ѐ􁱕����9�ѕ�
-����mͥ�t������(������������ๅ�����
-�����������(���������(��������������������
-��������((����������ЁٕͅQ���Ȁ�ձ�(��������ф����ٕ��1��ѕ��Ƞ�����М���������(���������������Q�����СٕͅQ���Ȥ(�����������х��̹ѕ��
-��ѕ�Ѐ�Յɑ��������(�����������х��̹�����1��й�����͡�ܜ���ͅ٥����(����������ٕͅQ���Ȁ�͕�Q�����Р�������Յɑ��9�ф�ͥ���ф�م�Ք���х��̤������(����������(��������(�����((������幌��չ�ѥ����Յɑ��9�ф�͕�ѥ��%������ѕ�а��х��̤��(�����������ɽ��%�������1�����=�ɽ�����(��������������9�ѕ�
-����m͕�ѥ��%�t�􁍽�ѕ��(������������Ё쁕�ɽ�聝�ȁ��݅�Ё}������͔��ɽ����ɽ��}͕�ѥ��}��ѕ̜����͕�Р(����������쁝ɽ��}��聝ɽ��%���͕�ѥ��}������͕%�С͕�ѥ��%�����������ѕ�а�����ѕ�}��聹�܁�є���ѽ%M=M�ɥ�������(����������쁽�
-�������耝�ɽ��}���͕�ѥ��}�����(���������(��������������Ȥ�쁍��ͽ�����ɽȠ��ɽȁ�Յɑ�������ф���������蜰���Ȥ��х��̹ѕ��
-��ѕ�Ѐ��ɽȃ�r\���х��̹�����1��йɕ��ٔ��ͅ٥�����ɕ��ɸ��(�����������յ��й�Օ��M����ѽ�����������ȵ��ѕm��ф��ͥ�􈜀��͕�ѥ��%������t����������������쁕��ѕ��
-��ѕ�Ѐ􁍽�ѕ�Ё��(������􁕱͔��(����������ѕ�
-����m͕�ѥ��%�t�􁍽�ѕ��(������������Ё쁕�ɽ����ȁ��݅�Ё}������͔��ɽ���ͽ��}��ѕ̜����͕�Р(������������͕�}��聍��ɕ��U͕�%���͕�ѥ��}������͕%�С͕�ѥ��%�����������ѕ�а�����ѕ�}��聹�܁�є���ѽ%M=M�ɥ�������(����������쁽�
-�������耝�͕�}���͕�ѥ��}�����(���������(��������������Ȥ�쁍��ͽ�����ɽȠ��ɽȁ�Յɑ�������ф����ͽ���蜰���Ȥ��х��̹ѕ��
-��ѕ�Ѐ��ɽȃ�r\���х��̹�����1��йɕ��ٔ��ͅ٥�����ɕ��ɸ��(�������(�������х��̹ѕ��
-��ѕ�Ѐ�Յɑ�����rL�(�������х��̹�����1��йɕ��ٔ��ͅ٥����(������͕�Q�����Р�������х��̹�����1��йɕ��ٔ��͡�ܜ��������(�����(������幌��չ�ѥ�����ɝ��=��͕��U�Յɥ�����(��������������ɕ��U͕�%�������������ɕ��ɸ(����������Ё쁑�ф���݅�Ё}������͔��ɽ����͕�}���ɑ}���͕�̜��͕���Р�͕�ѥ��}�������͕�̜���Ġ��͕�}��������ɕ��U͕�%��(���������ͽ���=��͕�̀���(������졑�ф����mt���������Ȁ�������ͽ���=��͕��mȹ͕�ѥ��}��t��ȹ���͕�́�������(�����(����(�����չ�ѥ����Ʌ����͔�����)�����ɽ��%��������1�����=�ɽ����쁵���Ʌ�Q���Р�M�����������ȁ�Օ���������ȁ���ѽ��������������������ɕ��ɸ��(������͕��ѽ��̀�͕��ѽ��̀�������Ȥ�����(����������Ёɽ��%����9=QL������=���ɥ�����-��(����������Ё���%����ɽ��%�����͕��ѽ��̤�����(�������ɕ������̀�1Q}-eL���̡9=QM}1Qm���%��t�(���������յ��й���������	�%�����䵑�����䜤�ѕ��
-��ѕ�Ѐ􁹽х�����䡹��%��(������ɕ��������(����������͕ѱ���%���쁍���Ё�Ѹ�􁑽�յ��й���������	�%���ٔͅ���䵉Ѹ��쁥����Ѹ���Ѹ���屔��������􀝙������(�����((�����չ�ѥ���͕�
-��Ʌ���ѥ�����(���������Ʌ����ѥ��(���������յ��й���������	�%����Ѹ����ɥ������������1��йѽ��������ѥٔ���ѥ�����􀝅��ɥ������(���������յ��й���������	�%����Ѹ���͡٥�����������1��йѽ��������ѥٔ���ѥ�����􀝹�͡٥�����(������ɕ��������(�����((�����չ�ѥ�������ѕ��9�ؠ���(���������յ��й���������	�%��������ɕ؜�������1��йѽ������������������ɕ��A�������Ĥ(���������յ��й���������	�%����������М�������1��йѽ������������������ɕ��A�������ѽх�A���̤(���������յ��й���������	�%��������������ѽȜ��ѕ��
-��ѕ�Ѐ􁀑���ɕ��A���􀼀��ѽх�A������(�����((�����չ�ѥ�������A�������(�������������ɕ��A������ѽх�A���̤�ɕ��ɸ(���������ɕ��A�����(���������յ��й�Օ��M����ѽ����������̵���х���Ȁ����������������������ऀ����(����������������1��йѽ��������ѥٔ������������ɕ��A������Ĥ(��������(����������ѕ��9�ؠ�(������ݥ���ܹ͍ɽ��Q�������(�����((�����չ�ѥ����ɕ�A�������(�������������ɕ��A������Ĥ�ɕ��ɸ(���������ɕ��A�����(���������յ��й�Օ��M����ѽ����������̵���х���Ȁ����������������������ऀ����(����������������1��йѽ��������ѥٔ������������ɕ��A������Ĥ(��������(����������ѕ��9�ؠ�(������ݥ���ܹ͍ɽ��Q�������(�����((����)�չ�ѥ������Յ����U%A�ɵ�ͽ̠���(��مȁ����̀􁑽�յ��й���������	�%���е�Ѹ�����̜�(��مȁ���̀􁑽�յ��й���������	�%���е�Ѹ����̜�(��مȁ������􁑽�յ��й���������	�%����������Ѹ��(��مȁ������ɽ��%��������1�����=�ɽ��(����������̤�����̹��屔��������􁡥������������耜�(���������̤����̹��屔��������􁡥������������耜�(���������������������屔��������􁡥������������耜�(��مȁ�����Ȁ􁑽�յ��й���������	�%����ɽ��������Ȝ�(�����������Ȥ��(���������������(�����������ȹ��屔��������􀝉�����(�����������ȹѕ��
-��ѕ�Ѐ��х́٥��������ѽ�������������������M�����������ȁ�Օ���������ɱ���(����􁕱͔��(�����������ȹ��屔��������􀝹����(�����(���)�()��幌��չ�ѥ�����ɝ��=��͕����������(��������ɽ��%���ɕ��ɸ(������Ё쁑�ф���݅�Ё}������͔��ɽ����ɽ��}���ɑ}���͕�̜��͕���Р�͕�ѥ��}�������͕�̜���Ġ��ɽ��}������ɽ��%��(���ɽ��=��͕�̀���(��졑�ф����mt���������Ȁ���쁝ɽ��=��͕��mȹ͕�ѥ��}��t��ȹ���͕�́�������)�)��幌��չ�ѥ������Р���(����������Ё쁑�ф��͕�ͥ������݅�Ё}������͔���Ѡ����M��ͥ����(�����������͕�ͥ�����ݥ���ܹ����ѥ����ɕ��􀜽�������ѵ���ɕ��ɸ��(���������ɕ��U͕�%���͕�ͥ����͕ȹ��(����������Ё쁑�ф��ɽ�������݅�Ё}������͔��ɽ����ɽ����̜��͕���Р���}���������Ġ���������ɕ��U͕�%���ͥ������(�������������􀄄��ɽ���������ɽ�������}������)����͕ѱ���%����(������Ё쁑�ф�}͕ѱ���I�܁��݅�Ё}������͔��ɽ���͕ѱ��М��͕���Р��ɽ��}������Ġ������͕ѱ���%���ͥ������(���ɽ��%���}͕ѱ���I�܀��}͕ѱ���I�ܹ�ɽ��}���聹ձ�(�������ɽ��%����(��������Ё쁑�ф�}������݅�Ё}������͔��ɽ����ɽ��̜��͕���Р�������}������Ġ�������ɽ��%���ͥ������(������1�����=�ɽ����}������}����������}��������ɕ��U͕�%��聙��͔(����������%���}���� _grp.leader_id : null
+      .mynote-ta { background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.08); border-radius:0; color:#94a3b8; font-size:0.7rem; font-family:inherit; resize:none; outline:none; width:90px; height:18px; padding:1px 3px; line-height:1.4; transition:all 0.2s ease; overflow:hidden; }
+      .mynote-ta:focus { border-bottom-color:#3b82f6; color:#cbd5e1; height:44px; width:140px; overflow:auto; }
+      .mynote-ta::placeholder { color:#374151; font-size:0.65rem; }
+      .mynote-status { font-size:0.6rem; color:#22c55e; opacity:0; transition:opacity 0.4s ease; }
+      .mynote-status.show { opacity:1; }
+      .mynote-status.saving { color:#6b7280; }
+      .leader-note { font-size:0.65rem; color:#78716c; font-style:italic; max-width:160px; word-break:break-word; line-height:1.3; text-align:right; }
+      .leader-note:empty { display:none; }
+      .leader-badge { font-size:0.6rem; color:#6b7280; cursor:default; }
+      `
+      document.head.appendChild(style)
+    }
+
+    function renderNotasUI() {
+      if (!currentUserId) return
+      inyectarEstiloNotas()
+      document.querySelectorAll('.section[data-sid]').forEach(secEl => {
+        const sid = secEl.getAttribute('data-sid')
+        const label = secEl.querySelector('.section-label')
+        if (!label || label.querySelector('.mynote-ta')) return
+        // Leader in group context reads from shared group table; members read personal notes
+        const existing = (groupId && isLeaderOfGroup) ? (leaderNotesCache[sid] || '') : (notesCache[sid] || '')
+
+        const box = document.createElement('div')
+        box.className = 'mynote-box'
+
+        // Row 1: badge (leader only) + textarea + save status
+        const row = document.createElement('div')
+        row.className = 'mynote-row'
+        if (groupId && isLeaderOfGroup) {
+          const badge = document.createElement('span')
+          badge.className = 'leader-badge'
+          badge.title = 'Nota visible para todos los miembros'
+          badge.textContent = '👥'
+          row.appendChild(badge)
+        }
+        const ta = document.createElement('textarea')
+        ta.className = 'mynote-ta'
+        ta.placeholder = (groupId && isLeaderOfGroup) ? 'nota del grupo...' : 'mi nota...'
+        ta.value = existing
+        const status = document.createElement('div')
+        status.className = 'mynote-status'
+        row.appendChild(ta)
+        row.appendChild(status)
+        box.appendChild(row)
+
+        // Row 2: leader note below (members only, read-only)
+        if (groupId && !isLeaderOfGroup) {
+          const lspan = document.createElement('div')
+          lspan.className = 'leader-note'
+          lspan.setAttribute('data-lsid', sid)
+          lspan.textContent = leaderNotesCache[sid] || ''
+          box.appendChild(lspan)
+        }
+        label.appendChild(box)
+
+        let saveTimer = null
+        ta.addEventListener('input', () => {
+          clearTimeout(saveTimer)
+          status.textContent = 'Guardando...'
+          status.classList.add('show', 'saving')
+          saveTimer = setTimeout(() => guardarNota(sid, ta.value, status), 700)
+        })
+      })
+    }
+
+    async function guardarNota(sectionId, content, status) {
+      if (groupId && isLeaderOfGroup) {
+        leaderNotesCache[sectionId] = content
+        const { error: gErr } = await _supabase.from('group_section_notes').upsert(
+          { group_id: groupId, section_id: parseInt(sectionId, 10), content, updated_at: new Date().toISOString() },
+          { onConflict: 'group_id,section_id' }
+        )
+        if (gErr) { console.error('Error guardando nota de grupo:', gErr); status.textContent = 'Error ✗'; status.classList.remove('saving'); return }
+        document.querySelectorAll('.leader-note[data-lsid="' + sectionId + '"]').forEach(el => { el.textContent = content })
+      } else {
+        notesCache[sectionId] = content
+        const { error: pErr } = await _supabase.from('song_notes').upsert(
+          { user_id: currentUserId, section_id: parseInt(sectionId, 10), content, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id,section_id' }
+        )
+        if (pErr) { console.error('Error guardando nota personal:', pErr); status.textContent = 'Error ✗'; status.classList.remove('saving'); return }
+      }
+      status.textContent = 'Guardado ✓'
+      status.classList.remove('saving')
+      setTimeout(() => status.classList.remove('show'), 1600)
+    }
+    async function cargarOffsetsUsuario() {
+      if (!currentUserId || isAdmin) return
+      const { data } = await _supabase.from('user_chord_offsets').select('section_id, offsets').eq('user_id', currentUserId)
+      personalOffsets = {}
+      ;(data || []).forEach(r => { personalOffsets[r.section_id] = r.offsets || {} })
+    }
+    
+    function transpose(n) {
+if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede cambiar la tonalidad del grupo'); return }
+      semitones = (semitones + n + 12) % 12
+      const rootIdx = NOTAS.indexOf(originalKey)
+      const newIdx = (rootIdx + semitones) % 12
+      preferFlats = FLAT_KEYS.has(NOTAS_FLAT[newIdx])
+      document.getElementById('key-display').textContent = notaDisplay(newIdx)
+      renderAll()
+      if (setlistId) { const btn = document.getElementById('save-key-btn'); if (btn) btn.style.display = 'flex' }
+    }
+
+    function setCifrado(tipo) {
+      cifrado = tipo
+      document.getElementById('btn-americano').classList.toggle('active', tipo === 'americano')
+      document.getElementById('btn-nashville').classList.toggle('active', tipo === 'nashville')
+      renderAll()
+    }
+
+    function updateFabNav() {
+      document.getElementById('fab-prev').classList.toggle('hidden', currentPage === 1)
+      document.getElementById('fab-next').classList.toggle('hidden', currentPage === totalPages)
+      document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`
+    }
+
+    function nextPage() {
+      if (currentPage >= totalPages) return
+      currentPage++
+      document.querySelectorAll('#pages-container .page').forEach((el, idx) => {
+        el.classList.toggle('active', idx === currentPage - 1)
+      })
+      updateFabNav()
+      window.scrollTo(0, 0)
+    }
+
+    function prevPage() {
+      if (currentPage <= 1) return
+      currentPage--
+      document.querySelectorAll('#pages-container .page').forEach((el, idx) => {
+        el.classList.toggle('active', idx === currentPage - 1)
+      })
+      updateFabNav()
+      window.scrollTo(0, 0)
+    }
+
+    
+function actualizarUIPermisos() {
+  var minus = document.getElementById('t-btn-minus')
+  var plus = document.getElementById('t-btn-plus')
+  var align = document.getElementById('align-btn')
+  var hide = groupId && !isLeaderOfGroup
+  if (minus) minus.style.display = hide ? 'none' : ''
+  if (plus) plus.style.display = hide ? 'none' : ''
+  if (align) align.style.display = hide ? 'none' : ''
+  var banner = document.getElementById('group-banner')
+  if (banner) {
+    if (hide) {
+      banner.style.display = 'block'
+      banner.textContent = 'Estas viendo la tonalidad del grupo. Solo el lider puede cambiarla.'
+    } else {
+      banner.style.display = 'none'
+    }
+  }
+}
+
+async function cargarOffsetsGrupo() {
+  if (!groupId) return
+  const { data } = await _supabase.from('group_chord_offsets').select('section_id, offsets').eq('group_id', groupId)
+  groupOffsets = {}
+  ;(data || []).forEach(r => { groupOffsets[r.section_id] = r.offsets || {} })
+}
+async function init() {
+      const { data: { session } } = await _supabase.auth.getSession()
+      if (!session) { window.location.href = '/login.html'; return }
+      currentUserId = session.user.id
+      const { data: profile } = await _supabase.from('profiles').select('is_admin').eq('id', currentUserId).single()
+      isAdmin = !!(profile && profile.is_admin)
+if (setlistId) {
+  const { data: _setlistRow } = await _supabase.from('setlist').select('group_id').eq('id', setlistId).single()
+  groupId = _setlistRow ? _setlistRow.group_id : null
+  if (groupId) {
+    const { data: _grp } = await _supabase.from('groups').select('leader_id').eq('id', groupId).single()
+    isLeaderOfGroup = _grp ? _grp.leader_id === currentUserId : false
+    leaderId = _grp ? _grp.leader_id : null
   } else {
     isLeaderOfGroup = true
   }
@@ -902,13 +1053,10 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede guardar la 
         mostrarToast('Error al guardar: ' + error.message)
       } else {
         mostrarToast('Tonalidad ' + currentKey + ' guardada')
-        // Actualizar setlistItemId con el nuevo id del registro insertado
         setlistItemId = String(inserted.id)
-        // Actualizar itemIdsParam con el nuevo id
         const itemsArr = itemIdsParam ? itemIdsParam.split(',') : setlistSongs.map(() => '')
         itemsArr[setlistIndex] = String(inserted.id)
         itemIdsParam = itemsArr.join(',')
-        // Actualizar keys en memoria
         const keysArr = keysParam ? keysParam.split(',') : setlistSongs.map(() => '')
         keysArr[setlistIndex] = currentKey
         const newKeys = keysArr.join(',')
