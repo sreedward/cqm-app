@@ -41,9 +41,18 @@
     .add-setlist-btn:hover { border-color: #3b82f6; color: #3b82f6; }
     .transpose-bar { background: #0d1626; border-bottom: 1px solid #1e2d45; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; row-gap: 0.5rem; position: sticky; top: var(--header-h, 57px); z-index: 9; }
     .t-label { font-size: 0.75rem; color: #4a5568; }
-    .t-btn { background: #1e2d45; border: none; color: #e2e8f0; border-radius: 6px; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .t-btn:hover { background: #3b82f6; }
-    .key-display { background: #1e2d45; color: #3b82f6; border-radius: 6px; padding: 3px 10px; font-size: 0.85rem; font-weight: 700; font-family: monospace; min-width: 36px; text-align: center; }
+    .key-dropdown-btn { background: #1e2d45; border: none; color: #3b82f6; border-radius: 6px; padding: 4px 10px; font-size: 0.85rem; font-weight: 700; font-family: monospace; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .key-dropdown-btn:hover { background: rgba(59,130,246,0.22); }
+    .key-dd-backdrop { position: fixed; inset: 0; z-index: 199; display: none; }
+    .key-dd-backdrop.open { display: block; }
+    .key-dd-panel { position: fixed; background: rgba(8,18,40,0.97); backdrop-filter: blur(20px); border: 1px solid rgba(59,130,246,0.25); border-radius: 10px; padding: 0.55rem 0.55rem 0.45rem; z-index: 200; display: none; box-shadow: 0 8px 28px rgba(0,0,0,0.6); }
+    .key-dd-panel.open { display: block; }
+    .key-dd-row-label { font-size: 0.55rem; font-weight: 700; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.2rem; }
+    .key-dd-row { display: flex; gap: 0.25rem; margin-bottom: 0.35rem; }
+    .key-dd-row:last-of-type { margin-bottom: 0; }
+    .key-dd-opt { background: rgba(30,45,70,0.7); border: 1px solid #1e2d45; border-radius: 6px; color: #94a3b8; font-size: 0.78rem; font-weight: 700; font-family: monospace; padding: 7px 9px; cursor: pointer; transition: all 0.15s; }
+    .key-dd-opt:hover { background: rgba(59,130,246,0.2); color: #e2e8f0; border-color: rgba(59,130,246,0.4); }
+    .key-dd-opt.selected { background: #3b82f6; color: #fff; border-color: #3b82f6; }
     .cifrado-toggle { margin-left: auto; display: flex; background: #1e2d45; border-radius: 6px; overflow: hidden; }
     .cifrado-btn { background: none; border: none; color: #4a5568; padding: 4px 10px; font-size: 0.72rem; cursor: pointer; font-weight: 700; }
     .cifrado-btn.active { background: #3b82f6; color: #fff; }
@@ -300,9 +309,7 @@
 
   <div class="transpose-bar">
     <span class="t-label">Tono:</span>
-    <button class="t-btn" id="t-btn-minus" onclick="transpose(-1)"><i class="ti ti-minus"></i></button>
-    <div class="key-display" id="key-display">-</div>
-    <button class="t-btn" id="t-btn-plus" onclick="transpose(1)"><i class="ti ti-plus"></i></button>
+    <button class="key-dropdown-btn" onclick="abrirKeyDropdown(this)"><span id="key-display">-</span><span style="font-size:0.6rem;opacity:0.55">▾</span></button>
     <div class="cifrado-toggle">
       <button class="cifrado-btn active" id="btn-americano" onclick="setCifrado('americano')">Am</button>
       <button class="cifrado-btn" id="btn-nashville" onclick="setCifrado('nashville')">NNS</button>
@@ -867,7 +874,48 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede cambiar la 
       if (setlistId) { const btn = document.getElementById('save-key-btn'); if (btn) btn.style.display = 'flex' }
     }
 
-    function setCifrado(tipo) {
+    function abrirKeyDropdown(btn) {
+      if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede cambiar la tonalidad del grupo'); return }
+      const curKey = notaDisplay((NOTAS.indexOf(originalKey) + semitones + 120) % 12)
+      const naturals = ['C','D','E','F','G','A','B']
+      const sharps   = ['C#','D#','F#','G#','A#']
+      const flats    = ['Db','Eb','Gb','Ab','Bb']
+      const makeBtn = (n) => {
+        const isSel = n === curKey ? ' selected' : ''
+        return '<button class="key-dd-opt' + isSel + '" onclick="selectKey(\'' + n + '\')">' + n + '</button>'
+      }
+      document.getElementById('key-dd-natural').innerHTML = naturals.map(makeBtn).join('')
+      document.getElementById('key-dd-sharp').innerHTML = sharps.map(makeBtn).join('')
+      document.getElementById('key-dd-flat').innerHTML = flats.map(makeBtn).join('')
+      const panel = document.getElementById('key-dd-panel')
+      const rect = btn.getBoundingClientRect()
+      const panelW = 240
+      let left = rect.left
+      if (left + panelW > window.innerWidth - 8) left = window.innerWidth - panelW - 8
+      if (left < 8) left = 8
+      panel.style.left = left + 'px'
+      panel.style.top = (rect.bottom + 6) + 'px'
+      document.getElementById('key-dd-backdrop').classList.add('open')
+      panel.classList.add('open')
+    }
+    function cerrarKeyDropdown() {
+      document.getElementById('key-dd-backdrop').classList.remove('open')
+      document.getElementById('key-dd-panel').classList.remove('open')
+    }
+    function selectKey(note) {
+      if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede cambiar la tonalidad del grupo'); return }
+      const BEMOLES_LOCAL = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}
+      const targetIdx = NOTAS.indexOf(BEMOLES_LOCAL[note] || note)
+      if (targetIdx === -1) { cerrarKeyDropdown(); return }
+      const rootIdx = NOTAS.indexOf(originalKey)
+      semitones = (targetIdx - rootIdx + 12) % 12
+      preferFlats = ['Db','Eb','Gb','Ab','Bb'].includes(note)
+      document.getElementById('key-display').textContent = note
+      renderAll()
+      cerrarKeyDropdown()
+      if (setlistId) { const b = document.getElementById('save-key-btn'); if (b) b.style.display = 'flex' }
+    }
+        function setCifrado(tipo) {
       cifrado = tipo
       document.getElementById('btn-americano').classList.toggle('active', tipo === 'americano')
       document.getElementById('btn-nashville').classList.toggle('active', tipo === 'nashville')
@@ -1078,5 +1126,14 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede guardar la 
     window.addEventListener('resize', updateHeaderHeight)
     init()
   </script>
+  <div class="key-dd-backdrop" id="key-dd-backdrop" onclick="cerrarKeyDropdown()"></div>
+  <div class="key-dd-panel" id="key-dd-panel">
+    <div class="key-dd-row-label">Natural</div>
+    <div class="key-dd-row" id="key-dd-natural"></div>
+    <div class="key-dd-row-label" style="margin-top:0.3rem">Sostenido ♯</div>
+    <div class="key-dd-row" id="key-dd-sharp"></div>
+    <div class="key-dd-row-label" style="margin-top:0.3rem">Bemol ♭</div>
+    <div class="key-dd-row" id="key-dd-flat"></div>
+  </div>
 </body>
 </html>
