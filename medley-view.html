@@ -554,10 +554,9 @@ function abrirKeySheet(songOrigKey, btn) {
   const sharps   = ['C#','D#','F#','G#','A#']
   const flats    = ['Db','Eb','Gb','Ab','Bb']
   const BEMOLES_LOCAL = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}
-  const curIdx = NOTAS.indexOf(BEMOLES_LOCAL[curKey] || curKey)
-  const makeBtn = (n) => {
+    const makeBtn = (n) => {
     const nIdx = NOTAS.indexOf(BEMOLES_LOCAL[n] || n)
-    const isSel = nIdx === curIdx ? ' selected' : ''
+    const isSel = n === curKey ? ' selected' : ''
     return '<button class="key-opt' + isSel + '" onclick="seleccionarKey(' + nIdx + ')">' + n + '</button>'
   }
   document.getElementById('key-dd-natural').innerHTML = naturals.map(makeBtn).join('')
