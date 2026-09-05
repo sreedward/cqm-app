@@ -236,13 +236,13 @@ header {
   font-size: 0.65rem; font-weight: 700; color: #475569;
   text-align: center; margin-bottom: 0.4rem; letter-spacing: 0.5px; text-transform: uppercase;
 }
-.key-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.3rem;
-}
+.key-dd-row-label { font-size: 0.55rem; font-weight: 700; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.2rem; }
+.key-dd-row { display: flex; gap: 0.25rem; margin-bottom: 0.35rem; }
+.key-dd-row:last-of-type { margin-bottom: 0; }
 .key-opt {
   background: rgba(30,45,70,0.7); border: 1px solid #1e2d45;
-  border-radius: 7px; color: #94a3b8; font-size: 0.8rem; font-weight: 700;
-  font-family: monospace; padding: 8px 4px; text-align: center;
+  border-radius: 6px; color: #94a3b8; font-size: 0.78rem; font-weight: 700;
+  font-family: monospace; padding: 7px 9px; text-align: center;
   cursor: pointer; transition: all 0.15s;
 }
 .key-opt:hover { background: rgba(59,130,246,0.2); color: #e2e8f0; border-color: rgba(59,130,246,0.4); }
@@ -282,7 +282,12 @@ if ('serviceWorker' in navigator) {
 <div class="key-dropdown-backdrop" id="sheet-backdrop" onclick="cerrarKeySheet()"></div>
 <div class="key-dropdown" id="key-sheet">
   <div class="key-dropdown-title" id="key-sheet-title">Tonalidad</div>
-  <div class="key-grid" id="key-grid"></div>
+  <div class="key-dd-row-label">Natural</div>
+  <div class="key-dd-row" id="key-dd-natural"></div>
+  <div class="key-dd-row-label" style="margin-top:0.3rem">Sostenido ♯</div>
+  <div class="key-dd-row" id="key-dd-sharp"></div>
+  <div class="key-dd-row-label" style="margin-top:0.3rem">Bemol ♭</div>
+  <div class="key-dd-row" id="key-dd-flat"></div>
 </div>
 
 <script>
@@ -545,16 +550,23 @@ function abrirKeySheet(songOrigKey, btn) {
   keySheetSongKey = songOrigKey
   const curKey = currentKeyForSong(songOrigKey)
   document.getElementById('key-sheet-title').textContent = curKey
-  let gridHTML = ''
-  NOTAS.forEach((n, i) => {
-    const sel = n === curKey ? ' selected' : ''
-    gridHTML += `<button class="key-opt${sel}" onclick="seleccionarKey(${i})">${n}</button>`
-  })
-  document.getElementById('key-grid').innerHTML = gridHTML
+  const naturals = ['C','D','E','F','G','A','B']
+  const sharps   = ['C#','D#','F#','G#','A#']
+  const flats    = ['Db','Eb','Gb','Ab','Bb']
+  const BEMOLES_LOCAL = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}
+  const curIdx = NOTAS.indexOf(BEMOLES_LOCAL[curKey] || curKey)
+  const makeBtn = (n) => {
+    const nIdx = NOTAS.indexOf(BEMOLES_LOCAL[n] || n)
+    const isSel = nIdx === curIdx ? ' selected' : ''
+    return '<button class="key-opt' + isSel + '" onclick="seleccionarKey(' + nIdx + ')">' + n + '</button>'
+  }
+  document.getElementById('key-dd-natural').innerHTML = naturals.map(makeBtn).join('')
+  document.getElementById('key-dd-sharp').innerHTML = sharps.map(makeBtn).join('')
+  document.getElementById('key-dd-flat').innerHTML = flats.map(makeBtn).join('')
   const dropdown = document.getElementById('key-sheet')
   if (btn) {
     const rect = btn.getBoundingClientRect()
-    const dropW = 200
+    const dropW = 240
     let left = rect.right - dropW
     if (left < 8) left = 8
     if (left + dropW > window.innerWidth - 8) left = window.innerWidth - dropW - 8
