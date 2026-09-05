@@ -312,6 +312,7 @@ let baseKey       = 'C'
 let cifrado       = 'americano'
 let notesCache    = {}
 let currentUserId = null
+let leadUserId    = null
 let keySheetSongKey = null
 let keySheetSongId  = null
 let scrollObserver = null
@@ -458,6 +459,7 @@ function renderAll() {
     const lines = (sec.content || '').split('\n')
     const linesHTML = lines.map(l => procesarLinea(l, sec.songKey, getSemitones(sec.song_id))).filter(Boolean).join('')
     const hasNote = !!notesCache[sec.id]
+    const showNoteBtn = (currentUserId === leadUserId) || hasNote
     scrollHTML += `
       <div class="sec-card ${css}" id="sec-${i}">
         <div class="card-hdr">
@@ -465,9 +467,7 @@ function renderAll() {
             <span class="sec-type">${escHtml(sec.type ? sec.type.toUpperCase() : tipo.toUpperCase())}</span>
             <span class="sec-song">${escHtml(sec.songTitle)}</span>
           </div>
-          <button class="note-toggle-btn ${hasNote ? 'has-note' : ''}" onclick="toggleNoteArea(${i})" title="Notas">
-            <i class="ti ti-clipboard-text"></i>
-          </button>
+          ${showNoteBtn ? `<button class="note-toggle-btn ${hasNote ? 'has-note' : ''}" onclick="toggleNoteArea(${i})" title="Notas"><i class="ti ti-clipboard-text"></i></button>` : ''}
         </div>
         ${linesHTML}
         <div class="note-area" id="note-area-${i}" style="display:none">
@@ -496,19 +496,22 @@ function toggleNoteArea(idx) {
 
 function renderNotaContent(secId, idx) {
   const el = document.getElementById(`note-content-${idx}`)
-  if (!el || !currentUserId) return
+  if (!el) return
   const existing = notesCache[secId] || ''
+  const isLead = currentUserId === leadUserId
   const btn = document.querySelector(`#sec-${idx} .note-toggle-btn`)
   if (btn) btn.className = `note-toggle-btn ${existing ? 'has-note' : ''}`
   if (existing.trim()) {
     el.innerHTML = `
       <div class="note-view">📋 ${escHtml(existing.trim())}</div>
-      <div class="note-view-actions">
+      ${isLead ? `<div class="note-view-actions">
         <button class="note-icon-btn" onclick="editarNota(${secId}, ${idx})" title="Editar">✏️</button>
         <button class="note-icon-btn" onclick="eliminarNota(${secId}, ${idx})" title="Eliminar">🗑️</button>
-      </div>`
-  } else {
+      </div>` : ''}`
+  } else if (isLead) {
     el.innerHTML = `<button class="note-add-btn" onclick="editarNota(${secId}, ${idx})">✏️ Agregar nota</button>`
+  } else {
+    el.innerHTML = ''
   }
 }
 
@@ -534,19 +537,19 @@ async function guardarNota(secId, idx) {
   const content = ta.value.trim()
   notesCache[secId] = content
   if (!content) {
-    await _sb.from('song_notes').delete().eq('user_id', currentUserId).eq('section_id', parseInt(secId, 10))
+    await _sb.from('medley_notes').delete().eq('user_id', currentUserId).eq('section_id', parseInt(secId, 10)).eq('medley_id', medleyId)
   } else {
-    await _sb.from('song_notes').upsert({
-      user_id: currentUserId, section_id: parseInt(secId, 10),
+    await _sb.from('medley_notes').upsert({
+      user_id: currentUserId, section_id: parseInt(secId, 10), medley_id: medleyId,
       content, updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id,section_id' })
+    }, { onConflict: 'medley_id,section_id,user_id' })
   }
   renderNotaContent(secId, idx)
 }
 
 async function eliminarNota(secId, idx) {
   if (!confirm('¿Eliminar esta nota?')) return
-  await _sb.from('song_notes').delete().eq('user_id', currentUserId).eq('section_id', parseInt(secId, 10))
+  await _sb.from('medley_notes').delete().eq('user_id', currentUserId).eq('section_id', parseInt(secId, 10)).eq('medley_id', medleyId)
   delete notesCache[secId]
   renderNotaContent(secId, idx)
 }
@@ -656,6 +659,7 @@ async function init() {
     if (!medleyId) { window.location.href = '/medleys.html'; return }
     const { data: medley, error: mErr } = await _sb.from('medleys').select('*').eq('id', medleyId).single()
     if (mErr || !medley) { window.location.href = '/medleys.html'; return }
+    leadUserId = medley.user_id || null
     try { const saved = localStorage.getItem('medley_keys_' + medleyId); if (saved) songSemitones = JSON.parse(saved) } catch(e) {}
     document.getElementById('medley-title').textContent = medley.name
     document.title = 'CQM — ' + medley.name
@@ -686,11 +690,12 @@ async function init() {
       const song = songsMap[ms.song_id]    || {}
       return { ...sec, songTitle: song.title || '—', songKey: song['original key'] || 'C' }
     })
-    if (currentUserId) {
+    if (leadUserId) {
       const { data: notesData } = await _sb
-        .from('song_notes')
+        .from('medley_notes')
         .select('section_id, content')
-        .eq('user_id', currentUserId)
+        .eq('medley_id', medleyId)
+        .eq('user_id', leadUserId)
       notesCache = {}
       ;(notesData || []).forEach(n => { notesCache[n.section_id] = n.content })
     }
