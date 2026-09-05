@@ -307,12 +307,13 @@ const SEC_ABBR = {
 const SEC_CSS = ['intro','verso','coro','pre-coro','puente','bridge','vamp','outro','tag','instrumental']
 
 let allSections   = []
-let semitones     = 0
+let songSemitones = {}   // { songId: semitones }
 let baseKey       = 'C'
 let cifrado       = 'americano'
 let notesCache    = {}
 let currentUserId = null
 let keySheetSongKey = null
+let keySheetSongId  = null
 let scrollObserver = null
 let scrollingTimer = null
 
@@ -381,10 +382,14 @@ function escHtml(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
 }
 
-function currentKeyForSong(songOrigKey) {
+function getSemitones(songId) {
+  return songSemitones[songId] || 0
+}
+
+function currentKeyForSong(songOrigKey, songId) {
   const idx = noteToIdx(BEMOLES[songOrigKey] || songOrigKey)
   if (idx === -1) return songOrigKey
-  return NOTAS[(idx + semitones + 120) % 12]
+  return NOTAS[(idx + getSemitones(songId) + 120) % 12]
 }
 
 function procesarLinea(line, songKey, shift) {
@@ -442,16 +447,16 @@ function renderAll() {
     const isLong = abbr === 'INTRO'
     if (sec.songTitle !== prevSong) {
       prevSong = sec.songTitle
-      const kLabel = currentKeyForSong(sec.songKey)
+      const kLabel = currentKeyForSong(sec.songKey, sec.song_id)
       scrollHTML += `
         <div class="song-sep">
           <span class="song-name">${escHtml(sec.songTitle)}</span>
           <div class="sep-line"></div>
-          <button class="key-pill" data-origkey="${escHtml(sec.songKey)}" onclick="abrirKeySheet('${escHtml(sec.songKey)}', this)">${escHtml(kLabel)} ▾</button>
+          <button class="key-pill" data-origkey="${escHtml(sec.songKey)}" onclick="abrirKeySheet('${escHtml(sec.songKey)}', this, '${escHtml(String(sec.song_id))}')">${escHtml(kLabel)} ▾</button>
         </div>`
     }
     const lines = (sec.content || '').split('\n')
-    const linesHTML = lines.map(l => procesarLinea(l, sec.songKey, semitones)).filter(Boolean).join('')
+    const linesHTML = lines.map(l => procesarLinea(l, sec.songKey, getSemitones(sec.song_id))).filter(Boolean).join('')
     const hasNote = !!notesCache[sec.id]
     scrollHTML += `
       <div class="sec-card ${css}" id="sec-${i}">
@@ -546,9 +551,10 @@ async function eliminarNota(secId, idx) {
   renderNotaContent(secId, idx)
 }
 
-function abrirKeySheet(songOrigKey, btn) {
+function abrirKeySheet(songOrigKey, btn, songId) {
   keySheetSongKey = songOrigKey
-  const curKey = currentKeyForSong(songOrigKey)
+  keySheetSongId  = songId || null
+  const curKey = currentKeyForSong(songOrigKey, songId)
   document.getElementById('key-sheet-title').textContent = curKey
   const naturals = ['C','D','E','F','G','A','B']
   const sharps   = ['C#','D#','F#','G#','A#']
@@ -581,16 +587,17 @@ function cerrarKeySheet() {
   document.getElementById('sheet-backdrop').classList.remove('open')
   document.getElementById('key-sheet').classList.remove('open')
   keySheetSongKey = null
+  keySheetSongId  = null
 }
 
 function seleccionarKey(noteIdx) {
-  if (keySheetSongKey === null) return
+  if (keySheetSongKey === null || keySheetSongId === null) return
   const BEMOLES = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'}
   const NOTAS   = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
   const origIdx = NOTAS.indexOf(BEMOLES[keySheetSongKey] || keySheetSongKey)
   if (origIdx === -1) { cerrarKeySheet(); return }
-  semitones = (noteIdx - origIdx + 12) % 12
-  _sb.from('medleys').update({ transpose_semitones: semitones }).eq('id', medleyId).then(() => {})
+  songSemitones[keySheetSongId] = (noteIdx - origIdx + 12) % 12
+  try { localStorage.setItem('medley_keys_' + medleyId, JSON.stringify(songSemitones)) } catch(e) {}
   cerrarKeySheet()
   renderAll()
 }
@@ -649,7 +656,7 @@ async function init() {
     if (!medleyId) { window.location.href = '/medleys.html'; return }
     const { data: medley, error: mErr } = await _sb.from('medleys').select('*').eq('id', medleyId).single()
     if (mErr || !medley) { window.location.href = '/medleys.html'; return }
-    semitones = medley.transpose_semitones || 0
+    try { const saved = localStorage.getItem('medley_keys_' + medleyId); if (saved) songSemitones = JSON.parse(saved) } catch(e) {}
     document.getElementById('medley-title').textContent = medley.name
     document.title = 'CQM — ' + medley.name
     const { data: mSecs, error: msErr } = await _sb
