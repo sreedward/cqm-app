@@ -413,6 +413,7 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
     )
 
+    const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
     let todasLasCanciones = []
 
     async function init() {
@@ -550,12 +551,12 @@
 
       lista.innerHTML = canciones.map(c => `
         <div class="song-card" onclick="window.location.href='/song.html?id=${c.id}'">
-          <div class="song-icon">${getInitials(c.title)}</div>
+          <div class="song-icon">${esc(getInitials(c.title))}</div>
           <div class="song-info">
-            <div class="song-title">${c.title}</div>
-            <div class="song-artist">${c.artist || 'Artista desconocido'}</div>
+            <div class="song-title">${esc(c.title)}</div>
+            <div class="song-artist">${esc(c.artist || 'Artista desconocido')}</div>
           </div>
-          <div class="song-key">${c['original key'] || '?'}</div>
+          <div class="song-key">${esc(c['original key'] || '?')}</div>
         </div>
       `).join('')
     }
