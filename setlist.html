@@ -414,6 +414,7 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
     )
 
+    const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     let userId = null
 let currentGroupId = null
 let userGroups = []
@@ -524,7 +525,7 @@ async function cargarSetlists() {
           <div class="setlist-card" onclick="window.location.href='/setlist-view.html?id=${s.id}'">
             <div class="setlist-header">
               <div>
-                <div class="setlist-name">${s.name}</div>
+                <div class="setlist-name">${esc(s.name)}</div>
                 ${fecha ? `<div class="setlist-date">${fecha}</div>` : ''}
               </div>
               <div class="setlist-count">${songsOrdered.length} canciones</div>
@@ -534,7 +535,7 @@ async function cargarSetlists() {
                 ${songsOrdered.slice(0, 4).map((song, i) => `
                   <div class="setlist-song-item">
                     <div class="song-num">${i + 1}</div>
-                    <div class="song-name">${song.title}</div>
+                    <div class="song-name">${esc(song.title)}</div>
                     <div class="song-key-tag">${song['original key'] || '?'}</div>
                   </div>
                 `).join('')}
