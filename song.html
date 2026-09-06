@@ -1086,31 +1086,22 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede guardar la 
         return
       }
 
-      // DELETE el registro actual
-      await _supabase.from('setlist_songs').delete().eq('id', currentRecord.id)
-
-      // INSERT nuevo registro con key_override
-      const { data: inserted, error } = await _supabase.from('setlist_songs').insert({
-        setlist_id:   currentRecord.setlist_id,
-        song_id:      currentRecord.song_id,
-        order:        currentRecord.order,
-        key_override: currentKey
-      }).select().single()
+      const { error } = await _supabase
+        .from('setlist_songs')
+        .update({ key_override: currentKey })
+        .eq('id', currentRecord.id)
 
       if (error) {
         mostrarToast('Error al guardar: ' + error.message)
       } else {
         mostrarToast('Tonalidad ' + currentKey + ' guardada')
-        setlistItemId = String(inserted.id)
-        const itemsArr = itemIdsParam ? itemIdsParam.split(',') : setlistSongs.map(() => '')
-        itemsArr[setlistIndex] = String(inserted.id)
-        itemIdsParam = itemsArr.join(',')
+        // Actualizar keys en memoria
         const keysArr = keysParam ? keysParam.split(',') : setlistSongs.map(() => '')
         keysArr[setlistIndex] = currentKey
         const newKeys = keysArr.join(',')
         keysParam = newKeys
         keyParam  = currentKey
-        const newUrl = '/song.html?id=' + songId + '&setlist=' + setlistId + '&index=' + setlistIndex + '&songs=' + setlistSongs.join(',') + '&itemids=' + encodeURIComponent(itemIdsParam) + '&itemid=' + encodeURIComponent(setlistItemId) + '&keys=' + encodeURIComponent(newKeys) + '&key=' + encodeURIComponent(currentKey)
+        const newUrl = '/song.html' + window.location.search.replace(/key=[^&]*/,'key='+encodeURIComponent(currentKey)).replace(/keys=[^&]*/,'keys='+encodeURIComponent(newKeys))
         history.replaceState(null, '', newUrl)
       }
     }
