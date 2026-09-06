@@ -441,7 +441,7 @@ if (!isLeader) { alert('Solo el lider puede eliminar el setlist.'); return }
     const setlistId = params.get('id')
     let songsOrdered = []
 let userId = null
-let isLeader = true
+let isLeader = false
 let groupId = null
 
     async function init() {
@@ -764,22 +764,12 @@ if (!isLeader) { alert('Solo el lider puede quitar canciones.'); return }
     }
 
     async function guardarOrden() {
-if (!isLeader) { return }
-      // UPDATE bloqueado por RLS  usar DELETE + INSERT para cada canci�n
-      for (let idx = 0; idx < songsOrdered.length; idx++) {
-        const song = songsOrdered[idx]
-        const { data: current } = await _supabase
-          .from('setlist_songs').select('*').eq('id', song.itemId).single()
-        if (!current) continue
-        await _supabase.from('setlist_songs').delete().eq('id', song.itemId)
-        const { data: inserted } = await _supabase.from('setlist_songs').insert({
-          setlist_id: parseInt(setlistId),
-          song_id: song.id,
-          order: idx,
-          key_override: song.keyOverride || null
-        }).select().single()
-        if (inserted?.id) song.itemId = inserted.id
-      }
+      if (!isLeader) { return }
+      await Promise.all(
+        songsOrdered.map((song, idx) =>
+          _supabase.from('setlist_songs').update({ order: idx }).eq('id', song.itemId)
+        )
+      )
     }
 
     function abrirModal() {
