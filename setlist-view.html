@@ -804,9 +804,8 @@ if (!isLeader) { alert('Solo el lider puede quitar canciones.'); return }
       }
 
       cerrarModal()
-      cargarSetlists()
+      window.location.href = '/setlist.html'
     }
-;(function(){var c=document.getElementById('contenido');if(!c)return;var h='';for(var i=0;i<5;i++)h+='<div class="sk-card"><div class="sk-line" style="height:16px;width:'+(40+i*8)+'%"></div></div>';c.innerHTML=h})()
 ;(function(){var c=document.getElementById('contenido');if(!c)return;var h='';for(var i=0;i<5;i++)h+='<div class="sk-card"><div class="sk-line" style="height:16px;width:'+(40+i*8)+'%"></div></div>';c.innerHTML=h})()
 
     init()
