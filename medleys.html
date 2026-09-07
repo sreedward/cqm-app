@@ -601,7 +601,7 @@ function showToast(msg, err = false) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2600)
 }
 ;(function(){
-  var c = document.getElementById('contenido')
+  var c = document.getElementById('grid')
   if (!c) return
   var h = ''
   for (var i = 0; i < 3; i++) h += '<div class="sk-card"><div class="sk-line" style="height:18px;width:'+(55+i*10)+'%;margin-bottom:8px"></div><div class="sk-line" style="height:14px;width:'+(30+i*5)+'%"></div></div>'
