@@ -428,7 +428,7 @@ let isLeaderOfCurrent = true
       if (!session) { window.location.href = '/login.html'; return }
       userId = session.user.id
       await cargarGrupos()
-      cargarSetlists()
+      await cargarSetlists()
     }
 
     
