@@ -355,6 +355,7 @@
       -webkit-backdrop-filter: blur(14px) !important;
     }
     /* ===== FIN GLASSMORPHISM ===== */
+.sk-card{background:rgba(255,255,255,0.04);border-radius:14px;padding:1rem;margin-bottom:.75rem}.sk-line{background:linear-gradient(90deg,rgba(255,255,255,0.06)25%,rgba(255,255,255,0.12)50%,rgba(255,255,255,0.06)75%);background-size:200% 100%;animation:sk 1.4s infinite;border-radius:6px}@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
 </style>
 
   <script>
@@ -534,11 +535,14 @@ async function agregarCancionAlSetlist(songId, titulo, el) {
   filtrarCanciones(document.getElementById('agregar-search').value)
 }
 async function cargarSetlist() {
-      const { data: setlist } = await _supabase
-        .from('setlist')
-        .select('*')
-        .eq('id', setlistId)
-        .single()
+      // Fetch setlist and its songs in parallel (saves one round trip)
+      const [{ data: setlist }, { data: setlistSongs }] = await Promise.all([
+        _supabase.from('setlist').select('*').eq('id', setlistId).single(),
+        _supabase.from('setlist_songs').select('id, order, song_id, key_override').eq('setlist_id', setlistId).order('order')
+      ])ise.all([
+        _supabase.from('setlist').select('*').eq('id', setlistId).single(),
+        _supabase.from('setlist_songs').select('id, order, song_id, key_override').eq('setlist_id', setlistId).order('order')
+      ])
 
       if (!setlist) { window.location.href = '/setlist.html'; return }
 
@@ -561,11 +565,7 @@ actualizarUIPermisos()
         document.getElementById('setlist-date').textContent = fecha
       }
 
-      const { data: setlistSongs } = await _supabase
-        .from('setlist_songs')
-                .select('id, order, song_id, key_override')
-        .eq('setlist_id', setlistId)
-        .order('order')
+
 
       if (!setlistSongs || setlistSongs.length === 0) {
         document.getElementById('contenido').innerHTML = `
@@ -806,6 +806,8 @@ if (!isLeader) { alert('Solo el lider puede quitar canciones.'); return }
       cerrarModal()
       cargarSetlists()
     }
+;(function(){var c=document.getElementById('contenido');if(!c)return;var h='';for(var i=0;i<5;i++)h+='<div class="sk-card"><div class="sk-line" style="height:16px;width:'+(40+i*8)+'%"></div></div>';c.innerHTML=h})()
+;(function(){var c=document.getElementById('contenido');if(!c)return;var h='';for(var i=0;i<5;i++)h+='<div class="sk-card"><div class="sk-line" style="height:16px;width:'+(40+i*8)+'%"></div></div>';c.innerHTML=h})()
 
     init()
   </script>
