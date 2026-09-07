@@ -248,6 +248,7 @@ header {
 .key-opt:hover { background: rgba(59,130,246,0.2); color: #e2e8f0; border-color: rgba(59,130,246,0.4); }
 .key-opt.selected { background: #3b82f6; color: #fff; border-color: #3b82f6; }
 .loading { text-align: center; color: #475569; padding: 3rem; font-size: 0.9rem; }
+.sk-card{background:rgba(255,255,255,0.04);border-radius:14px;padding:1rem;margin-bottom:.75rem}.sk-line{background:linear-gradient(90deg,rgba(255,255,255,0.06)25%,rgba(255,255,255,0.12)50%,rgba(255,255,255,0.06)75%);background-size:200% 100%;animation:sk 1.4s infinite;border-radius:6px}@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
 </style>
 <script>
 if ('serviceWorker' in navigator) {
@@ -706,6 +707,7 @@ async function init() {
     if (sc) sc.innerHTML = '<div class="loading" style="color:#f87171">Error al cargar el medley. Intenta de nuevo.</div>'
   }
 }
+;(function(){var c=document.getElementById('contenido');if(!c)return;var h='';for(var i=0;i<4;i++)h+='<div class="sk-card"><div class="sk-line" style="height:16px;width:'+(50+i*8)+'%"></div></div>';c.innerHTML=h})()
 
 init()
 </script>
