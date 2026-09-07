@@ -252,6 +252,10 @@ header {
 .skeleton { animation: pulse 1.4s ease-in-out infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
 .skel-card { background: rgba(13,22,38,0.5); border: 1px solid #1e2d45; border-radius: 14px; height: 148px; }
+
+.sk-card { background: rgba(255,255,255,0.04); border-radius: 14px; padding: 1.1rem 1rem; margin-bottom: 0.75rem; }
+.sk-line { background: linear-gradient(90deg,rgba(255,255,255,0.06) 25%,rgba(255,255,255,0.12) 50%,rgba(255,255,255,0.06) 75%); background-size: 200% 100%; animation: sk 1.4s infinite; border-radius: 6px; }
+@keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 </style>
 </head>
 <body>
@@ -596,6 +600,13 @@ function showToast(msg, err = false) {
   clearTimeout(toastTimer)
   toastTimer = setTimeout(() => t.classList.remove('show'), 2600)
 }
+;(function(){
+  var c = document.getElementById('contenido')
+  if (!c) return
+  var h = ''
+  for (var i = 0; i < 3; i++) h += '<div class="sk-card"><div class="sk-line" style="height:18px;width:'+(55+i*10)+'%;margin-bottom:8px"></div><div class="sk-line" style="height:14px;width:'+(30+i*5)+'%"></div></div>'
+  c.innerHTML = h
+})()
 
 init()
 </script>
