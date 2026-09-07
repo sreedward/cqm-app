@@ -492,37 +492,46 @@ async function cargarSetlists() {
         contenido.innerHTML = `
           <div class="empty">
             <i class="ti ti-list-check"></i>
-            <p>Aún no tienes setlists.<br>Crea uno para tu próximo show.</p>
+            <p>AÃºn no tienes setlists.<br>Crea uno para tu prÃ³ximo show.</p>
             ${isLeaderOfCurrent ? '<button class="empty-btn" onclick="abrirModal()">+ Crear Setlist</button>' : ''}
           </div>`
         return
       }
 
+      // Batch: 2 queries total instead of 2 per setlist
+      const setlistIds = setlists.map(s => s.id)
+      const { data: allItems } = await _supabase
+        .from('setlist_songs')
+        .select('setlist_id, order, song_id')
+        .in('setlist_id', setlistIds)
+        .order('order')
+
+      const allSongIds = [...new Set((allItems || []).map(x => x.song_id))]
+      const songMap = {}
+      if (allSongIds.length > 0) {
+        const { data: details } = await _supabase
+          .from('Songs')
+          .select('id, title, "original key"')
+          .in('id', allSongIds)
+        ;(details || []).forEach(d => { songMap[d.id] = d })
+      }
+
+      const itemsBySetlist = {}
+      ;(allItems || []).forEach(item => {
+        if (!itemsBySetlist[item.setlist_id]) itemsBySetlist[item.setlist_id] = []
+        itemsBySetlist[item.setlist_id].push(item)
+      })
+
       let html = `<div class="section-label">${setlists.length} setlist${setlists.length !== 1 ? 's' : ''}</div>`
 
       for (const s of setlists) {
-        const { data: songs } = await _supabase
-          .from('setlist_songs')
-          .select('order, song_id')
-          .eq('setlist_id', s.id)
-          .order('order')
-
-        const songIds = songs ? songs.map(x => x.song_id) : []
-        let songDetails = []
-
-        if (songIds.length > 0) {
-          const { data: details } = await _supabase
-            .from('Songs')
-            .select('id, title, "original key"')
-            .in('id', songIds)
-          songDetails = details || []
-        }
-
-        const songsOrdered = songs ? songs.map(s => songDetails.find(d => d.id === s.song_id)).filter(Boolean) : []
+        const items = itemsBySetlist[s.id] || []
+        const songsOrdered = items.map(x => songMap[x.song_id]).filter(Boolean)
         const fecha = s.date ? new Date(s.date).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }) : ''
+        const sUrl = '/setlist-view.html' + '?id=' + s.id
 
         html += `
-          <div class="setlist-card" onclick="window.location.href='/setlist-view.html?id=${s.id}'">
+          <div class="setlist-card" onclick="window.location.href='${sUrl}'">
             <div class="setlist-header">
               <div>
                 <div class="setlist-name">${esc(s.name)}</div>
@@ -536,49 +545,15 @@ async function cargarSetlists() {
                   <div class="setlist-song-item">
                     <div class="song-num">${i + 1}</div>
                     <div class="song-name">${esc(song.title)}</div>
-                    <div class="song-key-tag">${song['original key'] || '?'}</div>
+                    <div class="song-key-tag">${esc(song['original key'] || '?')}</div>
                   </div>
                 `).join('')}
-                ${songsOrdered.length > 4 ? `<div style="font-size:0.75rem;color:#4a5568;padding:0.4rem 0">+${songsOrdered.length - 4} más...</div>` : ''}
+                ${songsOrdered.length > 4 ? `<div style="font-size:0.75rem;color:#4a5568;padding:0.4rem 0">+${songsOrdered.length - 4} mÃ¡s...</div>` : ''}
               </div>` : ''}
           </div>`
       }
 
       contenido.innerHTML = html
-    }
-
-    function abrirModal() {
-      if (!isLeaderOfCurrent) { return }
-      document.getElementById('modal').classList.add('show')
-      document.getElementById('setlist-date').value = new Date().toISOString().split('T')[0]
-    }
-
-    function cerrarModal() {
-      document.getElementById('modal').classList.remove('show')
-      document.getElementById('setlist-name').value = ''
-    }
-
-    async function crearSetlist() {
-      if (!isLeaderOfCurrent) { alert('Solo el lider del grupo puede crear setlists.'); return }
-      const name = document.getElementById('setlist-name').value.trim()
-      const date = document.getElementById('setlist-date').value
-
-      if (!name) {
-        alert('Por favor ponle un nombre al setlist.')
-        return
-      }
-
-      const { error } = await _supabase
-        .from('setlist')
-        .insert({ name, date, user_id: userId, group_id: currentGroupId })
-
-      if (error) {
-        alert('Error creando setlist: ' + error.message)
-        return
-      }
-
-      cerrarModal()
-      cargarSetlists()
     }
 
     init()
