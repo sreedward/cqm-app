@@ -363,7 +363,239 @@ async function init() {
         console.error('[init]', err)
         renderGrid([])
       }
-    }
+    }async function cargarMedleys() {
+  const { data, error } = await _sb.from('medleys').select('*').order('created_at', { ascending: false })
+  if (error) {
+    console.error('[cargarMedleys] error:', JSON.stringify(error))
+    document.getElementById('page-sub').textContent = 'Error: ' + (error.message || error.code || JSON.stringify(error))
+    showToast('Error al cargar medleys', true)
+    renderGrid([])
+    return
+  }
+  console.log('[cargarMedleys] rows:', data && data.length)
+  allMedleys = (data || []).map(m => ({
+    ...m,
+    song_ids: Array.isArray(m.song_ids) ? m.song_ids : []
+  }))
+  buildFilterTabs()
+  aplicarFiltro()
+  actualizarSubtitulo()
+}
+
+function buildFilterTabs() {
+  const tagsSet = new Set()
+  allMedleys.forEach(m => {
+    if (Array.isArray(m.tags)) m.tags.forEach(t => tagsSet.add(t))
+  })
+  const tabs = document.getElementById('filter-tabs')
+  let html = '<button class="ftab active" data-filter="all" onclick="setFilter(this)">Todos</button>'
+  tagsSet.forEach(tag => {
+    html += `<button class="ftab" data-filter="${tag}" onclick="setFilter(this)">${tag}</button>`
+  })
+  tabs.innerHTML = html
+}
+
+function setFilter(btn) {
+  document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  activeFilter = btn.dataset.filter
+  aplicarFiltro()
+}
+
+function filtrar() {
+  searchQ = (document.getElementById('search-input').value || '').toLowerCase()
+  aplicarFiltro()
+}
+
+function aplicarFiltro() {
+  filteredMedleys = allMedleys.filter(m => {
+    const matchQ = !searchQ || m.name.toLowerCase().includes(searchQ)
+    const matchFilter = activeFilter === 'all' || (Array.isArray(m.tags) && m.tags.includes(activeFilter))
+    return matchQ && matchFilter
+  })
+  renderGrid(filteredMedleys)
+}
+
+function actualizarSubtitulo() {
+  const n = allMedleys.length
+  document.getElementById('page-sub').textContent = n === 1 ? '1 guardado' : `${n} guardados`
+}
+
+function renderGrid(medleys) {
+  const grid = document.getElementById('grid')
+  if (medleys.length === 0 && searchQ === '' && activeFilter === 'all') {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1">
+        <div class="empty-state">
+          <i class="ti ti-layers-intersect"></i>
+          <p>No tienes medleys todavía.<br>Crea uno para combinar secciones.</p>
+          <a class="empty-cta" href="/medley-builder.html"><i class="ti ti-plus"></i> Crear medley</a>
+        </div>
+      </div>`
+    return
+  }
+  let html = medleys.map((m, i) => cardHTML(m, i)).join('')
+  html += `<a class="mcard-new" href="/medley-builder.html">
+    <i class="ti ti-plus"></i>
+    <span>Nuevo medley</span>
+  </a>`
+  grid.innerHTML = html
+}
+
+function cardHTML(m, idx) {
+  const [g1, g2] = gradientForId(m.id)
+  const songs = m.song_ids.map(id => allSongs.find(s => s.id === id)).filter(Boolean)
+  const preview = songs.slice(0, 2)
+  const extra = songs.length - 2
+  const n = songs.length
+  const seccLabel = n === 1 ? '1 secc.' : `${n} secc.`
+  const thumbStyle = m.cover_url
+    ? `style="background:${g1}"`
+    : `style="background:linear-gradient(135deg,${g1},${g2})"`
+  const imgTag = m.cover_url
+    ? `<img src="${escHtml(m.cover_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+    : ''
+  const initialsHtml = m.cover_url ? '' : `<div class="thumb-initials">${escHtml(initials(m.name))}</div>`
+  const songRows = preview.map(s =>
+    `<div class="mcard-song"><i class="ti ti-music"></i> <span>${escHtml(s.title)}</span></div>`
+  ).join('')
+  const moreChip = extra > 0 ? `<span class="more-chip">+${extra} más</span>` : ''
+  return `
+  <div class="mcard" id="card-${escHtml(m.id)}" onclick="abrirMedley('${escHtml(m.id)}')" data-name="${escHtml(m.name)}">
+    <div class="mcard-thumb" ${thumbStyle} onclick="event.stopPropagation(); abrirCambiarFoto('${escHtml(m.id)}')">
+      ${imgTag}
+      ${initialsHtml}
+      <div class="thumb-overlay">
+        <i class="ti ti-camera"></i>
+        <span>Cambiar foto</span>
+      </div>
+    </div>
+    <div class="mcard-body">
+      <div class="mcard-title">${escHtml(m.name)}</div>
+      ${songRows}
+      ${moreChip}
+      <div class="mcard-footer">
+        <span class="mcard-count">${seccLabel}</span>
+        <button class="mcard-menu-btn" onclick="event.stopPropagation(); abrirCtx(event, '${escHtml(m.id)}')">•••</button>
+      </div>
+    </div>
+  </div>`
+}
+
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
+}
+
+function abrirMedley(id) {
+  const card = document.getElementById(`card-${id}`)
+  if (card) {
+    card.style.borderColor = '#3b82f6'
+    card.style.boxShadow = '0 0 0 2px rgba(59,130,246,0.35)'
+    card.style.transform = 'scale(0.965)'
+  }
+  setTimeout(() => {
+    window.location.href = `/medley-view.html?id=${encodeURIComponent(id)}`
+  }, 140)
+}
+
+function abrirCtx(e, id) {
+  ctxMedleyId = id
+  const menu = document.getElementById('ctx-menu')
+  menu.classList.add('open')
+  const rect = e.currentTarget.getBoundingClientRect()
+  const menuW = 150, menuH = 120
+  let top = rect.bottom + 4
+  let left = rect.right - menuW
+  if (top + menuH > window.innerHeight) top = rect.top - menuH - 4
+  if (left < 8) left = 8
+  menu.style.top = top + 'px'
+  menu.style.left = left + 'px'
+}
+
+function cerrarCtx() {
+  document.getElementById('ctx-menu').classList.remove('open')
+  ctxMedleyId = null
+}
+
+function ctxEditar() {
+  const id = ctxMedleyId
+  cerrarCtx()
+  if (id) window.location.href = `/medley-builder.html?id=${encodeURIComponent(id)}`
+}
+
+function ctxCambiarFoto() {
+  const id = ctxMedleyId
+  cerrarCtx()
+  abrirCambiarFoto(id)
+}
+
+async function ctxEliminar() {
+  const id = ctxMedleyId
+  cerrarCtx()
+  if (!id) return
+  const m = allMedleys.find(x => x.id === id)
+  if (!confirm(`¿Eliminar "${m?.name || 'este medley'}"?`)) return
+
+  // Optimistic update: quitar de la UI de inmediato
+  const snapshot = allMedleys
+  allMedleys = allMedleys.filter(x => x.id !== id)
+  aplicarFiltro()
+  actualizarSubtitulo()
+
+  const { error } = await _sb.from('medleys').delete().eq('id', id)
+  if (error) {
+    // Revertir si falló
+    allMedleys = snapshot
+    aplicarFiltro()
+    actualizarSubtitulo()
+    showToast('Error al eliminar', true)
+    return
+  }
+  showToast('✓ Medley eliminado')
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#ctx-menu') && !e.target.closest('.mcard-menu-btn')) cerrarCtx()
+})
+
+function abrirCambiarFoto(id) {
+  coverTargetId = id
+  document.getElementById('cover-file-input').click()
+}
+
+async function onCoverSelected(e) {
+  const file = e.target.files[0]
+  if (!file || !coverTargetId) return
+  e.target.value = ''
+  if (file.size > 3 * 1024 * 1024) { showToast('Imagen muy grande (máx 3 MB)', true); return }
+  showToast('Subiendo foto...')
+  const ext = file.name.split('.').pop() || 'jpg'
+  const path = `covers/${coverTargetId}.${ext}`
+  const { error: upErr } = await _sb.storage
+    .from('medley-covers')
+    .upload(path, file, { upsert: true, contentType: file.type })
+  if (upErr) {
+    showToast('No se pudo subir la foto. Verifica el bucket.', true)
+    return
+  }
+  const { data: { publicUrl } } = _sb.storage.from('medley-covers').getPublicUrl(path)
+  const { error: updateErr } = await _sb.from('medleys').update({ cover_url: publicUrl }).eq('id', coverTargetId)
+  if (updateErr) { showToast('Foto subida pero no guardada', true); return }
+  const idx = allMedleys.findIndex(m => m.id === coverTargetId)
+  if (idx !== -1) allMedleys[idx].cover_url = publicUrl
+  aplicarFiltro()
+  showToast('✓ Foto actualizada')
+  coverTargetId = null
+}
+
+let toastTimer = null
+function showToast(msg, err = false) {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.className = 'toast' + (err ? ' err' : '') + ' show'
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600)
+}
 
 init()
 </script>
