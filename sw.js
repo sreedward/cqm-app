@@ -1,18 +1,14 @@
-const CACHE_VERSION = 'v9'
+const CACHE_VERSION = 'v10'
 const STATIC_CACHE = `cqm-static-${CACHE_VERSION}`
 const API_CACHE    = `cqm-api-${CACHE_VERSION}`
 const STATIC_ASSETS = [
-  '/index.html', '/medleys.html', '/medley-view.html',
-  '/setlist.html', '/setlist-view.html', '/song.html',
-  '/library.html', '/login.html', '/manifest.json',
+  '/manifest.json',
 ]
 const SUPABASE_HOST = 'kzqnsbztfyhyyageuboz.supabase.co'
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then(c => c.addAll(STATIC_ASSETS))
-      .then(() => self.skipWaiting())
+    self.skipWaiting()
   )
 })
 
@@ -60,6 +56,17 @@ self.addEventListener('fetch', event => {
     })())
     return
   }
+
+    // HTML pages - Network-first (always get fresh HTML)
+    if (req.method === 'GET' && url.origin === self.location.origin && url.pathname.endsWith('.html')) {
+      event.respondWith(
+        fetch(req).then(res => {
+          if (res.ok) caches.open(STATIC_CACHE).then(c => c.put(req, res.clone()))
+          return res
+        }).catch(() => caches.match(req))
+      )
+      return
+    }
 
     // Same-origin GET â Cache First for static assets
   if (req.method === 'GET' && url.origin === self.location.origin) {
