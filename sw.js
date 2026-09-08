@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v6'
+const CACHE_VERSION = 'v7'
 const STATIC_CACHE = `cqm-static-${CACHE_VERSION}`
 const API_CACHE    = `cqm-api-${CACHE_VERSION}`
 const STATIC_ASSETS = [
@@ -30,7 +30,14 @@ self.addEventListener('fetch', event => {
 
   // Supabase API GET â Stale-While-Revalidate
   // Returns cached data immediately; updates cache in background
-  if (req.method === 'GET' && url.hostname === SUPABASE_HOST) {
+    // Skip SWR for mutable tables — always return fresh data
+  if (req.method === 'GET' && url.hostname === SUPABASE_HOST &&
+      (url.pathname.startsWith('/rest/v1/medleys') || url.pathname.startsWith('/rest/v1/setlists'))) {
+    event.respondWith(fetch(req))
+    return
+  }
+
+if (req.method === 'GET' && url.hostname === SUPABASE_HOST) {
     event.respondWith((async () => {
       const cache = await caches.open(API_CACHE)
       const cached = await cache.match(req)
@@ -60,5 +67,16 @@ self.addEventListener('fetch', event => {
       }))
     )
     return
+  }
+})
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'INVALIDATE_CACHE') {
+    const pattern = event.data.pattern
+    caches.open(API_CACHE).then(cache => {
+      cache.keys().then(keys =>
+        keys.filter(k => k.url.includes(pattern)).forEach(k => cache.delete(k))
+      )
+    })
   }
 })
