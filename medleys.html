@@ -351,7 +351,7 @@ async function init() {
 
         // Fetch songs and medleys in parallel (saves ~300ms)
         const [songsRes, medleysRes] = await Promise.all([
-          _sb.from('Songs').select('id,title').order('title').catch(() => ({ data: [] })),
+          _sb.from('Songs').select('id,title').order('title'),
           _sb.from('medleys').select('*').order('created_at', { ascending: false })
         ])
         allSongs = songsRes.data || []
@@ -616,16 +616,36 @@ function showToast(msg, err = false) {
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && session) {
-    _sb.from('medleys').select('*').order('created_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (!error && data) {
-          allMedleys = data.map(m => ({...m, song_ids: Array.isArray(m.song_ids) ? m.song_ids : []}))
-          aplicarFiltro()
-          actualizarSubtitulo()
-        }
-      })
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'INVALIDATE_CACHE', pattern: '/medleys' })
+    }
+    setTimeout(() => {
+      _sb.from('medleys').select('*').order('created_at', { ascending: false })
+        .then(({ data, error }) => {
+          if (!error && data) {
+            allMedleys = data.map(m => ({...m, song_ids: Array.isArray(m.song_ids) ? m.song_ids : []}))
+            aplicarFiltro()
+            actualizarSubtitulo()
+          }
+        })
+    }, 150)
   }
 })
+
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data && event.data.type === 'DATA_UPDATED' && event.data.table === 'medleys' && session) {
+      _sb.from('medleys').select('*').order('created_at', { ascending: false })
+        .then(({ data, error }) => {
+          if (!error && data) {
+            allMedleys = data.map(m => ({...m, song_ids: Array.isArray(m.song_ids) ? m.song_ids : []}))
+            aplicarFiltro()
+            actualizarSubtitulo()
+          }
+        })
+    }
+  })
+}
 
 init()
 </script>
