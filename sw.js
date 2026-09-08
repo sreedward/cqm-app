@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v7'
+const CACHE_VERSION = 'v8'
 const STATIC_CACHE = `cqm-static-${CACHE_VERSION}`
 const API_CACHE    = `cqm-api-${CACHE_VERSION}`
 const STATIC_ASSETS = [
@@ -28,35 +28,35 @@ self.addEventListener('fetch', event => {
   const req = event.request
   const url = new URL(req.url)
 
-  // Supabase API GET â Stale-While-Revalidate
+  // Supabase API GET - Stale-While-Revalidate
   // Returns cached data immediately; updates cache in background
-    // Skip SWR for mutable tables — always return fresh data
-  if (req.method === 'GET' && url.hostname === SUPABASE_HOST &&
-      (url.pathname.startsWith('/rest/v1/medleys') || url.pathname.startsWith('/rest/v1/setlists'))) {
-    event.respondWith(fetch(req))
-    return
-  }
-
-if (req.method === 'GET' && url.hostname === SUPABASE_HOST) {
+  if (req.method === 'GET' && url.hostname === SUPABASE_HOST) {
     event.respondWith((async () => {
       const cache = await caches.open(API_CACHE)
       const cached = await cache.match(req)
-      const networkPromise = fetch(req).then(res => {
-        if (res.ok) cache.put(req, res.clone())
+      const tableName = url.pathname.split('/').filter(Boolean)[2] || ''
+      const networkPromise = fetch(req.clone()).then(async res => {
+        if (res.ok) {
+          await cache.put(req, res.clone())
+          if (tableName === 'medleys' || tableName === 'setlists') {
+            const clients = await self.clients.matchAll({ type: 'window' })
+            clients.forEach(c => c.postMessage({ type: 'DATA_UPDATED', table: tableName }))
+          }
+        }
         return res
       }).catch(() => null)
-      // If we have cached data, return it instantly and update in background
-      if (cached) {
-        networkPromise // fire-and-forget update
-        return cached
-      }
-      // No cache yet â wait for network
+      if (cached) { networkPromise; return cached }
       return await networkPromise || new Response('Offline', { status: 503 })
     })())
     return
   }
 
-  // Same-origin GET â Cache First for static assets
+  503 })
+    })())
+    return
+  }
+
+    // Same-origin GET â Cache First for static assets
   if (req.method === 'GET' && url.origin === self.location.origin) {
     event.respondWith(
       caches.match(req).then(cached => cached || fetch(req).then(res => {
