@@ -352,7 +352,7 @@ async function init() {
         // Fetch songs and medleys in parallel (saves ~300ms)
         const [songsRes, medleysRes] = await Promise.all([
           _sb.from('Songs').select('id,title').order('title'),
-          _sb.from('medleys').select('*').order('created_at', { ascending: false })
+          _sb.from('medleys').select('*, medley_sections(id, song_id, order)').order('created_at', { ascending: false })
         ])
         allSongs = songsRes.data || []
         if (medleysRes.error) {
@@ -363,7 +363,7 @@ async function init() {
         }
         allMedleys = (medleysRes.data || []).map(m => ({
           ...m,
-          song_ids: Array.isArray(m.song_ids) ? m.song_ids : []
+          song_ids: [...new Set((m.medley_sections || []).map(ms => ms.song_id).filter(Boolean))]
         }))
         buildFilterTabs()
         aplicarFiltro()
@@ -374,7 +374,7 @@ async function init() {
         renderGrid([])
       }
     }async function cargarMedleys() {
-  const { data, error } = await _sb.from('medleys').select('*').order('created_at', { ascending: false })
+  const { data, error } = await _sb.from('medleys').select('*, medley_sections(id, song_id, order)').order('created_at', { ascending: false })
   if (error) {
     console.error('[cargarMedleys] error:', JSON.stringify(error))
     document.getElementById('page-sub').textContent = 'Error: ' + (error.message || error.code || JSON.stringify(error))
@@ -385,7 +385,7 @@ async function init() {
   console.log('[cargarMedleys] rows:', data && data.length)
   allMedleys = (data || []).map(m => ({
     ...m,
-    song_ids: Array.isArray(m.song_ids) ? m.song_ids : []
+    song_ids: [...new Set((m.medley_sections || []).map(ms => ms.song_id).filter(Boolean))]
   }))
   buildFilterTabs()
   aplicarFiltro()
@@ -620,10 +620,10 @@ document.addEventListener('visibilitychange', () => {
       navigator.serviceWorker.controller.postMessage({ type: 'INVALIDATE_CACHE', pattern: '/medleys' })
     }
     setTimeout(() => {
-      _sb.from('medleys').select('*').order('created_at', { ascending: false })
+      _sb.from('medleys').select('*, medley_sections(id, song_id, order)').order('created_at', { ascending: false })
         .then(({ data, error }) => {
           if (!error && data) {
-            allMedleys = data.map(m => ({...m, song_ids: Array.isArray(m.song_ids) ? m.song_ids : []}))
+            allMedleys = data.map(m => ({...m, song_ids: [...new Set((m.medley_sections || []).map(ms => ms.song_id).filter(Boolean))]}))
             aplicarFiltro()
             actualizarSubtitulo()
           }
@@ -635,10 +635,10 @@ document.addEventListener('visibilitychange', () => {
 if (navigator.serviceWorker) {
   navigator.serviceWorker.addEventListener('message', event => {
     if (event.data && event.data.type === 'DATA_UPDATED' && event.data.table === 'medleys' && session) {
-      _sb.from('medleys').select('*').order('created_at', { ascending: false })
+      _sb.from('medleys').select('*, medley_sections(id, song_id, order)').order('created_at', { ascending: false })
         .then(({ data, error }) => {
           if (!error && data) {
-            allMedleys = data.map(m => ({...m, song_ids: Array.isArray(m.song_ids) ? m.song_ids : []}))
+            allMedleys = data.map(m => ({...m, song_ids: [...new Set((m.medley_sections || []).map(ms => ms.song_id).filter(Boolean))]}))
             aplicarFiltro()
             actualizarSubtitulo()
           }
