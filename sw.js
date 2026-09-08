@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v10'
+const CACHE_VERSION = 'v11'
 const STATIC_CACHE = `cqm-static-${CACHE_VERSION}`
 const API_CACHE    = `cqm-api-${CACHE_VERSION}`
 const STATIC_ASSETS = [
@@ -48,11 +48,6 @@ self.addEventListener('fetch', event => {
       }).catch(() => null)
       if (cached) { networkPromise; return cached }
       return await networkPromise || new Response('Offline', { status: 503 })
-    })())
-    return
-  }
-
-  503 })
     })())
     return
   }
