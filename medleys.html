@@ -355,7 +355,12 @@ async function init() {
           _sb.from('medleys').select('*').order('created_at', { ascending: false })
         ])
         allSongs = songsRes.data || []
-        if (medleysRes.error) { showToast('Error al cargar medleys', true); renderGrid([]); return }
+        if (medleysRes.error) {
+          const errMsg = medleysRes.error.message || medleysRes.error.code || JSON.stringify(medleysRes.error)
+          document.getElementById('page-sub').textContent = 'Error: ' + errMsg
+          showToast('Error al cargar medleys', true)
+          renderGrid([]); return
+        }
         allMedleys = (medleysRes.data || []).map(m => ({
           ...m,
           song_ids: Array.isArray(m.song_ids) ? m.song_ids : []
@@ -365,6 +370,7 @@ async function init() {
         actualizarSubtitulo()
       } catch (err) {
         console.error('[init]', err)
+        document.getElementById('page-sub').textContent = 'Error: ' + (err.message || String(err))
         renderGrid([])
       }
     }async function cargarMedleys() {
@@ -607,6 +613,19 @@ function showToast(msg, err = false) {
   for (var i = 0; i < 3; i++) h += '<div class="sk-card"><div class="sk-line" style="height:18px;width:'+(55+i*10)+'%;margin-bottom:8px"></div><div class="sk-line" style="height:14px;width:'+(30+i*5)+'%"></div></div>'
   c.innerHTML = h
 })()
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && session) {
+    _sb.from('medleys').select('*').order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) {
+          allMedleys = data.map(m => ({...m, song_ids: Array.isArray(m.song_ids) ? m.song_ids : []}))
+          aplicarFiltro()
+          actualizarSubtitulo()
+        }
+      })
+  }
+})
 
 init()
 </script>
