@@ -539,9 +539,6 @@ async function cargarSetlist() {
       const [{ data: setlist }, { data: setlistSongs }] = await Promise.all([
         _supabase.from('setlist').select('*').eq('id', setlistId).single(),
         _supabase.from('setlist_songs').select('id, order, song_id, key_override').eq('setlist_id', setlistId).order('order')
-      ])ise.all([
-        _supabase.from('setlist').select('*').eq('id', setlistId).single(),
-        _supabase.from('setlist_songs').select('id, order, song_id, key_override').eq('setlist_id', setlistId).order('order')
       ])
 
       if (!setlist) { window.location.href = '/setlist.html'; return }
