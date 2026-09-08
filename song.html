@@ -747,14 +747,22 @@ if (groupId && !isLeaderOfGroup) { mostrarToast('Solo el lider puede ajustar aco
       renderNotasUI()
     }
 let  notesCache = {};
+let setlistNotesCache = {};
 
     async function cargarNotasUsuario() {
       if (!currentUserId) return
-      const { data } = await _supabase.from('song_notes').select('section_id, content').eq('user_id', currentUserId)
       notesCache = {};
-      (data || []).forEach(n => { notesCache[n.section_id] = n.content })
-      // In group context: load shared group notes (readable by all members)
+      setlistNotesCache = {};
       leaderNotesCache = {}
+      // Library personal notes (always load)
+      const { data } = await _supabase.from('song_notes').select('section_id, content').eq('user_id', currentUserId)
+      ;(data || []).forEach(n => { notesCache[n.section_id] = n.content })
+      // Setlist context: load setlist-specific personal notes
+      if (setlistId) {
+        const { data: sdata } = await _supabase.from('setlist_song_notes').select('section_id, content').eq('user_id', currentUserId).eq('setlist_id', parseInt(setlistId))
+        ;(sdata || []).forEach(n => { setlistNotesCache[n.section_id] = n.content })
+      }
+      // Group/medley context: load shared leader notes
       if (groupId) {
         const { data: ldata } = await _supabase.from('group_section_notes').select('section_id, content').eq('group_id', groupId)
         ;(ldata || []).forEach(n => { leaderNotesCache[n.section_id] = n.content })
@@ -769,12 +777,11 @@ let  notesCache = {};
       .section-label { display:flex; align-items:center; justify-content:space-between; gap:0.5rem; }
       .mynote-box { display:flex; flex-direction:column; align-items:flex-end; gap:2px; flex-shrink:0; margin-left:auto; }
       .mynote-row { display:flex; align-items:center; gap:3px; }
-      .mynote-ta { background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.08); border-radius:0; color:#94a3b8; font-size:0.7rem; font-family:inherit; resize:none; outline:none; width:90px; height:18px; padding:1px 3px; line-height:1.4; transition:all 0.2s ease; overflow:hidden; }
-      .mynote-ta:focus { border-bottom-color:#3b82f6; color:#cbd5e1; height:44px; width:140px; overflow:auto; }
+      .mynote-ta { background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.08); border-radius:0; color:#94a3b8; font-size:0.7rem; font-family:inherit; resize:none; outline:none; width:90px; height:18px; padding:1px 3px; line-height:1.4; transition:border-bottom-color 0.3s ease; overflow:hidden; }
+      .mynote-ta:focus { border-bottom-color:#3b82f6; color:#cbd5e1; height:44px; overflow:auto; }
       .mynote-ta::placeholder { color:#374151; font-size:0.65rem; }
-      .mynote-status { font-size:0.6rem; color:#22c55e; opacity:0; transition:opacity 0.4s ease; }
-      .mynote-status.show { opacity:1; }
-      .mynote-status.saving { color:#6b7280; }
+      .mynote-ta.saved { border-bottom-color:#22c55e !important; }
+      .mynote-ta.note-err { border-bottom-color:#ef4444 !important; }
       .leader-note { font-size:0.65rem; color:#78716c; font-style:italic; max-width:160px; word-break:break-word; line-height:1.3; text-align:right; }
       .leader-note:empty { display:none; }
       .leader-badge { font-size:0.6rem; color:#6b7280; cursor:default; }
@@ -789,13 +796,20 @@ let  notesCache = {};
         const sid = secEl.getAttribute('data-sid')
         const label = secEl.querySelector('.section-label')
         if (!label || label.querySelector('.mynote-ta')) return
-        // Leader in group context reads from shared group table; members read personal notes
-        const existing = (groupId && isLeaderOfGroup) ? (leaderNotesCache[sid] || '') : (notesCache[sid] || '')
+        // Determine which note cache to display based on context
+        let existing
+        if (groupId && isLeaderOfGroup) {
+          existing = leaderNotesCache[sid] || ''
+        } else if (setlistId) {
+          existing = setlistNotesCache[sid] || ''
+        } else {
+          existing = notesCache[sid] || ''
+        }
 
         const box = document.createElement('div')
         box.className = 'mynote-box'
 
-        // Row 1: badge (leader only) + textarea + save status
+        // Row 1: badge (leader only) + textarea
         const row = document.createElement('div')
         row.className = 'mynote-row'
         if (groupId && isLeaderOfGroup) {
@@ -809,10 +823,7 @@ let  notesCache = {};
         ta.className = 'mynote-ta'
         ta.placeholder = (groupId && isLeaderOfGroup) ? 'nota del grupo...' : 'mi nota...'
         ta.value = existing
-        const status = document.createElement('div')
-        status.className = 'mynote-status'
         row.appendChild(ta)
-        row.appendChild(status)
         box.appendChild(row)
 
         // Row 2: leader note below (members only, read-only)
@@ -828,33 +839,48 @@ let  notesCache = {};
         let saveTimer = null
         ta.addEventListener('input', () => {
           clearTimeout(saveTimer)
-          status.textContent = 'Guardando...'
-          status.classList.add('show', 'saving')
-          saveTimer = setTimeout(() => guardarNota(sid, ta.value, status), 700)
+          saveTimer = setTimeout(() => guardarNota(sid, ta.value, ta), 700)
         })
       })
     }
 
-    async function guardarNota(sectionId, content, status) {
+    async function guardarNota(sectionId, content, ta) {
+      let saveError = null
       if (groupId && isLeaderOfGroup) {
+        // Medley leader: save to shared group notes
         leaderNotesCache[sectionId] = content
         const { error: gErr } = await _supabase.from('group_section_notes').upsert(
           { group_id: groupId, section_id: parseInt(sectionId, 10), content, updated_at: new Date().toISOString() },
           { onConflict: 'group_id,section_id' }
         )
-        if (gErr) { console.error('Error guardando nota de grupo:', gErr); status.textContent = 'Error ✗'; status.classList.remove('saving'); return }
-        document.querySelectorAll('.leader-note[data-lsid="' + sectionId + '"]').forEach(el => { el.textContent = content })
+        saveError = gErr
+        if (!gErr) document.querySelectorAll('.leader-note[data-lsid="' + sectionId + '"]').forEach(el => { el.textContent = content })
+      } else if (setlistId) {
+        // Setlist context: save to setlist-specific personal notes
+        setlistNotesCache[sectionId] = content
+        const { error: sErr } = await _supabase.from('setlist_song_notes').upsert(
+          { user_id: currentUserId, setlist_id: parseInt(setlistId), section_id: parseInt(sectionId, 10), content, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id,setlist_id,section_id' }
+        )
+        saveError = sErr
       } else {
+        // Library: save to personal song notes
         notesCache[sectionId] = content
         const { error: pErr } = await _supabase.from('song_notes').upsert(
           { user_id: currentUserId, section_id: parseInt(sectionId, 10), content, updated_at: new Date().toISOString() },
           { onConflict: 'user_id,section_id' }
         )
-        if (pErr) { console.error('Error guardando nota personal:', pErr); status.textContent = 'Error ✗'; status.classList.remove('saving'); return }
+        saveError = pErr
       }
-      status.textContent = 'Guardado ✓'
-      status.classList.remove('saving')
-      setTimeout(() => status.classList.remove('show'), 1600)
+      if (saveError) {
+        console.error('Error guardando nota:', saveError)
+        ta.classList.add('note-err')
+        setTimeout(() => ta.classList.remove('note-err'), 2000)
+        return
+      }
+      // Silent save: brief green border flash
+      ta.classList.add('saved')
+      setTimeout(() => ta.classList.remove('saved'), 1200)
     }
     async function cargarOffsetsUsuario() {
       if (!currentUserId || isAdmin) return
