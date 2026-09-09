@@ -58,7 +58,7 @@ header {
 .search-input:focus { border-color: rgba(59,130,246,0.4); }
 
 /* ── Filter tabs ── */
-.filter-tabs { display: flex; gap: 0.45rem; padding: 0.3rem 1rem 0.6rem; overflow-x: auto; scrollbar-width: none; }
+.filter-tabs { display: flex; gap: 0.45rem; padding: 0.3rem 1rem 0.6rem; overflox-x: auto; scrollbar-width: none; }
 .filter-tabs::-webkit-scrollbar { display: none; }
 .ftab {
   background: none; border: 1px solid #1e2d45; border-radius: 20px;
@@ -117,9 +117,9 @@ header {
   position: absolute; inset: 0;
   background: rgba(0,0,0,0.52);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 2px; opacity: 0; transition: opacity 0.18s;
+  gap: 2px; opacity: 0; transition: opacity 0.18s; pointer-events: none;
 }
-@media (hover: hover) { .mcard-thumb:hover .thumb-overlay { opacity: 1; } }
+@media (hover: hover) { .mcard-thumb:hover .thumb-overlay { opacity: 1; pointer-events: auto; } }
 .thumb-overlay i { font-size: 1.1rem; color: #fff; }
 .thumb-overlay span { font-size: 0.52rem; color: rgba(255,255,255,0.85); letter-spacing: 0.3px; }
 
@@ -475,7 +475,7 @@ function cardHTML(m, idx) {
     <div class="mcard-thumb" ${thumbStyle}>
       ${imgTag}
       ${initialsHtml}
-      <div class="thumb-overlay">
+      <div class="thumb-overlay" onclick="event.stopPropagation(); abrirCambiarFoto('${escHtml(m.id)}')">
         <i class="ti ti-camera"></i>
         <span>Cambiar foto</span>
       </div>
