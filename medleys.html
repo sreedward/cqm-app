@@ -119,7 +119,7 @@ header {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 2px; opacity: 0; transition: opacity 0.18s;
 }
-.mcard-thumb:hover .thumb-overlay { opacity: 1; }
+@media (hover: hover) { .mcard-thumb:hover .thumb-overlay { opacity: 1; } }
 .thumb-overlay i { font-size: 1.1rem; color: #fff; }
 .thumb-overlay span { font-size: 0.52rem; color: rgba(255,255,255,0.85); letter-spacing: 0.3px; }
 
@@ -343,7 +343,7 @@ function initials(name) {
   return (name || '??').split(' ').slice(0, 2).map(w => w[0] || '').join('').toUpperCase()
 }
 
-async function init() {
+aasync function init() {
       try {
         const { data: { session: s } } = await _sb.auth.getSession()
         if (!s) { window.location.href = '/login.html'; return }
@@ -386,7 +386,7 @@ async function init() {
   allMedleys = (data || []).map(m => ({
     ...m,
     song_ids: [...new Set((m.medley_sections || []).map(ms => ms.song_id).filter(Boolean))]
-  }))
+    }))
   buildFilterTabs()
   aplicarFiltro()
   actualizarSubtitulo()
@@ -472,7 +472,7 @@ function cardHTML(m, idx) {
   const moreChip = extra > 0 ? `<span class="more-chip">+${extra} más</span>` : ''
   return `
   <div class="mcard" id="card-${escHtml(m.id)}" onclick="abrirMedley('${escHtml(m.id)}')" data-name="${escHtml(m.name)}">
-    <div class="mcard-thumb" ${thumbStyle} onclick="event.stopPropagation(); abrirCambiarFoto('${escHtml(m.id)}')">
+    <div class="mcard-thumb" ${thumbStyle}>
       ${imgTag}
       ${initialsHtml}
       <div class="thumb-overlay">
