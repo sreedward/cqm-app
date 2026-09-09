@@ -568,6 +568,30 @@ async function cargarSetlists() {
       c.innerHTML = h
     })()
 
+    function abrirModal() {
+      if (!isLeaderOfCurrent) return
+      document.getElementById('modal').classList.add('show')
+      document.getElementById('setlist-name').value = ''
+      document.getElementById('setlist-date').value = ''
+      setTimeout(() => document.getElementById('setlist-name').focus(), 100)
+    }
+
+    function cerrarModal() {
+      document.getElementById('modal').classList.remove('show')
+    }
+
+    async function crearSetlist() {
+      const name = document.getElementById('setlist-name').value.trim()
+      if (!name) { document.getElementById('setlist-name').focus(); return }
+      const date = document.getElementById('setlist-date').value || null
+      const row = { user_id: userId, name, date }
+      if (currentGroupId !== null) row.group_id = currentGroupId
+      const { error } = await _supabase.from('setlist').insert(row)
+      if (error) { alert('Error: ' + error.message); return }
+      cerrarModal()
+      cargarSetlists()
+    }
+
     init()
   </script>
 </body>
