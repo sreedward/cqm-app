@@ -343,7 +343,7 @@ function initials(name) {
   return (name || '??').split(' ').slice(0, 2).map(w => w[0] || '').join('').toUpperCase()
 }
 
-aasync function init() {
+async function init() {
       try {
         const { data: { session: s } } = await _sb.auth.getSession()
         if (!s) { window.location.href = '/login.html'; return }
@@ -386,7 +386,7 @@ aasync function init() {
   allMedleys = (data || []).map(m => ({
     ...m,
     song_ids: [...new Set((m.medley_sections || []).map(ms => ms.song_id).filter(Boolean))]
-    }))
+  }))
   buildFilterTabs()
   aplicarFiltro()
   actualizarSubtitulo()
