@@ -87,6 +87,8 @@ header {
   transition: border-color 0.18s, box-shadow 0.18s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  text-decoration: none;
+  color: inherit;
 }
 .mcard:hover {
   border-color: rgba(59,130,246,0.42);
@@ -453,7 +455,7 @@ function cardHTML(m, idx) {
   ).join('')
   const moreChip = extra > 0 ? `<span class="more-chip">+${extra} más</span>` : ''
   return `
-  <div class="mcard" id="card-${escHtml(m.id)}" onclick="abrirMedley('${escHtml(m.id)}')" data-name="${escHtml(m.name)}">
+  <a class="mcard" id="card-${escHtml(m.id)}" href="/medley-view.html?id=${encodeURIComponent(m.id)}" data-name="${escHtml(m.name)}">
     <div class="mcard-thumb" ${thumbStyle}>
       <span class="thumb-title">${escHtml(m.name)}</span>
     </div>
@@ -463,10 +465,10 @@ function cardHTML(m, idx) {
       ${moreChip}
       <div class="mcard-footer">
         <span class="mcard-count">${seccLabel}</span>
-        <button class="mcard-menu-btn" onclick="event.stopPropagation(); abrirCtx(event, '${escHtml(m.id)}')">•••</button>
+        <button class="mcard-menu-btn" onclick="event.stopPropagation(); event.preventDefault(); abrirCtx(event, '${escHtml(m.id)}')">•••</button>
       </div>
     </div>
-  </div>`
+  </a>`
 }
 
 function escHtml(str) {
@@ -477,7 +479,7 @@ function abrirMedley(id) {
   const card = document.getElementById(`card-${id}`)
   if (card) {
     card.style.borderColor = '#3b82f6'
-    card.style.boxShagow = '0 0 0 2px rgba(59,130,246,0.35)'
+    card.style.boxShadow = '0 0 0 2px rgba(59,130,246,0.35)'
     card.style.transform = 'scale(0.965)'
   }
   setTimeout(() => {
