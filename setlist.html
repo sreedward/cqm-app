@@ -495,7 +495,7 @@ async function cargarSetlists() {
         contenido.innerHTML = `
           <div class="empty">
             <i class="ti ti-list-check"></i>
-            <p>AÃºn no tienes setlists.<br>Crea uno para tu prÃ³ximo show.</p>
+            <p>Aún no tienes setlists.<br>Crea uno para tu próximo show.</p>
             ${isLeaderOfCurrent ? '<button class="empty-btn" onclick="abrirModal()">+ Crear Setlist</button>' : ''}
           </div>`
         return
@@ -551,7 +551,7 @@ async function cargarSetlists() {
                     <div class="song-key-tag">${esc(song['original key'] || '?')}</div>
                   </div>
                 `).join('')}
-                ${songsOrdered.length > 4 ? `<div style="font-size:0.75rem;color:#4a5568;padding:0.4rem 0">+${songsOrdered.length - 4} mÃ¡s...</div>` : ''}
+                ${songsOrdered.length > 4 ? `<div style="font-size:0.75rem;color:#4a5568;padding:0.4rem 0">+${songsOrdered.length - 4} más...</div>` : ''}
               </div>` : ''}
           </div>`
       }
