@@ -144,9 +144,21 @@ header {
 }
 .mcard-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 0.38rem; }
 .mcard-count { font-size: 0.68rem; font-weight: 600; color: #3b82f6; }
+/* Todos los hijos del card son transparentes a pointer-events:
+   los clicks siempre llegan al <a> padre, no a un div hijo */
+.mcard-thumb, .mcard-body, .mcard-title, .mcard-song,
+.mcard-song span, .mcard-song i, .thumb-title, .more-chip,
+.mcard-footer, .mcard-count {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
 .mcard-menu-btn {
   background: none; border: none; color: #475569; font-size: 0.9rem;
   cursor: pointer; padding: 2px 4px; line-height: 1;
+  pointer-events: all;
+  position: relative;
+  z-index: 5;
 }
 .mcard-menu-btn:hover { color: #94a3b8; }
 
