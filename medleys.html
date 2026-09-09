@@ -58,7 +58,7 @@ header {
 .search-input:focus { border-color: rgba(59,130,246,0.4); }
 
 /* ── Filter tabs ── */
-.filter-tabs { display: flex; gap: 0.45rem; padding: 0.3rem 1rem 0.6rem; overflox-x: auto; scrollbar-width: none; }
+.filter-tabs { display: flex; gap: 0.45rem; padding: 0.3rem 1rem 0.6rem; overflow-x: auto; scrollbar-width: none; }
 .filter-tabs::-webkit-scrollbar { display: none; }
 .ftab {
   background: none; border: 1px solid #1e2d45; border-radius: 20px;
@@ -100,39 +100,35 @@ header {
 
 /* Thumbnail */
 .mcard-thumb {
-  height: 70px;
+  height: 82px;
   position: relative;
   overflow: hidden;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.8rem;
   flex-shrink: 0;
-  cursor: pointer;
 }
-.mcard-thumb img {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%; object-fit: cover;
+/* Brillo sutil en la parte superior */
+.mcard-thumb::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 40%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.08), transparent);
+  pointer-events: none; z-index: 1;
 }
-/* Overlay cámara — solo visible en hover del thumb */
-.thumb-overlay {
-  position: absolute; inset: 0;
-  background: rgba(0,0,0,0.52);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 2px; opacity: 0; transition: opacity 0.18s; pointer-events: none;
+/* Título dentro del thumb */
+.thumb-title {
+  position: relative; z-index: 2;
+  padding: 0 10px;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.92);
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+  letter-spacing: 0.2px;
 }
-@media (hover: hover) { .mcard-thumb:hover .thumb-overlay { opacity: 1; pointer-events: auto; } }
-.thumb-overlay i { font-size: 1.1rem; color: #fff; }
-.thumb-overlay span { font-size: 0.52rem; color: rgba(255,255,255,0.85); letter-spacing: 0.3px; }
-
-/* Thumb initials (fallback) */
-.thumb-initials {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.1rem; font-weight: 700; color: rgba(255,255,255,0.7);
-  letter-spacing: 1px;
-}
-
-/* Input file oculto */
-.cover-input { display: none; }
 
 /* Card body */
 .mcard-body { padding: 0.55rem 0.65rem 0.6rem; flex: 1; display: flex; flex-direction: column; gap: 0.16rem; }
@@ -290,12 +286,8 @@ header {
 <!-- Context menu (aparece con "...") -->
 <div class="ctx-menu" id="ctx-menu">
   <div class="ctx-item" onclick="ctxEditar()"><i class="ti ti-edit"></i> Editar</div>
-  <div class="ctx-item" onclick="ctxCambiarFoto()"><i class="ti ti-camera"></i> Cambiar foto</div>
   <div class="ctx-item danger" onclick="ctxEliminar()"><i class="ti ti-trash"></i> Eliminar</div>
 </div>
-
-<!-- Input file oculto para subir foto -->
-<input type="file" id="cover-file-input" class="cover-input" accept="image/*" onchange="onCoverSelected(event)">
 
 <div class="toast" id="toast"></div>
 
@@ -321,7 +313,6 @@ let filteredMedleys = []
 let activeFilter = 'all'
 let searchQ = ''
 let ctxMedleyId = null
-let coverTargetId = null
 let session = null
 
 const GRADIENTS = [
@@ -339,9 +330,6 @@ function gradientForId(id) {
   return GRADIENTS[n % GRADIENTS.length]
 }
 
-function initials(name) {
-  return (name || '??').split(' ').slice(0, 2).map(w => w[0] || '').join('').toUpperCase()
-}
 
 async function init() {
       try {
@@ -459,13 +447,7 @@ function cardHTML(m, idx) {
   const extra = songs.length - 2
   const n = songs.length
   const seccLabel = n === 1 ? '1 secc.' : `${n} secc.`
-  const thumbStyle = m.cover_url
-    ? `style="background:${g1}"`
-    : `style="background:linear-gradient(135deg,${g1},${g2})"`
-  const imgTag = m.cover_url
-    ? `<img src="${escHtml(m.cover_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`
-    : ''
-  const initialsHtml = m.cover_url ? '' : `<div class="thumb-initials">${escHtml(initials(m.name))}</div>`
+  const thumbStyle = `style="background:linear-gradient(135deg,${g1},${g2})"`
   const songRows = preview.map(s =>
     `<div class="mcard-song"><i class="ti ti-music"></i> <span>${escHtml(s.title)}</span></div>`
   ).join('')
@@ -473,12 +455,7 @@ function cardHTML(m, idx) {
   return `
   <div class="mcard" id="card-${escHtml(m.id)}" onclick="abrirMedley('${escHtml(m.id)}')" data-name="${escHtml(m.name)}">
     <div class="mcard-thumb" ${thumbStyle}>
-      ${imgTag}
-      ${initialsHtml}
-      <div class="thumb-overlay" onclick="event.stopPropagation(); abrirCambiarFoto('${escHtml(m.id)}')">
-        <i class="ti ti-camera"></i>
-        <span>Cambiar foto</span>
-      </div>
+      <span class="thumb-title">${escHtml(m.name)}</span>
     </div>
     <div class="mcard-body">
       <div class="mcard-title">${escHtml(m.name)}</div>
@@ -500,7 +477,7 @@ function abrirMedley(id) {
   const card = document.getElementById(`card-${id}`)
   if (card) {
     card.style.borderColor = '#3b82f6'
-    card.style.boxShadow = '0 0 0 2px rgba(59,130,246,0.35)'
+    card.style.boxShagow = '0 0 0 2px rgba(59,130,246,0.35)'
     card.style.transform = 'scale(0.965)'
   }
   setTimeout(() => {
@@ -533,11 +510,6 @@ function ctxEditar() {
   if (id) window.location.href = `/medley-builder.html?id=${encodeURIComponent(id)}`
 }
 
-function ctxCambiarFoto() {
-  const id = ctxMedleyId
-  cerrarCtx()
-  abrirCambiarFoto(id)
-}
 
 async function ctxEliminar() {
   const id = ctxMedleyId
@@ -568,35 +540,6 @@ document.addEventListener('click', e => {
   if (!e.target.closest('#ctx-menu') && !e.target.closest('.mcard-menu-btn')) cerrarCtx()
 })
 
-function abrirCambiarFoto(id) {
-  coverTargetId = id
-  document.getElementById('cover-file-input').click()
-}
-
-async function onCoverSelected(e) {
-  const file = e.target.files[0]
-  if (!file || !coverTargetId) return
-  e.target.value = ''
-  if (file.size > 3 * 1024 * 1024) { showToast('Imagen muy grande (máx 3 MB)', true); return }
-  showToast('Subiendo foto...')
-  const ext = file.name.split('.').pop() || 'jpg'
-  const path = `covers/${coverTargetId}.${ext}`
-  const { error: upErr } = await _sb.storage
-    .from('medley-covers')
-    .upload(path, file, { upsert: true, contentType: file.type })
-  if (upErr) {
-    showToast('No se pudo subir la foto. Verifica el bucket.', true)
-    return
-  }
-  const { data: { publicUrl } } = _sb.storage.from('medley-covers').getPublicUrl(path)
-  const { error: updateErr } = await _sb.from('medleys').update({ cover_url: publicUrl }).eq('id', coverTargetId)
-  if (updateErr) { showToast('Foto subida pero no guardada', true); return }
-  const idx = allMedleys.findIndex(m => m.id === coverTargetId)
-  if (idx !== -1) allMedleys[idx].cover_url = publicUrl
-  aplicarFiltro()
-  showToast('✓ Foto actualizada')
-  coverTargetId = null
-}
 
 let toastTimer = null
 function showToast(msg, err = false) {
