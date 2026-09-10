@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v11'
+const CACHE_VERSION = 'v12'
 const STATIC_CACHE = `cqm-static-${CACHE_VERSION}`
 const API_CACHE    = `cqm-api-${CACHE_VERSION}`
 const STATIC_ASSETS = [
