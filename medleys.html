@@ -131,6 +131,8 @@ header {
   text-shadow: 0 1px 6px rgba(0,0,0,0.5);
   letter-spacing: 0.2px;
 }
+.thumb-tracks { position: absolute; bottom: 8px; left: 8px; right: 8px; display: flex; gap: 3px; z-index: 2; }
+.thumb-track { height: 7px; flex: 1; border-radius: 4px; background: rgba(255,255,255,0.22); }
 
 /* Card body */
 .mcard-body { padding: 0.55rem 0.65rem 0.6rem; flex: 1; display: flex; flex-direction: column; gap: 0.16rem; }
@@ -462,6 +464,7 @@ function cardHTML(m, idx) {
   const n = songs.length
   const seccLabel = n === 1 ? '1 secc.' : `${n} secc.`
   const thumbStyle = `style="background:linear-gradient(135deg,${g1},${g2})"`
+  const trackBars = n > 0 ? `<div class="thumb-tracks">${Array.from({length:n},()=>'<div class="thumb-track"></div>').join('')}</div>` : ''
   const songRows = preview.map(s =>
     `<div class="mcard-song"><i class="ti ti-music"></i> <span>${escHtml(s.title)}</span></div>`
   ).join('')
@@ -470,6 +473,7 @@ function cardHTML(m, idx) {
   <a class="mcard" id="card-${escHtml(m.id)}" href="/medley-view.html?id=${encodeURIComponent(m.id)}" data-name="${escHtml(m.name)}">
     <div class="mcard-thumb" ${thumbStyle}>
       <span class="thumb-title">${escHtml(m.name)}</span>
+    ${trackBars}
     </div>
     <div class="mcard-body">
       <div class="mcard-title">${escHtml(m.name)}</div>
