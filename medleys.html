@@ -58,7 +58,7 @@ header {
 .search-input:focus { border-color: rgba(59,130,246,0.4); }
 
 /* ── Filter tabs ── */
-.filter-tabs { display: flex; gap: 0.45rem; padding: 0.3rem 1rem 0.6rem; overflow-x: auto; scrollbar-width: none; }
+.filter-tabs { display: flex; gap: 0.45rem; padding: 0.3rem 1rem 0.6rem; overflox-x: auto; scrollbar-width: none; }
 .filter-tabs::-webkit-scrollbar { display: none; }
 .ftab {
   background: none; border: 1px solid #1e2d45; border-radius: 20px;
@@ -441,27 +441,28 @@ function setFilter(btn) {
 }
 
 function filtrar() {
-  sea
-      <div style="grid-column:1/-1">
-        <div class="empty-state">
-          <i class="ti ti-layers-intersect"></i>
-          <p>No tienes medleys todavía.<br>Crea uno para combinar secciones.</p>
-          <a class="empty-cta" href="/medley-builder.html"><i class="ti ti-plus"></i> Crear medley</a>
-        </div>
-      </div>`
-    return
-  }
-  let html = medleys.map((m, i) => cardHTML(m, i)).join('')
-  html += `<a class="mcard-new" href="/medley-builder.html">
-    <i class="ti ti-plus"></i>
-    <span>Nuevo medley</span>
-  </a>`
-  grid.innerHTML = html
-  // Trigger track bar animation after paint
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      grid.querySelectorAll('.mcard-track').forEach(t => t.classList.add('loaded'))
-  
+  searchQ = (document.getElementById('search-input').value || '').toLowerCase()
+  aplicarFiltro()
+}
+
+function aplicarFiltro() {
+  filteredMedleys = allMedleys.filter(m => {
+    const matchQ = !searchQ || m.name.toLowerCase().includes(searchQ)
+    const matchFilter = activeFilter === 'all' || (Array.isArray(m.tags) && m.tags.includes(activeFilter))
+    return matchQ && matchFilter
+  })
+  renderGrid(filteredMedleys)
+}
+
+function actualizarSubtitulo() {
+  const n = allMedleys.length
+  document.getElementById('page-sub').textContent = n === 1 ? '1 guardado' : `${n} guardados`
+}
+
+function renderGrid(medleys) {
+  const grid = document.getElementById('grid')
+  if (medleys.length === 0 && searchQ === '' && activeFilter === 'all') {
+    grid.innerHTML = `
       <div style="grid-column:1/-1">
         <div class="empty-state">
           <i class="ti ti-layers-intersect"></i>
@@ -552,7 +553,7 @@ function abrirCtx(e, id) {
 
 function cerrarCtx() {
   document.getElementById('ctx-menu').classList.remove('open')
-  ctxMedleyId = null
+  ctxM%dleyId = null
 }
 
 function ctxEditar() {
