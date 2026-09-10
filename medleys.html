@@ -58,7 +58,7 @@ header {
 .search-input:focus { border-color: rgba(59,130,246,0.4); }
 
 /* ── Filter tabs ── */
-.filter-tabs { display: flex; gap: 0.45rem; padding: 0.3rem 1rem 0.6rem; overflox-x: auto; scrollbar-width: none; }
+.filter-tabs { display: flex; gap: 0.45rem; padding: 0.3rem 1rem 0.6rem; overflow-x: auto; scrollbar-width: none; }
 .filter-tabs::-webkit-scrollbar { display: none; }
 .ftab {
   background: none; border: 1px solid #1e2d45; border-radius: 20px;
@@ -105,53 +105,32 @@ header {
   height: 82px;
   position: relative;
   overflow: hidden;
-  display: flex; align-items: flex-end;
+  display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-/* Left glow accent strip */
+/* Brillo sutil en la parte superior */
 .mcard-thumb::before {
   content: '';
-  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-  background: var(--card-accent, #3b82f6);
-  box-shadow: 0 0 10px 2px var(--card-accent, #3b82f6);
-  opacity: 0.8;
-  pointer-events: none; z-index: 3;
+  position: absolute; top: 0; left: 0; right: 0; height: 40%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.08), transparent);
+  pointer-events: none; z-index: 1;
 }
 /* Título dentro del thumb */
 .thumb-title {
-  position: absolute; z-index: 2;
-  top: 7px; left: 12px; right: 8px;
-  font-size: 0.73rem;
+  position: relative; z-index: 2;
+  padding: 0 10px;
+  text-align: center;
+  font-size: 0.78rem;
   font-weight: 700;
   color: rgba(255,255,255,0.92);
   line-height: 1.25;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-  letter-spacing: 0.1px;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+  letter-spacing: 0.2px;
 }
-/* Track bars */
-.mcard-tracks {
-  position: absolute;
-  bottom: 7px; left: 12px; right: 8px;
-  display: flex; gap: 3px; align-items: flex-end;
-  z-index: 2;
-}
-.mcard-track {
-  flex: 1; height: 16px; border-radius: 2px;
-  background: rgba(255,255,255,0.18);
-  position: relative; overflow: hidden;
-}
-.mcard-track::after {
-  content: '';
-  position: absolute; bottom: 0; left: 0; right: 0; height: 0%;
-  background: rgba(255,255,255,0.52);
-  border-radius: 2px;
-  transition: height 0.5s cubic-bezier(0.34,1.56,0.64,1);
-}
-.mcard-track.loaded::after { height: var(--th, 60%); }
 
 /* Card body */
 .mcard-body { padding: 0.55rem 0.65rem 0.6rem; flex: 1; display: flex; flex-direction: column; gap: 0.16rem; }
@@ -169,7 +148,7 @@ header {
    los clicks siempre llegan al <a> padre, no a un div hijo */
 .mcard-thumb, .mcard-body, .mcard-title, .mcard-song,
 .mcard-song span, .mcard-song i, .thumb-title, .more-chip,
-.mcard-footer, .mcard-count, .mcard-tracks, .mcard-track {
+.mcard-footer, .mcard-count {
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
@@ -287,7 +266,7 @@ header {
 .sk-card { background: rgba(255,255,255,0.04); border-radius: 14px; padding: 1.1rem 1rem; margin-bottom: 0.75rem; }
 .sk-line { background: linear-gradient(90deg,rgba(255,255,255,0.06) 25%,rgba(255,255,255,0.12) 50%,rgba(255,255,255,0.06) 75%); background-size: 200% 100%; animation: sk 1.4s infinite; border-radius: 6px; }
 @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-</style>
+</ctyle>
 </head>
 <body>
 
@@ -328,9 +307,9 @@ header {
 
 <nav class="bottom-nav">
   <div class="nav-row">
-    <a class="nav-item" href="/index.html"><i class="ti ti-home"></i><span>Inicio</span></a>
+    <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
+    <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
     <a class="nav-item active" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medleys</span></a>
-    <a class="nav-item" href="/library.html"><i class="ti ti-music"></i><span>Canciones</span></a>
     <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
   </div>
 </nav>
@@ -351,23 +330,18 @@ let ctxMedleyId = null
 let session = null
 
 const GRADIENTS = [
-  ['#1e3a5f','#0f2240', '#60a5fa'],
-  ['#0f3528','#082a1a', '#34d399'],
-  ['#3a1508','#2a0e04', '#f97316'],
-  ['#2d1a4a','#1a0d38', '#a78bfa'],
-  ['#1a3030','#0d2020', '#22d3ee'],
-  ['#3a2000','#2a1800', '#fbbf24'],
+  ['#1e3a5f','#0f2240'],
+  ['#0f3528','#082a1a'],
+  ['#3a1508','#2a0e04'],
+  ['#2d1a4a','#1a0d38'],
+  ['#1a3030','#0d2020'],
+  ['#3a2000','#2a1800'],
 ]
 
 function gradientForId(id) {
   const s = String(id || '000000')
   const n = parseInt(s.slice(-6), 16) || 0
   return GRADIENTS[n % GRADIENTS.length]
-}
-
-function trackHeightForSection(id, i) {
-  const n = parseInt(String(id || '0').replace(/-/g,'').slice(-8), 16) || 0
-  return 32 + ((n * (i * 7 + 11)) % 55) // 32–87%
 }
 
 
@@ -478,27 +452,16 @@ function renderGrid(medleys) {
     <span>Nuevo medley</span>
   </a>`
   grid.innerHTML = html
-  // Trigger track bar animation after paint
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      grid.querySelectorAll('.mcard-track').forEach(t => t.classList.add('loaded'))
-    }, 80)
-  })
 }
 
 function cardHTML(m, idx) {
-  const [g1, g2, accent] = gradientForId(m.id)
+  const [g1, g2] = gradientForId(m.id)
   const songs = m.song_ids.map(id => allSongs.find(s => s.id === id)).filter(Boolean)
   const preview = songs.slice(0, 2)
   const extra = songs.length - 2
   const n = songs.length
   const seccLabel = n === 1 ? '1 secc.' : `${n} secc.`
-  const barCount = Math.min(Math.max(n, 2), 8)
-  const tracks = Array.from({length: barCount}, (_, i) => {
-    const h = trackHeightForSection(m.id, i)
-    return `<div class="mcard-track" style="--th:${h}%"></div>`
-  }).join('')
-  const thumbStyle = `style="background:linear-gradient(135deg,${g1},${g2});--card-accent:${accent}"`
+  const thumbStyle = `style="background:linear-gradient(135deg,${g1},${g2})"`
   const songRows = preview.map(s =>
     `<div class="mcard-song"><i class="ti ti-music"></i> <span>${escHtml(s.title)}</span></div>`
   ).join('')
@@ -507,7 +470,6 @@ function cardHTML(m, idx) {
   <a class="mcard" id="card-${escHtml(m.id)}" href="/medley-view.html?id=${encodeURIComponent(m.id)}" data-name="${escHtml(m.name)}">
     <div class="mcard-thumb" ${thumbStyle}>
       <span class="thumb-title">${escHtml(m.name)}</span>
-      <div class="mcard-tracks">${tracks}</div>
     </div>
     <div class="mcard-body">
       <div class="mcard-title">${escHtml(m.name)}</div>
@@ -553,7 +515,7 @@ function abrirCtx(e, id) {
 
 function cerrarCtx() {
   document.getElementById('ctx-menu').classList.remove('open')
-  ctxM%dleyId = null
+  ctxMedleyId = null
 }
 
 function ctxEditar() {
