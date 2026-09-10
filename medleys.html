@@ -449,7 +449,7 @@ function renderGrid(medleys) {
     return
   }
   let html = medleys.map((m, i) => cardHTML(m, i)).join('')
-  html += `<a class="mcard-new" href="/medley-builder.html">
+  html += `<a class="mcard-new" href="/medley-builder.html" onclick="event.preventDefault();window.location.href='/medley-builder.html'">
     <i class="ti ti-plus"></i>
     <span>Nuevo medley</span>
   </a>`
@@ -470,7 +470,7 @@ function cardHTML(m, idx) {
   ).join('')
   const moreChip = extra > 0 ? `<span class="more-chip">+${extra} más</span>` : ''
   return `
-  <a class="mcard" id="card-${escHtml(m.id)}" href="/medley-view.html?id=${encodeURIComponent(m.id)}" data-name="${escHtml(m.name)}">
+  <a class="mcard" id="card-${escHtml(m.id)}" href="/medley-view.html?id=${encodeURIComponent(m.id)}" data-name="${escHtml(m.name)}" onclick="event.preventDefault();abrirMedley('${escHtml(m.id)}')">
     <div class="mcard-thumb" ${thumbStyle}>
       <span class="thumb-title">${escHtml(m.name)}</span>
     ${trackBars}
