@@ -545,7 +545,7 @@ try {
     if (deleteError) throw deleteError;
   } else {
     const { data: medley, error: mErr } = await _sb.from('medleys')
-      .insert({ name, user_id: userId, group_id: groupIdParam }).select('id').single();
+      .insert({ name, user_id: userId, lead_user_id: userId, group_id: groupIdParam }).select('id').single();
     if (mErr || !medley || !medley.id) throw new Error((mErr && mErr.message) || 'Sin ID de medley');
     targetId = medley.id;
     createdNewMedley = true;
