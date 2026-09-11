@@ -555,7 +555,6 @@ function abrirCtx(button, id) {
   menu.style.left = left + 'px'
 }
 
-let navigatingToMedley = false
 document.getElementById('grid').addEventListener('click', event => {
   const menuButton = event.target.closest('.mcard-menu-btn')
   if (menuButton) {
@@ -566,8 +565,7 @@ document.getElementById('grid').addEventListener('click', event => {
   }
 
   const card = event.target.closest('.mcard')
-  if (!card || navigatingToMedley) return
-  navigatingToMedley = true
+  if (!card) return
   window.location.assign(card.dataset.href)
 })
 
@@ -576,10 +574,7 @@ document.getElementById('grid').addEventListener('keydown', event => {
   const card = event.target.closest('.mcard')
   if (!card || event.target.closest('.mcard-menu-btn')) return
   event.preventDefault()
-  if (!navigatingToMedley) {
-    navigatingToMedley = true
-    window.location.assign(card.dataset.href)
-  }
+  window.location.assign(card.dataset.href)
 })
 
 function cerrarCtx() {
