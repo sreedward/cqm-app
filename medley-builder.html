@@ -277,7 +277,7 @@ if ('serviceWorker' in navigator) {
 </div>
 
 <nav class="bottom-nav">
-  <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
+  <a class="nav-item" href="/library.html"><i class="ti ti-books"></i><span>Biblioteca</span></a>
   <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
   <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
   <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
@@ -303,6 +303,11 @@ let sectionsMap = {};
 let track = [];
 let userId = null;
 let groupIdParam = null;
+let medleyIdParam = null;
+
+function escHtml(value) {
+  return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 
 async function init() {
   const { data: { session } } = await _sb.auth.getSession();
@@ -310,6 +315,7 @@ async function init() {
   userId = session.user.id;
 const _params = new URLSearchParams(window.location.search);
 const _gid = _params.get('group');
+medleyIdParam = _params.get('id');
 if (_gid) {
   const { data: _grp } = await _sb.from('groups').select('leader_id, name').eq('id', _gid).single();
   if (!_grp || _grp.leader_id !== userId) {
@@ -323,12 +329,13 @@ if (_gid) {
   const _banner = document.getElementById('group-banner');
   if (_banner) {
     _banner.style.display = 'block';
-    _banner.textContent = 'Este medley se creara para el grupo: ' + _grp.name;
+    _banner.textContent = 'Este medley se creará para el grupo: ' + _grp.name;
   }
 }
   const { data: songs } = await _sb.from('Songs').select('id, title, artist, "original key"').order('title');
   allSongs = songs || [];
   renderSongs(allSongs);
+  if (medleyIdParam) await cargarMedleyExistente();
 }
 
 function getInitials(t) { return t.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
@@ -339,12 +346,12 @@ function renderSongs(list) {
   area.innerHTML = list.map(s => `
     <div class="song-row" id="row-${s.id}">
       <div class="song-row-header" onclick="toggleSong(${s.id})">
-        <div class="song-initials">${getInitials(s.title)}</div>
+        <div class="song-initials">${escHtml(getInitials(s.title))}</div>
         <div class="song-row-info">
-          <div class="song-row-title">${s.title}</div>
-          <div class="song-row-artist">${s.artist || 'Artista desconocido'}</div>
+          <div class="song-row-title">${escHtml(s.title)}</div>
+          <div class="song-row-artist">${escHtml(s.artist || 'Artista desconocido')}</div>
         </div>
-        <div class="song-row-key">${s['original key'] || '?'}</div>
+        <div class="song-row-key">${escHtml(s['original key'] || '?')}</div>
         <i class="ti ti-chevron-down expand-icon" id="icon-${s.id}"></i>
       </div>
       <div class="sections-grid" id="secs-${s.id}"></div>
@@ -372,11 +379,44 @@ function renderSections(songId) {
   const song = allSongs.find(s => s.id === songId);
   if (!secs.length) { grid.innerHTML = '<div class="no-secs">Sin secciones cargadas</div>'; return; }
   grid.innerHTML = secs.map(sec => `
-    <div class="sec-chip" onclick="addToTrack(${songId}, ${sec.id}, '${sec.type}', '${song.title}')">
+    <button type="button" class="sec-chip" data-song-id="${escHtml(songId)}" data-section-id="${escHtml(sec.id)}" data-section-type="${escHtml(sec.type)}" data-song-title="${escHtml(song.title)}">
       <div class="sec-chip-dot ${secColor(sec.type)}"></div>
-      <span>${sec.type}</span>
-    </div>
+      <span>${escHtml(sec.type)}</span>
+    </button>
   `).join('');
+}
+
+document.getElementById('songs-area').addEventListener('click', event => {
+  const chip = event.target.closest('.sec-chip');
+  if (!chip) return;
+  addToTrack(chip.dataset.songId, chip.dataset.sectionId, chip.dataset.sectionType, chip.dataset.songTitle);
+});
+
+async function cargarMedleyExistente() {
+  const { data: medley, error: medleyError } = await _sb.from('medleys').select('id, name, user_id, group_id').eq('id', medleyIdParam).single();
+  if (medleyError || !medley) throw new Error('No se pudo cargar el medley para editar.');
+
+  document.getElementById('medley-name').value = medley.name || '';
+  document.querySelector('.page-title').textContent = 'Editar medley';
+  groupIdParam = medley.group_id || null;
+
+  const { data: rows, error: rowsError } = await _sb.from('medley_sections').select('song_id, section_id, order').eq('medley_id', medleyIdParam).order('order');
+  if (rowsError) throw rowsError;
+  const sectionIds = [...new Set((rows || []).map(row => row.section_id))];
+  let typesById = {};
+  if (sectionIds.length) {
+    const { data: sections, error: sectionsError } = await _sb.from('sections').select('id, type').in('id', sectionIds);
+    if (sectionsError) throw sectionsError;
+    (sections || []).forEach(section => { typesById[String(section.id)] = section.type; });
+  }
+  track = (rows || []).map(row => ({
+    songId: row.song_id,
+    secId: row.section_id,
+    secType: typesById[String(row.section_id)] || 'Sección',
+    songTitle: allSongs.find(song => String(song.id) === String(row.song_id))?.title || 'Canción'
+  }));
+  renderTrack();
+  checkSaveBtn();
 }
 
 function addToTrack(songId, secId, secType, songTitle) {
@@ -403,8 +443,8 @@ function renderTrack() {
       <i class="ti ti-grip-vertical track-handle"></i>
       <div class="track-color ${secColor(item.secType)}"></div>
       <div class="track-info">
-        <div class="track-sec-type" style="color: var(--sec-c)">${item.secType}</div>
-        <div class="track-song-name">${item.songTitle}</div>
+        <div class="track-sec-type" style="color: var(--sec-c)">${escHtml(item.secType)}</div>
+        <div class="track-song-name">${escHtml(item.songTitle)}</div>
       </div>
       <button class="track-del" onclick="removeFromTrack(${idx})"><i class="ti ti-trash"></i></button>
     </div>
@@ -495,19 +535,31 @@ if (!name || !track.length) return;
 const btn = document.getElementById('save-btn');
 btn.disabled = true;
 btn.innerHTML = '<i class="ti ti-loader-2"></i> Guardando...';
+let targetId = medleyIdParam;
+let createdNewMedley = false;
 try {
-  const { data: medley, error: mErr } = await _sb.from('medleys')
-    .insert({ name, user_id: userId, group_id: groupIdParam }).select('id').single();
-  if (mErr || !medley || !medley.id) throw new Error((mErr && mErr.message) || 'Sin ID de medley');
+  if (targetId) {
+    const { error: updateError } = await _sb.from('medleys').update({ name }).eq('id', targetId);
+    if (updateError) throw updateError;
+    const { error: deleteError } = await _sb.from('medley_sections').delete().eq('medley_id', targetId);
+    if (deleteError) throw deleteError;
+  } else {
+    const { data: medley, error: mErr } = await _sb.from('medleys')
+      .insert({ name, user_id: userId, group_id: groupIdParam }).select('id').single();
+    if (mErr || !medley || !medley.id) throw new Error((mErr && mErr.message) || 'Sin ID de medley');
+    targetId = medley.id;
+    createdNewMedley = true;
+  }
   const rows = track.map((item, idx) => ({
-    medley_id: medley.id, song_id: item.songId, section_id: item.secId, order: idx + 1
+    medley_id: targetId, song_id: item.songId, section_id: item.secId, order: idx + 1
   }));
   const { error: sErr } = await _sb.from('medley_sections').insert(rows);
   if (sErr) throw new Error(sErr.message);
-  mostrarToast('Medley guardado!');
-  setTimeout(() => { window.location.href = '/medley-view.html?id=' + medley.id; }, 900);
+  mostrarToast(medleyIdParam ? 'Cambios guardados' : 'Medley guardado!');
+  setTimeout(() => { window.location.href = '/medley-view.html?id=' + encodeURIComponent(targetId); }, 500);
 } catch(e) {
   console.error('guardarMedley error:', e);
+  if (createdNewMedley && targetId) await _sb.from('medleys').delete().eq('id', targetId);
   mostrarToast('Error: ' + e.message);
   btn.disabled = false;
   btn.innerHTML = '<i class="ti ti-device-floppy"></i> Guardar';
@@ -525,7 +577,10 @@ function mostrarToast(msg) {
   setTimeout(() => { t.style.display = 'none'; }, 5000);
 }
 
-init();
+init().catch(error => {
+  console.error('medley-builder init error:', error);
+  mostrarToast(error.message || 'No se pudo cargar el constructor.');
+});
 </script>
 </body>
 </html>

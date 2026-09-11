@@ -42,8 +42,18 @@ header {
 }
 .hdr-row { display: flex; align-items: center; gap: 0.5rem; }
 .back-btn { background: none; border: none; color: #3b82f6; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; padding: 2px; }
-.page-title { font-size: 1rem; font-weight: 700; color: #e2e8f0; flex: 1; }
-.page-sub { font-size: 0.68rem; color: #475569; padding-left: 1.7rem; margin-top: 0.08rem; }
+.page-title { font-size: 1.08rem; font-weight: 750; color: #f8fafc; flex: 1; letter-spacing: -0.02em; }
+.page-sub { font-size: 0.7rem; color: #64748b; margin-top: 0.12rem; }
+.header-create { width: 34px; height: 34px; border: 1px solid rgba(96,165,250,.4); border-radius: 11px; background: linear-gradient(135deg,#2563eb,#7c3aed); color: #fff; display: grid; place-items: center; font-size: 1.15rem; cursor: pointer; box-shadow: 0 8px 22px rgba(59,130,246,.2); }
+
+/* Scope switcher: personal medleys and accessible groups */
+.scope-wrap { padding: .8rem 1rem .25rem; }
+.scope-label { color: #64748b; font-size: .63rem; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; margin-bottom: .48rem; }
+.scope-tabs { display: flex; gap: .5rem; overflow-x: auto; scrollbar-width: none; padding-bottom: .1rem; }
+.scope-tabs::-webkit-scrollbar { display: none; }
+.scope-btn { border: 1px solid rgba(71,85,105,.5); background: rgba(13,22,38,.62); color: #94a3b8; border-radius: 12px; padding: .55rem .8rem; min-width: max-content; display: flex; align-items: center; gap: .42rem; font: 600 .72rem inherit; cursor: pointer; }
+.scope-btn i { color: #60a5fa; font-size: .95rem; }
+.scope-btn.active { color: #fff; border-color: rgba(96,165,250,.55); background: linear-gradient(135deg,rgba(37,99,235,.3),rgba(124,58,237,.22)); box-shadow: inset 0 0 22px rgba(59,130,246,.08), 0 7px 20px rgba(0,0,0,.18); }
 
 /* ── Search ── */
 .search-wrap { padding: 0.6rem 1rem 0.3rem; }
@@ -274,11 +284,18 @@ header {
 
 <header>
   <div class="hdr-row">
-    <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i></button>
-    <span class="page-title">Mis Medleys</span>
+    <span class="page-title">Medleys</span>
+    <button class="header-create" type="button" onclick="crearMedley()" aria-label="Crear medley"><i class="ti ti-plus"></i></button>
   </div>
-  <div class="page-sub" id="page-sub">Cargando...</div>
+  <div class="page-sub" id="page-sub">Tus combinaciones, listas para tocar</div>
 </header>
+
+<section class="scope-wrap" aria-label="Origen de los medleys">
+  <div class="scope-label">Espacio</div>
+  <div class="scope-tabs" id="scope-tabs">
+    <button class="scope-btn active" type="button" data-scope="personal" onclick="setScope(this)"><i class="ti ti-user"></i> Míos</button>
+  </div>
+</section>
 
 <div class="search-wrap">
   <div class="search-inner">
@@ -309,9 +326,9 @@ header {
 
 <nav class="bottom-nav">
   <div class="nav-row">
-    <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
+    <a class="nav-item" href="/library.html"><i class="ti ti-books"></i><span>Biblioteca</span></a>
     <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
-    <a class="nav-item active" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medleys</span></a>
+    <a class="nav-item active" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
     <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
   </div>
 </nav>
@@ -330,6 +347,8 @@ let activeFilter = 'all'
 let searchQ = ''
 let ctxMedleyId = null
 let session = null
+let groups = []
+let activeScope = 'personal'
 
 const GRADIENTS = [
   ['#1e3a5f','#0f2240'],
@@ -354,11 +373,13 @@ async function init() {
         session = s
 
         // Fetch songs and medleys in parallel (saves ~300ms)
-        const [songsRes, medleysRes] = await Promise.all([
+        const [songsRes, medleysRes, membershipsRes] = await Promise.all([
           _sb.from('Songs').select('id,title').order('title'),
-          _sb.from('medleys').select('*, medley_sections(id, song_id, order)').order('created_at', { ascending: false })
+          _sb.from('medleys').select('*, medley_sections(id, song_id, order)').order('created_at', { ascending: false }),
+          _sb.from('group_members').select('groups(id, name, leader_id)').eq('user_id', s.user.id)
         ])
         allSongs = songsRes.data || []
+        groups = (membershipsRes.data || []).map(row => row.groups).filter(Boolean)
         if (medleysRes.error) {
           const errMsg = medleysRes.error.message || medleysRes.error.code || JSON.stringify(medleysRes.error)
           document.getElementById('page-sub').textContent = 'Error: ' + errMsg
@@ -369,6 +390,7 @@ async function init() {
           ...m,
           song_ids: [...new Set((m.medley_sections || []).map(ms => ms.song_id).filter(Boolean))]
         }))
+        buildScopeTabs()
         buildFilterTabs()
         aplicarFiltro()
         actualizarSubtitulo()
@@ -409,6 +431,23 @@ function buildFilterTabs() {
   tabs.innerHTML = html
 }
 
+function buildScopeTabs() {
+  const tabs = document.getElementById('scope-tabs')
+  const personal = '<button class="scope-btn active" type="button" data-scope="personal" onclick="setScope(this)"><i class="ti ti-user"></i> Míos</button>'
+  const groupButtons = groups.map(group =>
+    `<button class="scope-btn" type="button" data-scope="${escHtml(group.id)}" onclick="setScope(this)"><i class="ti ti-users"></i> ${escHtml(group.name)}</button>`
+  ).join('')
+  tabs.innerHTML = personal + groupButtons
+}
+
+function setScope(btn) {
+  document.querySelectorAll('.scope-btn').forEach(item => item.classList.remove('active'))
+  btn.classList.add('active')
+  activeScope = btn.dataset.scope
+  aplicarFiltro()
+  actualizarSubtitulo()
+}
+
 function setFilter(btn) {
   document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'))
   btn.classList.add('active')
@@ -425,14 +464,30 @@ function aplicarFiltro() {
   filteredMedleys = allMedleys.filter(m => {
     const matchQ = !searchQ || m.name.toLowerCase().includes(searchQ)
     const matchFilter = activeFilter === 'all' || (Array.isArray(m.tags) && m.tags.includes(activeFilter))
-    return matchQ && matchFilter
+    const matchScope = activeScope === 'personal'
+      ? !m.group_id && m.user_id === session.user.id
+      : String(m.group_id) === activeScope
+    return matchQ && matchFilter && matchScope
   })
   renderGrid(filteredMedleys)
 }
 
 function actualizarSubtitulo() {
-  const n = allMedleys.length
-  document.getElementById('page-sub').textContent = n === 1 ? '1 guardado' : `${n} guardados`
+  const n = filteredMedleys.length
+  const group = groups.find(item => String(item.id) === activeScope)
+  const label = group ? group.name : 'Tus medleys personales'
+  document.getElementById('page-sub').textContent = `${label} · ${n === 1 ? '1 guardado' : `${n} guardados`}`
+}
+
+function builderUrl() {
+  const group = groups.find(item => String(item.id) === activeScope)
+  return group && group.leader_id === session.user.id
+    ? `/medley-builder.html?group=${encodeURIComponent(group.id)}`
+    : '/medley-builder.html'
+}
+
+function crearMedley() {
+  window.location.assign(builderUrl())
 }
 
 function renderGrid(medleys) {
@@ -443,13 +498,13 @@ function renderGrid(medleys) {
         <div class="empty-state">
           <i class="ti ti-layers-intersect"></i>
           <p>No tienes medleys todavía.<br>Crea uno para combinar secciones.</p>
-          <a class="empty-cta" href="/medley-builder.html"><i class="ti ti-plus"></i> Crear medley</a>
+          <a class="empty-cta" href="${builderUrl()}"><i class="ti ti-plus"></i> Crear medley</a>
         </div>
       </div>`
     return
   }
   let html = medleys.map((m, i) => cardHTML(m, i)).join('')
-  html += `<a class="mcard-new" href="/medley-builder.html" onclick="event.preventDefault();window.location.href='/medley-builder.html'">
+  html += `<a class="mcard-new" href="${builderUrl()}">
     <i class="ti ti-plus"></i>
     <span>Nuevo medley</span>
   </a>`
