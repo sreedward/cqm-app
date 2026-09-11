@@ -657,9 +657,16 @@ async function init() {
     const { data: { session } } = await _sb.auth.getSession()
     if (!session) { window.location.href = '/login.html'; return }
     currentUserId = session.user.id
-    if (!medleyId) { window.location.href = '/medleys.html'; return }
+    if (!medleyId) {
+      document.getElementById('scroll').innerHTML = '<div class="loading" style="color:#f87171">No se recibió un medley válido.<br><br><a href="/medleys.html" style="color:#60a5fa">Volver a Medleys</a></div>'
+      return
+    }
     const { data: medley, error: mErr } = await _sb.from('medleys').select('*').eq('id', medleyId).single()
-    if (mErr || !medley) { window.location.href = '/medleys.html'; return }
+    if (mErr || !medley) {
+      console.error('[medley-view] medley fetch failed:', mErr)
+      document.getElementById('scroll').innerHTML = '<div class="loading" style="color:#f87171">No se pudo abrir este medley.<br><br><button type="button" onclick="location.reload()" style="background:#2563eb;border:0;border-radius:8px;color:white;padding:8px 14px;cursor:pointer">Reintentar</button>&nbsp; <a href="/medleys.html" style="color:#60a5fa">Volver</a></div>'
+      return
+    }
     leadUserId = medley.user_id || null
     try { const saved = localStorage.getItem('medley_keys_' + medleyId); if (saved) songSemitones = JSON.parse(saved) } catch(e) {}
     document.getElementById('medley-title').textContent = medley.name

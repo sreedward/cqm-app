@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v13'
+const CACHE_VERSION = 'v14'
 const STATIC_CACHE = `cqm-static-${CACHE_VERSION}`
 const API_CACHE    = `cqm-api-${CACHE_VERSION}`
 const STATIC_ASSETS = [
@@ -29,26 +29,10 @@ self.addEventListener('fetch', event => {
   const req = event.request
   const url = new URL(req.url)
 
-  // Supabase API GET - Stale-While-Revalidate
-  // Returns cached data immediately; updates cache in background
+  // Authenticated Supabase data must never come from a shared stale cache.
+  // Network-only keeps list and detail views consistent across users/devices.
   if (req.method === 'GET' && url.hostname === SUPABASE_HOST) {
-    event.respondWith((async () => {
-      const cache = await caches.open(API_CACHE)
-      const cached = await cache.match(req)
-      const tableName = url.pathname.split('/').filter(Boolean)[2] || ''
-      const networkPromise = fetch(req.clone()).then(async res => {
-        if (res.ok) {
-          await cache.put(req, res.clone())
-          if (tableName === 'medleys' || tableName === 'setlists') {
-            const clients = await self.clients.matchAll({ type: 'window' })
-            clients.forEach(c => c.postMessage({ type: 'DATA_UPDATED', table: tableName }))
-          }
-        }
-        return res
-      }).catch(() => null)
-      if (cached) { networkPromise; return cached }
-      return await networkPromise || new Response('Offline', { status: 503 })
-    })())
+    event.respondWith(fetch(req).catch(() => new Response('Offline', { status: 503 })))
     return
   }
 
