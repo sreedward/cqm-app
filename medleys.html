@@ -91,24 +91,26 @@ header {
   border: 1.5px solid rgba(30,45,70,0.8);
   border-radius: 14px;
   overflow: hidden;
-  cursor: pointer;
   display: flex;
   flex-direction: column;
+  position: relative;
   transition: border-color 0.18s, box-shadow 0.18s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
-  text-decoration: none;
+}
+.mcard-link {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .mcard:hover {
   border-color: rgba(59,130,246,0.42);
   box-shadow: 0 0 0 1px rgba(59,130,246,0.16), 0 4px 18px rgba(59,130,246,0.10);
 }
-.mcard:active {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59,130,246,0.32), 0 6px 22px rgba(59,130,246,0.18);
-  transform: scale(0.965);
-}
+.mcard-link:active { opacity: 0.86; }
 
 /* Thumbnail */
 .mcard-thumb {
@@ -156,8 +158,7 @@ header {
 }
 .mcard-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 0.38rem; }
 .mcard-count { font-size: 0.68rem; font-weight: 600; color: #3b82f6; }
-/* Todos los hijos del card son transparentes a pointer-events:
-   los clicks siempre llegan al <a> padre, no a un div hijo */
+/* El contenido visual deja el click al enlace nativo de la tarjeta. */
 .mcard-thumb, .mcard-body, .mcard-title, .mcard-song,
 .mcard-song span, .mcard-song i, .thumb-title, .more-chip,
 .mcard-footer, .mcard-count {
@@ -169,7 +170,9 @@ header {
   background: none; border: none; color: #475569; font-size: 0.9rem;
   cursor: pointer; padding: 2px 4px; line-height: 1;
   pointer-events: all;
-  position: relative;
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.48rem;
   z-index: 5;
 }
 .mcard-menu-btn:hover { color: #94a3b8; }
@@ -525,40 +528,31 @@ function cardHTML(m, idx) {
   ).join('')
   const moreChip = extra > 0 ? `<span class="more-chip">+${extra} más</span>` : ''
   return `
-  <a class="mcard" id="card-${escHtml(m.id)}" href="/medley-view.html?id=${encodeURIComponent(m.id)}" data-name="${escHtml(m.name)}" onclick="event.preventDefault();abrirMedley('${escHtml(m.id)}')">
-    <div class="mcard-thumb" ${thumbStyle}>
-      <span class="thumb-title">${escHtml(m.name)}</span>
-    ${trackBars}
-    </div>
-    <div class="mcard-body">
-      <div class="mcard-title">${escHtml(m.name)}</div>
-      ${songRows}
-      ${moreChip}
-      <div class="mcard-footer">
-        <span class="mcard-count">${seccLabel}</span>
-        <button class="mcard-menu-btn" onclick="event.stopPropagation(); event.preventDefault(); abrirCtx(event, '${escHtml(m.id)}')">•••</button>
+  <div class="mcard" id="card-${escHtml(m.id)}" data-name="${escHtml(m.name)}">
+    <a class="mcard-link" href="/medley-view.html?id=${encodeURIComponent(m.id)}" aria-label="Abrir ${escHtml(m.name)}">
+      <div class="mcard-thumb" ${thumbStyle}>
+        <span class="thumb-title">${escHtml(m.name)}</span>
+        ${trackBars}
       </div>
-    </div>
-  </a>`
+      <div class="mcard-body">
+        <div class="mcard-title">${escHtml(m.name)}</div>
+        ${songRows}
+        ${moreChip}
+        <div class="mcard-footer">
+          <span class="mcard-count">${seccLabel}</span>
+        </div>
+      </div>
+    </a>
+    <button class="mcard-menu-btn" type="button" aria-label="Opciones de ${escHtml(m.name)}" onclick="abrirCtx(event, '${escHtml(m.id)}')">•••</button>
+  </div>`
 }
 
 function escHtml(str) {
   return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
 }
 
-function abrirMedley(id) {
-  const card = document.getElementById(`card-${id}`)
-  if (card) {
-    card.style.borderColor = '#3b82f6'
-    card.style.boxShadow = '0 0 0 2px rgba(59,130,246,0.35)'
-    card.style.transform = 'scale(0.965)'
-  }
-  setTimeout(() => {
-    window.location.href = `/medley-view.html?id=${encodeURIComponent(id)}`
-  }, 140)
-}
-
 function abrirCtx(e, id) {
+  e.stopPropagation()
   ctxMedleyId = id
   const menu = document.getElementById('ctx-menu')
   menu.classList.add('open')
