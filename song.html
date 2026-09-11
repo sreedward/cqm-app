@@ -68,7 +68,7 @@
     .reset-align-btn.original-btn { color: #f87171; }
     .page { display: none; padding: 1rem 1.25rem 2rem; }
     .page.active { display: block; }
-    .section { border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.85rem; }
+    .section { border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.85rem; overflow: hidden; }
     .section-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
     .section.intro { background: #0a1f12; border-left: 3px solid #22c55e; }
     .section.intro .section-label { color: #22c55e; }
@@ -612,6 +612,23 @@ if (isAdmin) return (sec && sec.chord_offsets) || {}
       dragState = null
     }
 
+    function clampChordToSection(el, proposedOffset) {
+      el.style.transform = 'translateX(' + proposedOffset + 'px)'
+      const section = el.closest('.section')
+      if (!section) return proposedOffset
+
+      const sectionRect = section.getBoundingClientRect()
+      const sectionStyle = window.getComputedStyle(section)
+      const leftLimit = sectionRect.left + (parseFloat(sectionStyle.borderLeftWidth) || 0) + 4
+      const rightLimit = sectionRect.right - (parseFloat(sectionStyle.borderRightWidth) || 0) - 4
+      const chordRect = el.getBoundingClientRect()
+      let boundedOffset = proposedOffset
+
+      if (chordRect.left < leftLimit) boundedOffset += Math.ceil(leftLimit - chordRect.left)
+      if (chordRect.right > rightLimit) boundedOffset -= Math.ceil(chordRect.right - rightLimit)
+      return boundedOffset
+    }
+
     function onChordPointerMove(e) {
       if (!dragState || dragState.el !== e.currentTarget) return
       const delta = e.clientX - dragState.startX
@@ -620,11 +637,7 @@ if (isAdmin) return (sec && sec.chord_offsets) || {}
         dragState.dragging = true
       }
       const proposedOffset = Math.round(dragState.startOffset + delta)
-      dragState.el.style.transform = 'translateX(' + proposedOffset + 'px)'
-      const r = dragState.el.getBoundingClientRect()
-      let finalOffset = proposedOffset
-      if (r.left < 0) finalOffset += Math.ceil(-r.left)
-      else if (r.right > window.innerWidth) finalOffset -= Math.ceil(r.right - window.innerWidth)
+      const finalOffset = clampChordToSection(dragState.el, proposedOffset)
       if (finalOffset !== proposedOffset) dragState.el.style.transform = 'translateX(' + finalOffset + 'px)'
       dragState.el.dataset.offset = finalOffset
       dragState.currentOffset = finalOffset
