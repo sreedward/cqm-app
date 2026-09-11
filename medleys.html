@@ -541,12 +541,11 @@ function escHtml(str) {
   return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
 }
 
-function abrirCtx(e, id) {
-  e.stopPropagation()
+function abrirCtx(button, id) {
   ctxMedleyId = id
   const menu = document.getElementById('ctx-menu')
   menu.classList.add('open')
-  const rect = e.currentTarget.getBoundingClientRect()
+  const rect = button.getBoundingClientRect()
   const menuW = 150, menuH = 120
   let top = rect.bottom + 4
   let left = rect.right - menuW
@@ -562,7 +561,7 @@ document.getElementById('grid').addEventListener('click', event => {
   if (menuButton) {
     event.preventDefault()
     event.stopPropagation()
-    abrirCtx(event, menuButton.dataset.medleyMenu)
+    abrirCtx(menuButton, menuButton.dataset.medleyMenu)
     return
   }
 
