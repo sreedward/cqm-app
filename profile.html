@@ -43,7 +43,21 @@ header {
   display: flex;
   align-items: center;
 }
-.header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; }
+.header-title { flex: 1; font-size: 1rem; font-weight: 600; color: #e2e8f0; }
+.settings-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(59,130,246,0.28);
+  background: rgba(30,45,69,0.72);
+  color: #60a5fa;
+  font-size: 1.15rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.settings-btn:active { transform: scale(0.96); }
 .avatar-section {
   display: flex;
   flex-direction: column;
@@ -67,26 +81,9 @@ header {
   overflow: hidden;
 }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
-.avatar-edit-btn {
-  position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #3b82f6;
-  border: 2px solid #080c14;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  color: #fff;
-  cursor: pointer;
-}
 .user-email { font-size: 0.9rem; color: #e2e8f0; font-weight: 500; }
 .display-name-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
 .display-name-row span { font-size: 0.85rem; color: #94a3b8; }
-.edit-name-btn { color: #3b82f6; font-size: 0.9rem; cursor: pointer; background: none; border: none; display: flex; align-items: center; }
 .user-since { font-size: 0.75rem; color: #4a5568; margin-top: 4px; }
 .admin-badge {
   background: #1e2d45;
@@ -159,6 +156,58 @@ header {
   color: #2a3a4a;
   padding: 1rem;
 }
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(2,6,23,0.76);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.settings-overlay.show { display: flex; }
+.settings-panel {
+  width: 100%;
+  max-width: 440px;
+  overflow: hidden;
+  background: rgba(10,18,35,0.97);
+  border: 1px solid rgba(59,130,246,0.22);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+}
+.settings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.1rem 0.75rem;
+  border-bottom: 1px solid rgba(59,130,246,0.12);
+}
+.settings-title { font-size: 1rem; font-weight: 700; color: #e2e8f0; }
+.settings-close { background: none; border: 0; color: #64748b; font-size: 1.25rem; cursor: pointer; padding: 4px; }
+.settings-option {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid rgba(30,45,69,0.7);
+  background: transparent;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.9rem 1.1rem;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.settings-option:last-child { border-bottom: 0; }
+.settings-option:active { background: rgba(59,130,246,0.08); }
+.settings-option i:first-child { width: 28px; color: #60a5fa; font-size: 1.15rem; text-align: center; }
+.settings-option-copy { flex: 1; }
+.settings-option-title { color: #e2e8f0; font-size: 0.9rem; font-weight: 600; }
+.settings-option-sub { color: #64748b; font-size: 0.73rem; margin-top: 2px; }
+.settings-chevron { color: #475569; }
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -336,46 +385,23 @@ if ('serviceWorker' in navigator) {
     <i class="ti ti-arrow-left"></i>
   </button>
   <div class="header-title">Mi Perfil</div>
+  <button class="settings-btn" type="button" onclick="abrirConfiguracion()" aria-label="Configuración de perfil" title="Configuración">
+    <i class="ti ti-settings"></i>
+  </button>
 </header>
 
 <div class="avatar-section">
   <div class="avatar-wrap">
     <div class="avatar" id="avatar">?</div>
-    <div class="avatar-edit-btn" id="avatar-edit-btn" title="Cambiar foto">
-      <i class="ti ti-camera"></i>
-    </div>
     <input type="file" id="avatar-file" accept="image/*" style="display:none">
   </div>
   <div class="user-email" id="user-email">Cargando...</div>
   <div class="display-name-row">
     <span id="display-name">&nbsp;</span>
-    <button class="edit-name-btn" id="edit-name-btn" title="Editar nombre">
-      <i class="ti ti-pencil"></i>
-    </button>
   </div>
   <div class="user-since" id="user-since"></div>
   <div class="admin-badge" id="admin-badge">ADMIN</div>
 </div>
-
-<div class="section-label">Grupo de alabanza</div>
-<a class="menu-item" href="/groups.html">
-  <div class="menu-icon purple"><i class="ti ti-users"></i></div>
-  <div class="menu-info">
-    <div class="menu-title">Mis grupos</div>
-    <div class="menu-sub">Crea o únete a un grupo de alabanza</div>
-  </div>
-  <i class="ti ti-chevron-right menu-arrow"></i>
-</a>
-
-<div class="section-label">Cuenta</div>
-<a class="menu-item" href="/reset.html">
-  <div class="menu-icon blue"><i class="ti ti-lock"></i></div>
-  <div class="menu-info">
-    <div class="menu-title">Cambiar contraseña</div>
-    <div class="menu-sub">Actualiza tu contraseña de acceso</div>
-  </div>
-  <i class="ti ti-chevron-right menu-arrow"></i>
-</a>
 
 <div class="section-label" id="admin-section" style="display:none">Admin</div>
 <a class="menu-item" href="/admin.html" id="admin-link" style="display:none">
@@ -387,21 +413,44 @@ if ('serviceWorker' in navigator) {
   <i class="ti ti-chevron-right menu-arrow"></i>
 </a>
 
-<div class="section-label">Acerca de</div>
-<a class="menu-item" href="/more.html">
-  <div class="menu-icon green"><i class="ti ti-brand-instagram"></i></div>
-  <div class="menu-info">
-    <div class="menu-title">Síguenos</div>
-    <div class="menu-sub">Redes sociales de Musishens</div>
-  </div>
-  <i class="ti ti-chevron-right menu-arrow"></i>
-</a>
-
 <button class="logout-btn" onclick="cerrarSesion()">
   <i class="ti ti-logout"></i> Cerrar sesión
 </button>
 
 <div class="version">ChartQuick by Musishens — v1.0</div>
+
+<div class="settings-overlay" id="settings-overlay" onclick="cerrarConfiguracion()" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <div class="settings-panel" onclick="event.stopPropagation()">
+    <div class="settings-head">
+      <div class="settings-title" id="settings-title">Configuración de perfil</div>
+      <button class="settings-close" type="button" onclick="cerrarConfiguracion()" aria-label="Cerrar"><i class="ti ti-x"></i></button>
+    </div>
+    <button class="settings-option" type="button" onclick="seleccionarFoto()">
+      <i class="ti ti-camera"></i>
+      <div class="settings-option-copy">
+        <div class="settings-option-title">Cambiar foto</div>
+        <div class="settings-option-sub">Actualiza tu imagen de perfil</div>
+      </div>
+      <i class="ti ti-chevron-right settings-chevron"></i>
+    </button>
+    <button class="settings-option" type="button" onclick="editarNombreDesdeConfiguracion()">
+      <i class="ti ti-user-edit"></i>
+      <div class="settings-option-copy">
+        <div class="settings-option-title">Editar nombre</div>
+        <div class="settings-option-sub">Cambia cómo te ven otros usuarios</div>
+      </div>
+      <i class="ti ti-chevron-right settings-chevron"></i>
+    </button>
+    <a class="settings-option" href="/reset.html">
+      <i class="ti ti-lock"></i>
+      <div class="settings-option-copy">
+        <div class="settings-option-title">Cambiar contraseña</div>
+        <div class="settings-option-sub">Actualiza tu contraseña de acceso</div>
+      </div>
+      <i class="ti ti-chevron-right settings-chevron"></i>
+    </a>
+  </div>
+</div>
 
 <nav class="bottom-nav">
   <a class="nav-item" href="/library.html">
@@ -577,14 +626,31 @@ async function uploadAvatar(file) {
   }
 }
 
-document.getElementById('avatar-edit-btn').addEventListener('click', () => {
+function abrirConfiguracion() {
+  document.getElementById('settings-overlay').classList.add('show')
+}
+
+function cerrarConfiguracion() {
+  document.getElementById('settings-overlay').classList.remove('show')
+}
+
+function seleccionarFoto() {
+  cerrarConfiguracion()
   document.getElementById('avatar-file').click()
-})
+}
+
+function editarNombreDesdeConfiguracion() {
+  cerrarConfiguracion()
+  editDisplayName()
+}
+
 document.getElementById('avatar-file').addEventListener('change', (e) => {
   const file = e.target.files[0]
   if (file) uploadAvatar(file)
 })
-document.getElementById('edit-name-btn').addEventListener('click', editDisplayName)
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') cerrarConfiguracion()
+})
 
 async function cerrarSesion() {
   localStorage.removeItem('cqm_profile_cache')
