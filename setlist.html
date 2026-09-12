@@ -422,6 +422,37 @@
 let currentGroupId = null
 let userGroups = []
 let isLeaderOfCurrent = true
+let allowSetlistDraftExit = false
+
+function hasUnsavedSetlistDraft() {
+  const modal = document.getElementById('modal')
+  if (allowSetlistDraftExit || !modal || !modal.classList.contains('show')) return false
+  const name = document.getElementById('setlist-name').value.trim()
+  const date = document.getElementById('setlist-date').value
+  return Boolean(name || date)
+}
+
+function confirmarSalidaSetlist() {
+  if (!hasUnsavedSetlistDraft()) return true
+  if (!confirm('Tienes una setlist sin crear. ¿Quieres salir y descartarla?')) return false
+  allowSetlistDraftExit = true
+  return true
+}
+
+document.addEventListener('click', event => {
+  const link = event.target.closest('a[href]')
+  if (!link || !hasUnsavedSetlistDraft()) return
+  if (!confirmarSalidaSetlist()) {
+    event.preventDefault()
+    event.stopImmediatePropagation()
+  }
+}, true)
+
+window.addEventListener('beforeunload', event => {
+  if (!hasUnsavedSetlistDraft()) return
+  event.preventDefault()
+  event.returnValue = ''
+})
 
     async function init() {
       const { data: { session } } = await _supabase.auth.getSession()
@@ -570,14 +601,17 @@ async function cargarSetlists() {
 
     function abrirModal() {
       if (!isLeaderOfCurrent) return
+      allowSetlistDraftExit = false
       document.getElementById('modal').classList.add('show')
       document.getElementById('setlist-name').value = ''
       document.getElementById('setlist-date').value = ''
       setTimeout(() => document.getElementById('setlist-name').focus(), 100)
     }
 
-    function cerrarModal() {
+    function cerrarModal(force) {
+      if (!force && !confirmarSalidaSetlist()) return
       document.getElementById('modal').classList.remove('show')
+      allowSetlistDraftExit = false
     }
 
     async function crearSetlist() {
@@ -588,7 +622,7 @@ async function cargarSetlists() {
       if (currentGroupId !== null) row.group_id = currentGroupId
       const { error } = await _supabase.from('setlist').insert(row)
       if (error) { alert('Error: ' + error.message); return }
-      cerrarModal()
+      cerrarModal(true)
       cargarSetlists()
     }
 

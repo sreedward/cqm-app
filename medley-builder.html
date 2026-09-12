@@ -239,7 +239,7 @@ if ('serviceWorker' in navigator) {
 </head>
 <body>
 <header>
-  <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i></button>
+  <button class="back-btn" onclick="salirDelBuilder()"><i class="ti ti-arrow-left"></i></button>
   <div class="header-info">
     <div class="page-title">Medley Builder</div>
     <div class="page-sub">Combina secciones de canciones</div>
@@ -304,6 +304,9 @@ let track = [];
 let userId = null;
 let groupIdParam = null;
 let medleyIdParam = null;
+let initialDraftState = '';
+let builderReady = false;
+let allowUnsavedExit = false;
 
 function escHtml(value) {
   return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -336,7 +339,47 @@ if (_gid) {
   allSongs = songs || [];
   renderSongs(allSongs);
   if (medleyIdParam) await cargarMedleyExistente();
+  initialDraftState = getDraftState();
+  builderReady = true;
 }
+
+function getDraftState() {
+  const nameInput = document.getElementById('medley-name');
+  return JSON.stringify({
+    name: nameInput ? nameInput.value.trim() : '',
+    track: track.map(item => [String(item.songId), String(item.secId)])
+  });
+}
+
+function hasUnsavedChanges() {
+  return builderReady && !allowUnsavedExit && getDraftState() !== initialDraftState;
+}
+
+function confirmarSalidaSinGuardar() {
+  if (!hasUnsavedChanges()) return true;
+  if (!confirm('Tienes cambios sin guardar. ¿Quieres salir y descartarlos?')) return false;
+  allowUnsavedExit = true;
+  return true;
+}
+
+function salirDelBuilder() {
+  if (confirmarSalidaSinGuardar()) history.back();
+}
+
+document.addEventListener('click', event => {
+  const link = event.target.closest('a[href]');
+  if (!link || !hasUnsavedChanges()) return;
+  if (!confirmarSalidaSinGuardar()) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+}, true);
+
+window.addEventListener('beforeunload', event => {
+  if (!hasUnsavedChanges()) return;
+  event.preventDefault();
+  event.returnValue = '';
+});
 
 function getInitials(t) { return t.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
 
@@ -555,6 +598,8 @@ try {
   }));
   const { error: sErr } = await _sb.from('medley_sections').insert(rows);
   if (sErr) throw new Error(sErr.message);
+  initialDraftState = getDraftState();
+  allowUnsavedExit = true;
   mostrarToast(medleyIdParam ? 'Cambios guardados' : 'Medley guardado!');
   setTimeout(() => { window.location.href = '/medley-view.html?id=' + encodeURIComponent(targetId); }, 500);
 } catch(e) {
