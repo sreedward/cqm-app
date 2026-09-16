@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#080c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CQM">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
+<title>CQM - Servicio</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: linear-gradient(135deg, #060b18 0%, #0b1628 35%, #0d0c20 65%, #13082a 100%) fixed;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 12px));
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(59,130,246,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 10%, rgba(34,197,94,0.06) 0%, transparent 40%);
+  pointer-events: none; z-index: 0;
+}
+body > * { position: relative; z-index: 1; }
+
+header {
+  background: rgba(8, 15, 28, 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid rgba(59,130,246,0.15);
+  padding: 1rem 1.25rem;
+  display: flex; align-items: center; gap: 0.75rem;
+  position: sticky; top: 0; z-index: 10;
+}
+.back-btn { background: none; border: none; color: #3b82f6; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; flex-shrink: 0; }
+.header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.icon-btn {
+  background: rgba(30, 45, 69, 0.60);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 8px;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; cursor: pointer; color: #94a3b8;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.icon-btn:hover { background: rgba(239,68,68,0.15); color: #ef4444; border-color: rgba(239,68,68,0.20); }
+
+.content { padding: 1.25rem; }
+
+/* Date banner */
+.date-banner {
+  background: rgba(13, 22, 38, 0.60);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 1.25rem;
+}
+.date-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: rgba(59,130,246,0.15);
+  border: 1px solid rgba(59,130,246,0.20);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.date-icon-day { font-size: 1.2rem; font-weight: 700; color: #3b82f6; line-height: 1; }
+.date-icon-mon { font-size: 0.6rem; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.5px; }
+.date-info { flex: 1; }
+.date-full { font-size: 0.88rem; font-weight: 600; color: #e2e8f0; }
+.date-relative { font-size: 0.73rem; color: #64748b; margin-top: 3px; }
+
+/* Section */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.85rem; margin-top: 1.25rem;
+}
+.section-label { font-size: 0.7rem; color: #4a5568; letter-spacing: 1.5px; text-transform: uppercase; }
+
+/* Content card */
+.content-card {
+  background: rgba(13, 22, 38, 0.55);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59,130,246,0.10);
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.content-card:active { transform: scale(0.98); }
+.content-card:hover { border-color: rgba(59,130,246,0.22); }
+.content-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: rgba(59,130,246,0.12);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; color: #3b82f6; flex-shrink: 0;
+}
+.content-name { font-size: 0.9rem; font-weight: 600; color: #e2e8f0; }
+.content-type { font-size: 0.72rem; color: #64748b; margin-top: 3px; }
+.content-arrow { color: #2d3f5a; font-size: 0.95rem; flex-shrink: 0; margin-left: auto; }
+.no-content-card {
+  background: rgba(13, 22, 38, 0.40);
+  border: 1px dashed rgba(59,130,246,0.12);
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex; align-items: center; gap: 10px;
+  color: #4a5568; font-size: 0.85rem;
+}
+.no-content-card i { font-size: 1.1rem; }
+.assign-content-btn {
+  margin-left: auto;
+  background: rgba(59,130,246,0.12);
+  border: 1px solid rgba(59,130,246,0.20);
+  border-radius: 8px;
+  color: #3b82f6;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: none;
+}
+
+/* Member rows */
+.member-row {
+  background: rgba(13, 22, 38, 0.55);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59,130,246,0.10);
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 0.6rem;
+}
+.m-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(30, 45, 69, 0.80); color: #3b82f6;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.88rem; font-weight: 700; flex-shrink: 0;
+  border: 2px solid rgba(59,130,246,0.15); overflow: hidden;
+}
+.m-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.m-info { flex: 1; min-width: 0; }
+.m-name { font-size: 0.88rem; font-weight: 600; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-instrument { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
+.status-badge {
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.status-badge.pending { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.20); }
+.status-badge.accepted { background: rgba(34,197,94,0.12); color: #22c55e; border: 1px solid rgba(34,197,94,0.20); }
+.status-badge.declined { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.20); }
+
+/* My response banner (musician) */
+.my-response-banner {
+  background: rgba(13, 22, 38, 0.70);
+  border: 1px solid rgba(59,130,246,0.18);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.25rem;
+  display: none;
+}
+.my-response-banner.visible { display: block; }
+.response-label { font-size: 0.7rem; color: #4a5568; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 0.75rem; }
+.response-instrument { font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.85rem; }
+.response-instrument strong { color: #e2e8f0; }
+.response-btns { display: flex; gap: 8px; }
+.response-btns button {
+  flex: 1; padding: 0.7rem; border-radius: 10px; border: none;
+  font-weight: 600; font-size: 0.82rem; cursor: pointer;
+  transition: opacity 0.2s;
+}
+.response-btns button.current { opacity: 0.5; pointer-events: none; }
+.btn-accept { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.25) !important; }
+.btn-accept.active { background: rgba(34,197,94,0.25); }
+.btn-decline { background: rgba(239,68,68,0.10); color: #ef4444; border: 1px solid rgba(239,68,68,0.20) !important; }
+.btn-decline.active { background: rgba(239,68,68,0.20); }
+
+/* Delete service btn */
+.delete-service-wrap { margin-top: 2rem; }
+.delete-service-btn {
+  width: 100%; background: rgba(26,8,8,0.60);
+  border: 1px solid rgba(127,29,29,0.50); border-radius: 12px;
+  color: #ef4444; font-size: 0.88rem; font-weight: 600;
+  padding: 0.85rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background 0.2s;
+}
+.delete-service-btn:hover { background: rgba(39,8,8,0.80); }
+
+/* Empty */
+.empty-state { text-align: center; padding: 1.5rem 1rem; color: #4a5568; font-size: 0.82rem; }
+
+/* Modals */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+  z-index: 50; align-items: flex-end; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  background: rgba(10,18,35,0.97); backdrop-filter: blur(20px);
+  border: 1px solid rgba(59,130,246,0.18);
+  border-radius: 20px 20px 0 0;
+  padding: 1.25rem 1.25rem 1.5rem;
+  width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto;
+}
+.modal-handle { width: 36px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; margin: 0 auto 1.25rem; }
+.modal-title { font-size: 1.05rem; font-weight: 700; color: #e2e8f0; margin-bottom: 1rem; }
+.confirm-message { font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin-bottom: 0.25rem; }
+.modal-btns { display: flex; gap: 8px; margin-top: 1.1rem; }
+.modal-btns button { flex: 1; padding: 0.8rem; border-radius: 12px; border: none; font-weight: 600; font-size: 0.88rem; cursor: pointer; }
+.btn-cancel { background: rgba(30,45,69,0.70); color: #94a3b8; }
+.btn-danger { background: linear-gradient(135deg,#ef4444,#dc2626); color: #fff; }
+
+/* Bottom nav */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(8,15,28,0.88);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-top: 1px solid rgba(59,130,246,0.13);
+  display: flex;
+  padding: 8px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+}
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 0; text-decoration: none; }
+.nav-item i { font-size: 1.2rem; color: #4a5568; }
+.nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
+.nav-item.active i, .nav-item.active span { color: #3b82f6; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 90px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(13,22,38,0.95); backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.20); border-radius: 12px;
+  padding: 0.7rem 1.2rem; color: #e2e8f0; font-size: 0.85rem;
+  white-space: nowrap; z-index: 200; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s; pointer-events: none;
+  display: flex; align-items: center; gap: 6px;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: rgba(34,197,94,0.30); }
+.toast.success i { color: #22c55e; }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="back-btn" id="back-btn"><i class="ti ti-arrow-left"></i></button>
+  <div class="header-title" id="service-title">Cargando...</div>
+  <button class="icon-btn" id="delete-svc-btn" style="display:none" title="Eliminar servicio" onclick="abrirConfirmEliminar()">
+    <i class="ti ti-trash"></i>
+  </button>
+</header>
+
+<div class="content">
+
+  <!-- Date banner -->
+  <div class="date-banner" id="date-banner" style="display:none">
+    <div class="date-icon">
+      <div class="date-icon-day" id="date-day">—</div>
+      <div class="date-icon-mon" id="date-mon">—</div>
+    </div>
+    <div class="date-info">
+      <div class="date-full" id="date-full">—</div>
+      <div class="date-relative" id="date-relative">—</div>
+    </div>
+  </div>
+
+  <!-- My response banner (musicians only) -->
+  <div class="my-response-banner" id="my-response-banner">
+    <div class="response-label">Tu participación en este servicio</div>
+    <div class="response-instrument" id="response-instrument">Instrumento: <strong>—</strong></div>
+    <div class="response-btns">
+      <button class="btn-accept" id="btn-accept" onclick="responder('accepted')">
+        <i class="ti ti-check"></i> Acepto
+      </button>
+      <button class="btn-decline" id="btn-decline" onclick="responder('declined')">
+        <i class="ti ti-x"></i> No puedo
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenido asignado -->
+  <div class="section-header" style="margin-top:0">
+    <div class="section-label">Contenido</div>
+  </div>
+  <div id="content-section"></div>
+
+  <!-- Equipo -->
+  <div class="section-header">
+    <div class="section-label">Equipo</div>
+    <div style="font-size:0.68rem;color:#4a5568" id="team-summary"></div>
+  </div>
+  <div id="team-list"></div>
+
+  <!-- Eliminar (solo lider) -->
+  <div class="delete-service-wrap" id="delete-wrap" style="display:none">
+    <button class="delete-service-btn" onclick="abrirConfirmEliminar()">
+      <i class="ti ti-trash"></i> Eliminar servicio
+    </button>
+  </div>
+
+</div>
+
+<!-- Confirm delete -->
+<div class="modal-overlay" id="confirm-eliminar-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Eliminar servicio</div>
+    <p class="confirm-message">Esta acción eliminará el servicio y las asignaciones de los miembros. No se puede deshacer.</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="cerrarConfirmEliminar()">Cancelar</button>
+      <button class="btn-danger" onclick="eliminarServicio()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<nav class="bottom-nav">
+  <a class="nav-item" href="/library.html"><i class="ti ti-music"></i><span>Canciones</span></a>
+  <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
+  <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
+  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
+</nav>
+
+<script>
+const _supabase = supabase.createClient(
+  'https://kzqnsbztfyhyyageuboz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
+)
+
+const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+const DAYS_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado']
+
+const urlParams = new URLSearchParams(window.location.search)
+const serviceId = urlParams.get('id')
+const groupId = urlParams.get('group')
+
+let currentUser = null
+let isLeader = false
+let myServiceMember = null
+let toastTimer = null
+
+document.getElementById('back-btn').onclick = () => {
+  window.location.href = groupId ? `/group-view.html?id=${groupId}` : '/groups.html'
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast')
+  t.innerHTML = type === 'success' ? `<i class="ti ti-circle-check"></i> ${msg}` : msg
+  t.className = 'toast' + (type ? ' ' + type : '') + ' show'
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800)
+}
+
+function relativeFecha(dateStr) {
+  const today = new Date(); today.setHours(0,0,0,0)
+  const d = new Date(dateStr + 'T12:00:00'); d.setHours(0,0,0,0)
+  const diff = Math.round((d - today) / (1000 * 60 * 60 * 24))
+  if (diff === 0) return 'Hoy'
+  if (diff === 1) return 'Mañana'
+  if (diff === -1) return 'Ayer'
+  if (diff > 1 && diff < 7) return `En ${diff} días`
+  if (diff < 0) return `Hace ${Math.abs(diff)} días`
+  return `En ${Math.round(diff / 7)} semana${Math.round(diff / 7) > 1 ? 's' : ''}`
+}
+
+async function init() {
+  const { data: { session } } = await _supabase.auth.getSession()
+  if (!session) { window.location.href = '/login.html'; return }
+  currentUser = session.user
+
+  if (!serviceId) { window.history.back(); return }
+
+  const { data: svc, error } = await _supabase
+    .from('group_services')
+    .select(`
+      id, name, service_date, setlist_id, medley_id, group_id, created_by,
+      setlist(id, name),
+      medleys(id, name),
+      groups(leader_id),
+      service_members(id, user_id, instrument, status)
+    `)
+    .eq('id', serviceId)
+    .single()
+
+  if (error || !svc) {
+    document.getElementById('service-title').textContent = 'Sin acceso'
+    return
+  }
+
+  isLeader = svc.groups?.leader_id === currentUser.id
+  document.getElementById('service-title').textContent = svc.name
+
+  // Date banner
+  const d = new Date(svc.service_date + 'T12:00:00')
+  document.getElementById('date-day').textContent = d.getDate()
+  document.getElementById('date-mon').textContent = MONTHS_SHORT[d.getMonth()]
+  document.getElementById('date-full').textContent = `${DAYS_ES[d.getDay()]} ${d.getDate()} de ${MONTHS_ES[d.getMonth()]}`
+  document.getElementById('date-relative').textContent = relativeFecha(svc.service_date)
+  document.getElementById('date-banner').style.display = 'flex'
+
+  // Leader controls
+  if (isLeader) {
+    document.getElementById('delete-svc-btn').style.display = 'flex'
+    document.getElementById('delete-wrap').style.display = 'block'
+  }
+
+  // Content section
+  const contentSec = document.getElementById('content-section')
+  if (svc.setlist_id && svc.setlist) {
+    contentSec.innerHTML = `
+      <a class="content-card" href="/setlist-view.html?id=${svc.setlist_id}">
+        <div class="content-icon"><i class="ti ti-list-check"></i></div>
+        <div>
+          <div class="content-name">${svc.setlist.name}</div>
+          <div class="content-type">Setlist</div>
+        </div>
+        <i class="ti ti-chevron-right content-arrow"></i>
+      </a>`
+  } else if (svc.medley_id && svc.medleys) {
+    contentSec.innerHTML = `
+      <a class="content-card" href="/medley-view.html?id=${svc.medley_id}">
+        <div class="content-icon"><i class="ti ti-layers-intersect"></i></div>
+        <div>
+          <div class="content-name">${svc.medleys.name}</div>
+          <div class="content-type">Medley</div>
+        </div>
+        <i class="ti ti-chevron-right content-arrow"></i>
+      </a>`
+  } else {
+    contentSec.innerHTML = `
+      <div class="no-content-card">
+        <i class="ti ti-minus"></i>
+        <span>Sin contenido asignado</span>
+      </div>`
+  }
+
+  // Team
+  const members = svc.service_members || []
+  const userIds = members.map(m => m.user_id)
+  let profilesById = {}
+  if (userIds.length) {
+    const { data: profs } = await _supabase
+      .from('profiles')
+      .select('id, display_name, avatar_url')
+      .in('id', userIds)
+    ;(profs||[]).forEach(p => { profilesById[p.id] = p })
+  }
+
+  const accepted = members.filter(m => m.status === 'accepted').length
+  const pending = members.filter(m => m.status === 'pending').length
+  const declined = members.filter(m => m.status === 'declined').length
+  if (members.length) {
+    document.getElementById('team-summary').textContent =
+      `${accepted} sí · ${pending} pendiente · ${declined} no`
+  }
+
+  const teamList = document.getElementById('team-list')
+  if (members.length === 0) {
+    teamList.innerHTML = '<div class="empty-state">No hay músicos asignados aún.</div>'
+  } else {
+    members.forEach(m => {
+      const p = profilesById[m.user_id] || {}
+      const name = p.display_name || 'Músico'
+      const initials = name.substring(0, 2).toUpperCase()
+      const statusLabel = { pending: 'PENDIENTE', accepted: 'ACEPTADO', declined: 'NO PUEDE' }[m.status] || 'PENDIENTE'
+
+      const row = document.createElement('div')
+      row.className = 'member-row'
+      row.innerHTML = `
+        <div class="m-avatar">
+          ${p.avatar_url ? `<img src="${p.avatar_url}" alt="${initials}">` : initials}
+        </div>
+        <div class="m-info">
+          <div class="m-name">${name}</div>
+          <div class="m-instrument">${m.instrument || 'Sin instrumento asignado'}</div>
+        </div>
+        <div class="status-badge ${m.status || 'pending'}">${statusLabel}</div>
+      `
+      teamList.appendChild(row)
+
+      // My entry
+      if (m.user_id === currentUser.id) {
+        myServiceMember = m
+      }
+    })
+  }
+
+  // Show my response banner (only if I'm a member and not the leader)
+  if (myServiceMember && !isLeader) {
+    const banner = document.getElementById('my-response-banner')
+    banner.classList.add('visible')
+    document.getElementById('response-instrument').innerHTML =
+      `Instrumento: <strong>${myServiceMember.instrument || 'Sin asignar'}</strong>`
+    actualizarBotonesRespuesta(myServiceMember.status)
+  }
+}
+
+function actualizarBotonesRespuesta(status) {
+  document.getElementById('btn-accept').classList.toggle('active', status === 'accepted')
+  document.getElementById('btn-decline').classList.toggle('active', status === 'declined')
+  document.getElementById('btn-accept').classList.toggle('current', status === 'accepted')
+  document.getElementById('btn-decline').classList.toggle('current', status === 'declined')
+}
+
+async function responder(status) {
+  if (!myServiceMember) return
+  const { error } = await _supabase
+    .from('service_members')
+    .update({ status })
+    .eq('id', myServiceMember.id)
+
+  if (error) { showToast('No se pudo actualizar tu respuesta'); return }
+  myServiceMember.status = status
+  actualizarBotonesRespuesta(status)
+
+  // Update the badge in the team list
+  const rows = document.querySelectorAll('.member-row')
+  rows.forEach(row => {
+    const nameEl = row.querySelector('.m-name')
+    if (nameEl) {
+      const badge = row.querySelector('.status-badge')
+      // Simple check: update row if it matches our member by re-loading
+    }
+  })
+
+  showToast(status === 'accepted' ? 'Confirmaste tu participación' : 'Marcaste que no podés', 'success')
+  // Reload team to update badges
+  setTimeout(() => init(), 800)
+}
+
+function abrirConfirmEliminar() { document.getElementById('confirm-eliminar-modal').classList.add('open') }
+function cerrarConfirmEliminar() { document.getElementById('confirm-eliminar-modal').classList.remove('open') }
+async function eliminarServicio() {
+  cerrarConfirmEliminar()
+  await _supabase.from('service_members').delete().eq('service_id', serviceId)
+  const { error } = await _supabase.from('group_services').delete().eq('id', serviceId)
+  if (error) { showToast('No se pudo eliminar'); return }
+  window.location.href = groupId ? `/group-view.html?id=${groupId}` : '/groups.html'
+}
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open') })
+})
+
+init()
+</script>
+</body>
+</html>

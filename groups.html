@@ -300,7 +300,7 @@ header {
 <body>
 
 <header>
-  <button class="back-btn" onclick="window.location.href='/profile.html'"><i class="ti ti-arrow-left"></i></button>
+  <button class="back-btn" onclick="window.location.href='/more.html'"><i class="ti ti-arrow-left"></i></button>
   <div class="header-title">Grupos</div>
   <button class="new-btn" onclick="abrirModalCrear()"><i class="ti ti-plus"></i> Nuevo</button>
 </header>
@@ -426,7 +426,7 @@ async function cargarGrupos() {
       <div class="group-info">
         <div class="group-name">${g.name}</div>
         <div class="group-meta">
-          <span class="${isLeader ? 'leader-badge' : 'member-badge'}">${isLeader ? 'LEADER' : 'MIEMBRO'}</span>
+          <span class="${isLeader ? 'leader-badge' : 'member-badge'}">${isLeader ? '⚓ LÍDER' : 'MIEMBRO'}</span>
           <span class="group-role">${isLeader ? 'Administras este grupo' : roles}</span>
         </div>
       </div>
