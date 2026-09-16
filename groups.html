@@ -198,6 +198,39 @@ header {
 }
 .no-services i { font-size: 1.5rem; display: block; margin-bottom: 6px; opacity: 0.4; }
 
+/* ── Leader empty state (centered CTA) ── */
+.leader-empty {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: rgba(59,130,246,0.05);
+  border: 1px dashed rgba(59,130,246,0.20);
+  border-radius: 16px;
+}
+.leader-empty-icon {
+  font-size: 2.8rem; margin-bottom: 0.75rem; opacity: 0.35;
+}
+.leader-empty h3 {
+  font-size: 1rem; font-weight: 700;
+  color: #e2e8f0; margin-bottom: 0.4rem;
+}
+.leader-empty p {
+  font-size: 0.8rem; color: #64748b;
+  line-height: 1.5; margin-bottom: 1.25rem;
+}
+.leader-empty-btn {
+  background: linear-gradient(135deg,#3b82f6,#6366f1);
+  border: none; border-radius: 12px;
+  padding: 0.8rem 2rem;
+  font-size: 0.95rem; font-weight: 700; color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(59,130,246,0.40);
+  display: flex; align-items: center; gap: 8px;
+  transition: opacity 0.2s;
+}
+.leader-empty-btn:hover { opacity: 0.88; }
+
 /* ── Empty state (no groups) ── */
 .empty-state {
   text-align: center; padding: 4rem 2rem;
@@ -523,7 +556,16 @@ async function cargarDashboard() {
         </div>
         <div class="services-list">
           ${groupServices.length === 0
-            ? `<div class="no-services"><i class="ti ti-calendar-off"></i>Sin servicios próximos</div>`
+            ? isLeader
+              ? `<div class="leader-empty">
+                  <div class="leader-empty-icon"><i class="ti ti-calendar-plus"></i></div>
+                  <h3>Sin servicios todavía</h3>
+                  <p>Creá el primer servicio para tu equipo y empezá a coordinar el equipo.</p>
+                  <button class="leader-empty-btn" onclick="abrirServicio(${g.id}, '${g.name.replace(/'/g,"\\'")}')">
+                    <i class="ti ti-plus"></i> Crear primer servicio
+                  </button>
+                </div>`
+              : `<div class="no-services"><i class="ti ti-calendar-off"></i>Sin servicios próximos</div>`
             : groupServices.map(s => renderServiceCard(s, isLeader)).join('')
           }
         </div>
