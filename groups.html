@@ -198,38 +198,53 @@ header {
 }
 .no-services i { font-size: 1.5rem; display: block; margin-bottom: 6px; opacity: 0.4; }
 
-/* ── Leader empty state (centered CTA) ── */
-.leader-empty {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  text-align: center;
-  padding: 2.5rem 1.5rem;
-  background: rgba(59,130,246,0.05);
-  border: 1px dashed rgba(59,130,246,0.20);
-  border-radius: 16px;
+/* ── Inline create service form ── */
+.inline-create {
+  background: rgba(13,22,38,0.70);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(59,130,246,0.18);
+  border-radius: 18px;
+  padding: 1.4rem 1.25rem 1.5rem;
 }
-.leader-empty-icon {
-  font-size: 2.8rem; margin-bottom: 0.75rem; opacity: 0.35;
+.inline-create-title {
+  font-size: 1.05rem; font-weight: 700; color: #e2e8f0;
+  margin-bottom: 0.2rem;
 }
-.leader-empty h3 {
-  font-size: 1rem; font-weight: 700;
-  color: #e2e8f0; margin-bottom: 0.4rem;
+.inline-create-sub {
+  font-size: 0.75rem; color: #64748b; margin-bottom: 1.25rem;
 }
-.leader-empty p {
-  font-size: 0.8rem; color: #64748b;
-  line-height: 1.5; margin-bottom: 1.25rem;
+.ic-field { margin-bottom: 1rem; }
+.ic-label {
+  font-size: 0.68rem; color: #64748b;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  margin-bottom: 0.4rem;
 }
-.leader-empty-btn {
+.ic-input {
+  width: 100%;
+  background: rgba(8,15,28,0.60);
+  border: 1px solid rgba(59,130,246,0.18);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  color: #fff; font-size: 16px; outline: none;
+  transition: border-color 0.2s;
+}
+.ic-input:focus { border-color: rgba(59,130,246,0.50); }
+.ic-input::placeholder { color: #4a5568; }
+.ic-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.ic-input-time { min-width: 105px; }
+.ic-submit {
+  width: 100%;
   background: linear-gradient(135deg,#3b82f6,#6366f1);
   border: none; border-radius: 12px;
-  padding: 0.8rem 2rem;
+  padding: 0.85rem;
   font-size: 0.95rem; font-weight: 700; color: #fff;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(59,130,246,0.40);
-  display: flex; align-items: center; gap: 8px;
+  cursor: pointer; margin-top: 0.25rem;
+  box-shadow: 0 4px 16px rgba(59,130,246,0.35);
   transition: opacity 0.2s;
 }
-.leader-empty-btn:hover { opacity: 0.88; }
+.ic-submit:hover { opacity: 0.88; }
+.ic-submit:disabled { opacity: 0.5; }
 
 /* ── Empty state (no groups) ── */
 .empty-state {
@@ -477,6 +492,12 @@ function generarCodigo() {
 const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
 
+function nextSunday() {
+  const d = new Date()
+  d.setDate(d.getDate() + ((7 - d.getDay()) % 7 || 7))
+  return d.toISOString().slice(0, 10)
+}
+
 function fmtFecha(dateStr) {
   if (!dateStr) return ''
   const [y, m, d] = dateStr.split('-').map(Number)
@@ -557,13 +578,21 @@ async function cargarDashboard() {
         <div class="services-list">
           ${groupServices.length === 0
             ? isLeader
-              ? `<div class="leader-empty">
-                  <div class="leader-empty-icon"><i class="ti ti-calendar-plus"></i></div>
-                  <h3>Sin servicios todavía</h3>
-                  <p>Creá el primer servicio para tu equipo y empezá a coordinar el equipo.</p>
-                  <button class="leader-empty-btn" onclick="abrirServicio(${g.id}, '${g.name.replace(/'/g,"\\'")}')">
-                    <i class="ti ti-plus"></i> Crear primer servicio
-                  </button>
+              ? `<div class="inline-create" id="ic-${g.id}">
+                  <div class="inline-create-title">Nuevo Servicio</div>
+                  <div class="inline-create-sub">${g.name}</div>
+                  <div class="ic-field">
+                    <div class="ic-label">Nombre</div>
+                    <input class="ic-input" type="text" id="ic-name-${g.id}" placeholder="Ej: Domingo Mañana" maxlength="60" autocomplete="off">
+                  </div>
+                  <div class="ic-field">
+                    <div class="ic-label">Fecha y Hora</div>
+                    <div class="ic-row">
+                      <input class="ic-input" type="date" id="ic-date-${g.id}" value="${nextSunday()}">
+                      <input class="ic-input ic-input-time" type="time" id="ic-time-${g.id}" value="10:00">
+                    </div>
+                  </div>
+                  <button class="ic-submit" id="ic-btn-${g.id}" onclick="crearServicioInline(${g.id})">Crear Servicio</button>
                 </div>`
               : `<div class="no-services"><i class="ti ti-calendar-off"></i>Sin servicios próximos</div>`
             : groupServices.map(s => renderServiceCard(s, isLeader)).join('')
@@ -642,6 +671,23 @@ function renderEmptyState(wrap) {
 
 function irAGrupo(groupId) {
   window.location.href = `/group-view.html?id=${groupId}`
+}
+
+/* ─── Create service inline (empty state form) ─── */
+async function crearServicioInline(groupId) {
+  const name = document.getElementById(`ic-name-${groupId}`).value.trim()
+  const date = document.getElementById(`ic-date-${groupId}`).value
+  const time = document.getElementById(`ic-time-${groupId}`).value || '10:00'
+  if (!name) { showToast('Ingresá un nombre para el servicio'); document.getElementById(`ic-name-${groupId}`).focus(); return }
+  if (!date) { showToast('Seleccioná una fecha'); return }
+  const btn = document.getElementById(`ic-btn-${groupId}`)
+  btn.disabled = true; btn.textContent = 'Creando...'
+  const { data: svc, error } = await _supabase
+    .from('group_services')
+    .insert({ group_id: groupId, name, service_date: date, service_time: time })
+    .select().single()
+  if (error) { showToast('No se pudo crear el servicio'); btn.disabled = false; btn.textContent = 'Crear Servicio'; return }
+  window.location.href = `/service-view.html?id=${svc.id}`
 }
 
 /* ─── Create service modal ─── */
