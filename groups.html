@@ -105,6 +105,17 @@ header {
   transition: color 0.2s; flex-shrink: 0;
 }
 .group-more-btn:hover { color: #94a3b8; }
+.new-svc-inline-btn {
+  background: linear-gradient(135deg,#3b82f6,#6366f1);
+  border: none; border-radius: 9px;
+  padding: 0 12px; height: 32px;
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.78rem; font-weight: 700; color: #fff;
+  cursor: pointer; flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(59,130,246,0.35);
+  transition: opacity 0.2s;
+}
+.new-svc-inline-btn:hover { opacity: 0.88; }
 
 /* ── Service cards ── */
 .services-list { display: flex; flex-direction: column; gap: 8px; }
@@ -505,14 +516,16 @@ async function cargarDashboard() {
               ${isLeader ? `<span class="group-members-count" title="Código de invitación">Código: ${g.invite_code}</span>` : ''}
             </div>
           </div>
-          <button class="group-more-btn" onclick="irAGrupo(${g.id})" title="Ver miembros y ajustes"><i class="ti ti-dots-vertical"></i></button>
+          <div style="display:flex;gap:6px;flex-shrink:0;align-items:center">
+            ${isLeader ? `<button class="new-svc-inline-btn" onclick="abrirServicio(${g.id}, '${g.name.replace(/'/g,"\\'")}')"><i class="ti ti-plus"></i> Nuevo</button>` : ''}
+            <button class="group-more-btn" onclick="irAGrupo(${g.id})" title="Ver miembros y ajustes"><i class="ti ti-dots-vertical"></i></button>
+          </div>
         </div>
         <div class="services-list">
           ${groupServices.length === 0
             ? `<div class="no-services"><i class="ti ti-calendar-off"></i>Sin servicios próximos</div>`
             : groupServices.map(s => renderServiceCard(s, isLeader)).join('')
           }
-          ${isLeader ? `<button class="new-service-btn" onclick="abrirServicio(${g.id}, '${g.name.replace(/'/g,"\\'")}')"><i class="ti ti-plus"></i> Nuevo servicio</button>` : ''}
         </div>
       </div>
       ${idx < memberships.length - 1 ? '<hr class="divider">' : ''}
