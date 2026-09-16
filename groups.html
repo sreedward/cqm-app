@@ -9,336 +9,384 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CQM">
 <link rel="apple-touch-icon" href="/icons/icon.svg">
-<title>CQM - Mis Grupos</title>
+<title>CQM - Grupos</title>
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   background: linear-gradient(135deg, #060b18 0%, #0b1628 35%, #0d0c20 65%, #13082a 100%) fixed;
-  color: #ffffff;
+  color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100vh;
-  padding-bottom: 90px;
+  padding-bottom: calc(94px + env(safe-area-inset-bottom, 12px));
 }
 body::before {
   content: '';
-  position: fixed;
-  inset: 0;
+  position: fixed; inset: 0;
   background:
     radial-gradient(ellipse at 20% 20%, rgba(59,130,246,0.12) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.10) 0%, transparent 50%),
     radial-gradient(ellipse at 60% 10%, rgba(34,197,94,0.06) 0%, transparent 40%);
-  pointer-events: none;
-  z-index: 0;
+  pointer-events: none; z-index: 0;
 }
 body > * { position: relative; z-index: 1; }
 
+/* ── Header ── */
 header {
-  background: rgba(8, 15, 28, 0.80);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background: rgba(8,15,28,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid rgba(59,130,246,0.15);
   padding: 1rem 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  display: flex; align-items: center; gap: 0.75rem;
+  position: sticky; top: 0; z-index: 10;
 }
-.back-btn { background: none; border: none; color: #3b82f6; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; }
-.header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; flex: 1; }
-.new-btn {
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
-  border: none;
-  color: #fff;
-  border-radius: 10px;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  box-shadow: 0 2px 12px rgba(59,130,246,0.30);
+.header-title { font-size: 1.05rem; font-weight: 700; color: #e2e8f0; flex: 1; }
+.header-actions { display: flex; gap: 6px; }
+.icon-btn {
+  background: rgba(30,45,69,0.60);
+  border: 1px solid rgba(59,130,246,0.18);
+  border-radius: 9px;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; cursor: pointer; color: #94a3b8;
+  transition: background 0.2s, color 0.2s;
 }
+.icon-btn:hover { background: rgba(59,130,246,0.20); color: #60a5fa; }
+.join-btn-header {
+  background: rgba(59,130,246,0.12);
+  border: 1px solid rgba(59,130,246,0.25);
+  border-radius: 9px;
+  padding: 0 12px; height: 34px;
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.78rem; font-weight: 600; color: #60a5fa;
+  cursor: pointer; transition: background 0.2s;
+}
+.join-btn-header:hover { background: rgba(59,130,246,0.22); }
 
-.content { padding: 1.25rem; }
+/* ── Content ── */
+.content { padding: 1rem 1.25rem; }
 
-/* Join section */
-.join-section {
-  background: rgba(13, 22, 38, 0.60);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(59,130,246,0.15);
-  border-radius: 14px;
-  padding: 1rem 1.1rem;
-  margin-bottom: 1.5rem;
-}
-.join-section-label {
-  font-size: 0.72rem;
-  color: #64748b;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.join-section-label i { font-size: 0.85rem; color: #3b82f6; }
-.join-row { display: flex; gap: 8px; }
-.join-input {
-  flex: 1;
-  background: rgba(8, 15, 28, 0.60);
-  border: 1px solid rgba(59,130,246,0.20);
-  border-radius: 10px;
-  padding: 0.7rem 0.85rem;
-  color: #fff;
-  font-size: 16px;
-  letter-spacing: 2px;
-  font-weight: 600;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.join-input:focus { border-color: rgba(59,130,246,0.50); }
-.join-input::placeholder { color: #4a5568; letter-spacing: 0; font-weight: 400; }
-.join-btn {
-  background: rgba(59,130,246,0.15);
-  border: 1px solid rgba(59,130,246,0.30);
-  color: #3b82f6;
-  border-radius: 10px;
-  padding: 0 1.1rem;
-  font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.2s;
-}
-.join-btn:hover { background: rgba(59,130,246,0.25); }
-
-/* Groups section */
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* ── Group block ── */
+.group-block { margin-bottom: 1.75rem; }
+.group-block-header {
+  display: flex; align-items: center; gap: 10px;
   margin-bottom: 0.85rem;
 }
-.section-label {
-  font-size: 0.7rem;
-  color: #4a5568;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+.group-avatar {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: rgba(168,85,247,0.18);
+  border: 1px solid rgba(168,85,247,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem; flex-shrink: 0; color: #a855f7;
 }
-.section-count {
-  background: rgba(59,130,246,0.15);
-  color: #3b82f6;
-  border-radius: 20px;
-  padding: 2px 8px;
-  font-size: 0.68rem;
-  font-weight: 700;
+.group-block.leader .group-avatar {
+  background: rgba(249,115,22,0.15);
+  border-color: rgba(249,115,22,0.25);
+  color: #f97316;
 }
+.group-block-info { flex: 1; min-width: 0; }
+.group-block-name {
+  font-size: 0.95rem; font-weight: 700; color: #e2e8f0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.group-block-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+.role-badge {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.5px;
+  padding: 2px 7px; border-radius: 20px;
+}
+.role-leader { background: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.25); }
+.role-member { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.22); }
+.group-members-count { font-size: 0.72rem; color: #64748b; }
+.group-more-btn {
+  background: none; border: none; color: #4a5568;
+  font-size: 1.1rem; cursor: pointer; padding: 4px;
+  transition: color 0.2s; flex-shrink: 0;
+}
+.group-more-btn:hover { color: #94a3b8; }
 
-/* Group cards */
-.group-card {
-  background: rgba(13, 22, 38, 0.55);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(59,130,246,0.10);
+/* ── Service cards ── */
+.services-list { display: flex; flex-direction: column; gap: 8px; }
+
+.service-card {
+  background: rgba(13,22,38,0.60);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.12);
   border-radius: 14px;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  margin-bottom: 0.75rem;
+  padding: 0.9rem 1rem;
   cursor: pointer;
   text-decoration: none;
   color: inherit;
+  display: block;
   transition: background 0.2s, border-color 0.2s, transform 0.15s;
 }
-.group-card:active { transform: scale(0.98); }
-.group-card:hover { background: rgba(20, 35, 60, 0.70); border-color: rgba(59,130,246,0.22); }
-.group-card.leader-card { border-color: rgba(249,115,22,0.20); }
-.group-card.leader-card:hover { border-color: rgba(249,115,22,0.35); }
+.service-card:active { transform: scale(0.98); }
+.service-card:hover { background: rgba(20,35,60,0.70); border-color: rgba(59,130,246,0.24); }
 
-.group-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  background: rgba(30, 45, 69, 0.80);
-  color: #a855f7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-  flex-shrink: 0;
+.service-card-top {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+  margin-bottom: 6px;
 }
-.group-card.leader-card .group-icon { color: #f97316; }
-.group-info { flex: 1; min-width: 0; }
-.group-name { font-size: 0.95rem; color: #e2e8f0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.group-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
-.group-role { font-size: 0.75rem; color: #64748b; }
-.leader-badge {
-  background: rgba(249,115,22,0.15);
-  color: #f97316;
-  border: 1px solid rgba(249,115,22,0.25);
-  border-radius: 20px;
-  padding: 1px 7px;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+.service-name { font-size: 0.92rem; font-weight: 600; color: #e2e8f0; }
+.service-datetime {
+  font-size: 0.75rem; color: #64748b;
+  display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap;
 }
-.member-badge {
-  background: rgba(59,130,246,0.12);
-  color: #60a5fa;
-  border: 1px solid rgba(59,130,246,0.20);
-  border-radius: 20px;
-  padding: 1px 7px;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-.group-arrow { color: #2d3f5a; font-size: 1rem; flex-shrink: 0; }
+.service-datetime i { font-size: 0.72rem; }
 
-/* Empty state */
+.status-chip {
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.4px;
+  padding: 3px 8px; border-radius: 20px; flex-shrink: 0;
+  white-space: nowrap;
+}
+.chip-accepted  { background: rgba(22,163,74,0.15);  color: #4ade80; border: 1px solid rgba(22,163,74,0.30); }
+.chip-pending   { background: rgba(245,158,11,0.13); color: #fbbf24; border: 1px solid rgba(245,158,11,0.30); }
+.chip-declined  { background: rgba(239,68,68,0.12);  color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+.chip-noassign  { background: rgba(100,116,139,0.15); color: #94a3b8; border: 1px solid rgba(100,116,139,0.25); }
+.chip-leader    { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+
+.service-card-footer {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 8px; padding-top: 8px;
+  border-top: 1px solid rgba(59,130,246,0.07);
+}
+.service-footer-item {
+  font-size: 0.72rem; color: #64748b;
+  display: flex; align-items: center; gap: 4px;
+}
+.service-footer-item i { font-size: 0.72rem; color: #3b82f6; }
+.confirmed-count {
+  font-size: 0.72rem; font-weight: 600; color: #4ade80;
+  display: flex; align-items: center; gap: 4px;
+}
+.confirmed-count i { font-size: 0.72rem; }
+
+/* ── New service button ── */
+.new-service-btn {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  width: 100%;
+  background: rgba(59,130,246,0.08);
+  border: 1px dashed rgba(59,130,246,0.25);
+  border-radius: 14px;
+  padding: 0.8rem;
+  color: #3b82f6;
+  font-size: 0.85rem; font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  margin-top: 8px;
+}
+.new-service-btn:hover { background: rgba(59,130,246,0.14); border-color: rgba(59,130,246,0.40); }
+.new-service-btn i { font-size: 1rem; }
+
+/* ── No services empty ── */
+.no-services {
+  text-align: center; padding: 1.5rem 1rem;
+  color: #4a5568; font-size: 0.82rem;
+}
+.no-services i { font-size: 1.5rem; display: block; margin-bottom: 6px; opacity: 0.4; }
+
+/* ── Empty state (no groups) ── */
 .empty-state {
-  text-align: center;
-  padding: 3rem 1.5rem;
-  color: #4a5568;
+  text-align: center; padding: 4rem 2rem;
 }
-.empty-state i { font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.4; }
-.empty-state p { font-size: 0.85rem; line-height: 1.5; }
-.empty-state strong { display: block; color: #64748b; margin-bottom: 0.4rem; font-size: 0.9rem; }
+.empty-state-icon { font-size: 3.5rem; margin-bottom: 1rem; opacity: 0.35; }
+.empty-state h2 { font-size: 1.05rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.5rem; }
+.empty-state p { font-size: 0.83rem; color: #64748b; line-height: 1.5; margin-bottom: 1.5rem; }
+.empty-cta-row { display: flex; gap: 8px; }
+.cta-btn {
+  flex: 1; padding: 0.75rem;
+  border-radius: 12px; border: none;
+  font-size: 0.85rem; font-weight: 600;
+  cursor: pointer;
+}
+.cta-primary { background: linear-gradient(135deg,#3b82f6,#6366f1); color: #fff; }
+.cta-secondary { background: rgba(30,45,69,0.80); color: #94a3b8; border: 1px solid rgba(59,130,246,0.15); }
 
-/* Bottom nav */
-.bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: rgba(8, 15, 28, 0.80);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  border-top: 1px solid rgba(59,130,246,0.13);
-  display: flex; padding: 8px 0 12px; z-index: 20;
+/* ── Divider ── */
+.divider {
+  border: none; border-top: 1px solid rgba(59,130,246,0.08);
+  margin: 0.5rem 0 1.75rem;
 }
-.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 0; text-decoration: none; }
-.nav-item i { font-size: 1.2rem; color: #4a5568; }
-.nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
-.nav-item.active i, .nav-item.active span { color: #3b82f6; }
 
-/* Modal overlay */
-.modal-overlay {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(4px);
-  z-index: 50;
-  align-items: flex-end;
-  justify-content: center;
+/* ── Modals ── */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+  z-index: 50; align-items: flex-end; justify-content: center;
 }
-.modal-overlay.open { display: flex; }
-.modal-sheet {
-  background: rgba(10, 18, 35, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+.overlay.open { display: flex; }
+.sheet {
+  background: rgba(10,18,35,0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(59,130,246,0.18);
-  border-top: 1px solid rgba(59,130,246,0.25);
   border-radius: 20px 20px 0 0;
   padding: 1.5rem 1.25rem;
-  width: 100%;
-  max-width: 480px;
+  width: 100%; max-width: 480px;
 }
-.modal-handle {
-  width: 36px; height: 4px; background: rgba(255,255,255,0.15);
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: rgba(255,255,255,0.12);
   border-radius: 2px; margin: 0 auto 1.25rem;
 }
-.modal-title { font-size: 1.05rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.4rem; }
-.modal-subtitle { font-size: 0.8rem; color: #64748b; margin-bottom: 1.25rem; }
-.modal-input-wrap { margin-bottom: 1rem; }
-.modal-input-label { font-size: 0.72rem; color: #64748b; letter-spacing: 0.5px; margin-bottom: 0.4rem; }
-.modal-input {
+.sheet-title { font-size: 1rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.3rem; }
+.sheet-sub { font-size: 0.78rem; color: #64748b; margin-bottom: 1.25rem; }
+.field { margin-bottom: 1rem; }
+.field-label { font-size: 0.7rem; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 0.4rem; }
+.field-input {
   width: 100%;
-  background: rgba(20, 32, 55, 0.70);
+  background: rgba(20,32,55,0.70);
   border: 1px solid rgba(59,130,246,0.20);
-  border-radius: 10px;
-  padding: 0.8rem 0.9rem;
-  color: #fff;
-  font-size: 16px;
-  outline: none;
+  border-radius: 10px; padding: 0.8rem 0.9rem;
+  color: #fff; font-size: 16px; outline: none;
   transition: border-color 0.2s;
 }
-.modal-input:focus { border-color: rgba(59,130,246,0.50); }
-.modal-input::placeholder { color: #4a5568; }
-.modal-btns { display: flex; gap: 8px; margin-top: 1.25rem; }
-.modal-btns button {
+.field-input:focus { border-color: rgba(59,130,246,0.50); }
+.field-input::placeholder { color: #4a5568; }
+.field-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.field-input-time { min-width: 90px; }
+.sheet-btns { display: flex; gap: 8px; margin-top: 1.25rem; }
+.sheet-btns button {
   flex: 1; padding: 0.85rem; border-radius: 12px; border: none;
   font-weight: 600; font-size: 0.9rem; cursor: pointer;
 }
-.btn-cancel { background: rgba(30, 45, 69, 0.70); color: #94a3b8; }
-.btn-primary { background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff; box-shadow: 0 2px 12px rgba(59,130,246,0.30); }
+.btn-cancel { background: rgba(30,45,69,0.70); color: #94a3b8; }
+.btn-primary { background: linear-gradient(135deg,#3b82f6,#6366f1); color: #fff; box-shadow: 0 2px 12px rgba(59,130,246,0.30); }
+.btn-primary:disabled { opacity: 0.5; }
 
-/* Toast */
-.toast {
-  position: fixed;
-  bottom: 90px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: rgba(13, 22, 38, 0.95);
-  backdrop-filter: blur(12px);
+/* ── Join sheet ── */
+.join-input {
+  width: 100%;
+  background: rgba(20,32,55,0.70);
   border: 1px solid rgba(59,130,246,0.20);
-  border-radius: 12px;
-  padding: 0.7rem 1.2rem;
-  color: #e2e8f0;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  z-index: 100;
-  opacity: 0;
-  transition: opacity 0.25s, transform 0.25s;
+  border-radius: 10px; padding: 0.8rem 0.9rem;
+  color: #fff; font-size: 18px; font-weight: 700;
+  letter-spacing: 3px; outline: none; text-align: center;
+  text-transform: uppercase;
+  transition: border-color 0.2s;
+}
+.join-input:focus { border-color: rgba(59,130,246,0.50); }
+.join-input::placeholder { font-size: 14px; font-weight: 400; letter-spacing: 0; color: #4a5568; text-transform: none; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 100px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(13,22,38,0.95); backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.20);
+  border-radius: 12px; padding: 0.7rem 1.2rem;
+  color: #e2e8f0; font-size: 0.85rem;
+  white-space: nowrap; z-index: 100;
+  opacity: 0; transition: opacity 0.25s, transform 0.25s;
   pointer-events: none;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Bottom nav ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 0 12px calc(env(safe-area-inset-bottom, 12px) + 20px);
+  background: transparent; pointer-events: none;
+}
+.nav-row {
+  display: flex; align-items: stretch; height: 62px; padding: 0 6px;
+  background: rgba(10,15,28,0.95);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(59,130,246,0.18);
+  border-radius: 22px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(255,255,255,0.05) inset;
+  pointer-events: all;
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; padding: 0 4px;
+  text-decoration: none; border-radius: 16px;
+  margin: 6px 3px;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-item i { font-size: 1.45rem; color: #5a6a7a; line-height: 1; display: block; transition: color 0.15s; }
+.nav-item span { font-size: 0.62rem; color: #5a6a7a; letter-spacing: 0.3px; white-space: nowrap; font-weight: 500; transition: color 0.15s; }
+.nav-item.active { background: rgba(59,130,246,0.15); }
+.nav-item.active i { color: #60a5fa; }
+.nav-item.active span { color: #60a5fa; font-weight: 700; }
 </style>
 </head>
 <body>
 
 <header>
-  <button class="back-btn" onclick="window.location.href='/more.html'"><i class="ti ti-arrow-left"></i></button>
   <div class="header-title">Grupos</div>
-  <button class="new-btn" onclick="abrirModalCrear()"><i class="ti ti-plus"></i> Nuevo</button>
+  <div class="header-actions">
+    <button class="join-btn-header" onclick="abrirJoin()"><i class="ti ti-link"></i> Unirse</button>
+    <button class="icon-btn" onclick="abrirCrearGrupo()" title="Crear grupo"><i class="ti ti-plus"></i></button>
+  </div>
 </header>
 
-<div class="content">
-  <!-- Join section -->
-  <div class="join-section">
-    <div class="join-section-label"><i class="ti ti-link"></i> Unirse con código</div>
-    <div class="join-row">
-      <input class="join-input" type="text" id="join-code" placeholder="Ej: XK9M2PQR o pega el enlace" maxlength="500" autocomplete="off" autocapitalize="characters"
-        onkeydown="if(event.key==='Enter') unirseConCodigo()">
-      <button class="join-btn" onclick="unirseConCodigo()">Unirme</button>
-    </div>
-  </div>
-
-  <!-- Groups list -->
-  <div class="section-header">
-    <div class="section-label">Tus grupos</div>
-    <div class="section-count" id="groups-count" style="display:none"></div>
-  </div>
-  <div id="groups-list"></div>
+<div class="content" id="main-content">
+  <div style="text-align:center;padding:3rem 0;color:#4a5568">Cargando...</div>
 </div>
 
-<!-- Create group modal -->
-<div class="modal-overlay" id="create-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Crear grupo</div>
-    <div class="modal-subtitle">Dale un nombre a tu grupo de alabanza</div>
-    <div class="modal-input-wrap">
-      <div class="modal-input-label">NOMBRE DEL GRUPO</div>
-      <input class="modal-input" type="text" id="new-group-name" placeholder="Ej: Equipo de Alabanza"
-        maxlength="60" autocomplete="off"
-        onkeydown="if(event.key==='Enter') confirmarCrear()">
+<!-- ── Modal: Crear servicio ── -->
+<div class="overlay" id="modal-servicio">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Nuevo Servicio</div>
+    <div class="sheet-sub" id="modal-servicio-sub">Worship Team</div>
+    <div class="field">
+      <div class="field-label">Nombre</div>
+      <input class="field-input" type="text" id="cs-name" placeholder="Ej: Domingo Mañana" maxlength="60" autocomplete="off">
     </div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="cerrarModalCrear()">Cancelar</button>
-      <button class="btn-primary" onclick="confirmarCrear()">Crear grupo</button>
+    <div class="field">
+      <div class="field-label">Fecha y Hora</div>
+      <div class="field-row">
+        <input class="field-input" type="date" id="cs-date">
+        <input class="field-input field-input-time" type="time" id="cs-time" value="10:00">
+      </div>
+    </div>
+    <div class="sheet-btns">
+      <button class="btn-cancel" onclick="cerrarServicio()">Cancelar</button>
+      <button class="btn-primary" id="cs-btn" onclick="crearServicio()">Crear Servicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Crear grupo ── -->
+<div class="overlay" id="modal-grupo">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Crear grupo</div>
+    <div class="sheet-sub">Dale un nombre a tu equipo de alabanza</div>
+    <div class="field">
+      <div class="field-label">Nombre del grupo</div>
+      <input class="field-input" type="text" id="new-group-name" placeholder="Ej: Equipo de Alabanza" maxlength="60" autocomplete="off"
+        onkeydown="if(event.key==='Enter') confirmarCrearGrupo()">
+    </div>
+    <div class="sheet-btns">
+      <button class="btn-cancel" onclick="cerrarCrearGrupo()">Cancelar</button>
+      <button class="btn-primary" id="crear-grupo-btn" onclick="confirmarCrearGrupo()">Crear grupo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Unirse con código ── -->
+<div class="overlay" id="modal-join">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Unirse a un grupo</div>
+    <div class="sheet-sub">Ingresá el código que te compartió el líder</div>
+    <div class="field">
+      <div class="field-label">Código de invitación</div>
+      <input class="join-input" type="text" id="join-code" placeholder="Ej: XK9M2PQR" maxlength="8" autocomplete="off" autocapitalize="characters"
+        onkeydown="if(event.key==='Enter') confirmarJoin()">
+    </div>
+    <div class="sheet-btns">
+      <button class="btn-cancel" onclick="cerrarJoin()">Cancelar</button>
+      <button class="btn-primary" onclick="confirmarJoin()">Unirme</button>
     </div>
   </div>
 </div>
@@ -346,10 +394,12 @@ header {
 <div class="toast" id="toast"></div>
 
 <nav class="bottom-nav">
-  <a class="nav-item" href="/library.html"><i class="ti ti-music"></i><span>Canciones</span></a>
-  <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
-  <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
-  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
+  <div class="nav-row">
+    <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
+    <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
+    <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medleys</span></a>
+    <a class="nav-item active" href="/groups.html"><i class="ti ti-users-group"></i><span>Grupos</span></a>
+  </div>
 </nav>
 
 <script>
@@ -360,132 +410,289 @@ const _supabase = supabase.createClient(
 
 let currentUser = null
 let toastTimer = null
+// State for create-service modal
+let csGroupId = null
+let csGroupName = ''
 
-function showToast(msg, duration = 2500) {
+/* ─── Utilities ─── */
+function showToast(msg, ms = 2500) {
   const t = document.getElementById('toast')
   t.textContent = msg
   t.classList.add('show')
   clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => t.classList.remove('show'), duration)
+  toastTimer = setTimeout(() => t.classList.remove('show'), ms)
 }
 
 function generarCodigo() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let code = ''
-  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)]
-  return code
+  let c = ''
+  for (let i = 0; i < 8; i++) c += chars[Math.floor(Math.random() * chars.length)]
+  return c
 }
 
+const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
+const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+
+function fmtFecha(dateStr) {
+  if (!dateStr) return ''
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const dt = new Date(y, m - 1, d)
+  return `${DIAS[dt.getDay()]} ${d} ${MESES[m - 1]}`
+}
+
+function fmtHora(t) {
+  return t ? t.slice(0, 5) : ''
+}
+
+/* ─── Init ─── */
 async function init() {
   const { data: { session } } = await _supabase.auth.getSession()
   if (!session) { window.location.href = '/login.html'; return }
   currentUser = session.user
-  await cargarGrupos()
+  await cargarDashboard()
 }
 
-async function cargarGrupos() {
-  const { data, error } = await _supabase
+/* ─── Dashboard ─── */
+async function cargarDashboard() {
+  // 1. Get user's groups
+  const { data: memberships, error } = await _supabase
     .from('group_members')
-    .select('roles, groups(id, name, leader_id)')
+    .select('roles, groups(id, name, leader_id, invite_code)')
     .eq('user_id', currentUser.id)
 
-  const list = document.getElementById('groups-list')
-  const countEl = document.getElementById('groups-count')
-  list.innerHTML = ''
+  const wrap = document.getElementById('main-content')
 
   if (error) {
-    list.innerHTML = '<div class="empty-state"><i class="ti ti-alert-triangle"></i><p>No se pudieron cargar tus grupos.</p></div>'
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><i class="ti ti-alert-triangle"></i></div><h2>Error cargando grupos</h2></div>'
     return
   }
 
-  if (!data || data.length === 0) {
-    countEl.style.display = 'none'
-    list.innerHTML = `
-      <div class="empty-state">
-        <i class="ti ti-users"></i>
-        <strong>Aún no tienes grupos</strong>
-        <p>Crea tu propio grupo o únete con un código de invitación.</p>
-      </div>`
+  if (!memberships || memberships.length === 0) {
+    renderEmptyState(wrap)
     return
   }
 
-  countEl.style.display = 'inline-block'
-  countEl.textContent = data.length
+  // 2. Load services for each group in parallel
+  const today = new Date().toISOString().slice(0, 10)
+  const groupIds = memberships.map(m => m.groups?.id).filter(Boolean)
 
-  data.forEach(row => {
-    const g = row.groups
+  const { data: allServices } = await _supabase
+    .from('group_services')
+    .select(`
+      id, name, service_date, service_time, setlist_id, medley_id, group_id,
+      service_members(user_id, instrument, status)
+    `)
+    .in('group_id', groupIds)
+    .gte('service_date', today)
+    .order('service_date')
+
+  // 3. Render
+  let html = ''
+  memberships.forEach((mem, idx) => {
+    const g = mem.groups
     if (!g) return
     const isLeader = g.leader_id === currentUser.id
-    const roles = (row.roles && row.roles.length) ? row.roles.join(', ') : 'Miembro'
+    const groupServices = (allServices || []).filter(s => s.group_id === g.id).slice(0, 4)
 
-    const card = document.createElement('a')
-    card.className = 'group-card' + (isLeader ? ' leader-card' : '')
-    card.href = `/group-view.html?id=${g.id}`
-    card.innerHTML = `
-      <div class="group-icon"><i class="ti ti-users"></i></div>
-      <div class="group-info">
-        <div class="group-name">${g.name}</div>
-        <div class="group-meta">
-          <span class="${isLeader ? 'leader-badge' : 'member-badge'}">${isLeader ? '⚓ LÍDER' : 'MIEMBRO'}</span>
-          <span class="group-role">${isLeader ? 'Administras este grupo' : roles}</span>
+    html += `
+      <div class="group-block ${isLeader ? 'leader' : ''}">
+        <div class="group-block-header">
+          <div class="group-avatar"><i class="ti ti-${isLeader ? 'crown' : 'users'}"></i></div>
+          <div class="group-block-info">
+            <div class="group-block-name">${g.name}</div>
+            <div class="group-block-meta">
+              <span class="role-badge ${isLeader ? 'role-leader' : 'role-member'}">${isLeader ? '⚓ LÍDER' : 'MIEMBRO'}</span>
+              ${isLeader ? `<span class="group-members-count" title="Código de invitación">Código: ${g.invite_code}</span>` : ''}
+            </div>
+          </div>
+          <button class="group-more-btn" onclick="irAGrupo(${g.id})" title="Ver miembros y ajustes"><i class="ti ti-dots-vertical"></i></button>
+        </div>
+        <div class="services-list">
+          ${groupServices.length === 0
+            ? `<div class="no-services"><i class="ti ti-calendar-off"></i>Sin servicios próximos</div>`
+            : groupServices.map(s => renderServiceCard(s, isLeader)).join('')
+          }
+          ${isLeader ? `<button class="new-service-btn" onclick="abrirServicio(${g.id}, '${g.name.replace(/'/g,"\\'")}')"><i class="ti ti-plus"></i> Nuevo servicio</button>` : ''}
         </div>
       </div>
-      <i class="ti ti-chevron-right group-arrow"></i>
+      ${idx < memberships.length - 1 ? '<hr class="divider">' : ''}
     `
-    list.appendChild(card)
   })
+
+  wrap.innerHTML = html
 }
 
-function abrirModalCrear() {
-  document.getElementById('new-group-name').value = ''
-  document.getElementById('create-modal').classList.add('open')
-  setTimeout(() => document.getElementById('new-group-name').focus(), 150)
+function renderServiceCard(s, isLeader) {
+  // Find this user's membership in the service
+  const myMember = (s.service_members || []).find(m => m.user_id === currentUser.id)
+  const totalMembers = (s.service_members || []).length
+  const confirmed = (s.service_members || []).filter(m => m.status === 'accepted').length
+
+  // Determine status chip
+  let chip = ''
+  if (isLeader) {
+    chip = `<span class="status-chip chip-leader">${confirmed}/${totalMembers} ✓</span>`
+  } else if (myMember) {
+    if (myMember.status === 'accepted') chip = `<span class="status-chip chip-accepted">✓ Listo</span>`
+    else if (myMember.status === 'declined') chip = `<span class="status-chip chip-declined">✗ No puedo</span>`
+    else chip = `<span class="status-chip chip-pending">⏳ Pendiente</span>`
+  } else {
+    chip = `<span class="status-chip chip-noassign">Sin asignar</span>`
+  }
+
+  // Content label
+  const contentLabel = s.setlist_id
+    ? `<span class="service-footer-item"><i class="ti ti-list-check"></i> Setlist</span>`
+    : s.medley_id
+    ? `<span class="service-footer-item"><i class="ti ti-layers-intersect"></i> Medley</span>`
+    : `<span class="service-footer-item" style="color:#4a5568"><i class="ti ti-music-off"></i> Sin contenido</span>`
+
+  // My role
+  const roleLabel = myMember ? `<span class="service-footer-item"><i class="ti ti-music"></i>${myMember.instrument || 'Músico'}</span>` : ''
+
+  return `
+    <a class="service-card" href="/service-view.html?id=${s.id}">
+      <div class="service-card-top">
+        <div>
+          <div class="service-name">${s.name}</div>
+          <div class="service-datetime">
+            <span><i class="ti ti-calendar"></i>${fmtFecha(s.service_date)}</span>
+            ${s.service_time ? `<span><i class="ti ti-clock"></i>${fmtHora(s.service_time)}</span>` : ''}
+          </div>
+        </div>
+        ${chip}
+      </div>
+      <div class="service-card-footer">
+        ${contentLabel}
+        ${roleLabel}
+        ${isLeader && totalMembers > 0 ? `<span class="confirmed-count" style="margin-left:auto"><i class="ti ti-users"></i>${confirmed} de ${totalMembers} confirmados</span>` : ''}
+      </div>
+    </a>
+  `
 }
 
-function cerrarModalCrear() {
-  document.getElementById('create-modal').classList.remove('open')
+function renderEmptyState(wrap) {
+  wrap.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-state-icon"><i class="ti ti-users-group"></i></div>
+      <h2>Aún no tenés grupos</h2>
+      <p>Creá tu equipo de alabanza o pedile el código de invitación a tu líder.</p>
+      <div class="empty-cta-row">
+        <button class="cta-btn cta-secondary" onclick="abrirJoin()"><i class="ti ti-link"></i> Unirme con código</button>
+        <button class="cta-btn cta-primary" onclick="abrirCrearGrupo()"><i class="ti ti-plus"></i> Crear grupo</button>
+      </div>
+    </div>
+  `
 }
 
-async function confirmarCrear() {
-  const name = document.getElementById('new-group-name').value.trim()
-  if (!name) { showToast('Escribe un nombre para el grupo'); return }
+function irAGrupo(groupId) {
+  window.location.href = `/group-view.html?id=${groupId}`
+}
 
-  const btn = document.querySelector('#create-modal .btn-primary')
-  btn.disabled = true
-  btn.textContent = 'Creando...'
+/* ─── Create service modal ─── */
+function abrirServicio(groupId, groupName) {
+  csGroupId = groupId
+  csGroupName = groupName
+  document.getElementById('modal-servicio-sub').textContent = groupName
+  document.getElementById('cs-name').value = ''
+  // Default to next Sunday
+  const d = new Date()
+  d.setDate(d.getDate() + ((7 - d.getDay()) % 7 || 7))
+  document.getElementById('cs-date').value = d.toISOString().slice(0, 10)
+  document.getElementById('cs-time').value = '10:00'
+  document.getElementById('modal-servicio').classList.add('open')
+  setTimeout(() => document.getElementById('cs-name').focus(), 150)
+}
 
-  const invite_code = generarCodigo()
+function cerrarServicio() {
+  document.getElementById('modal-servicio').classList.remove('open')
+}
 
-  const { data: group, error } = await _supabase
-    .from('groups')
-    .insert({ name, invite_code, leader_id: currentUser.id })
+async function crearServicio() {
+  const name = document.getElementById('cs-name').value.trim()
+  const date = document.getElementById('cs-date').value
+  const time = document.getElementById('cs-time').value || '10:00'
+  if (!name) { showToast('Ingresá un nombre para el servicio'); return }
+  if (!date) { showToast('Seleccioná una fecha'); return }
+
+  const btn = document.getElementById('cs-btn')
+  btn.disabled = true; btn.textContent = 'Creando...'
+
+  const { data: svc, error } = await _supabase
+    .from('group_services')
+    .insert({ group_id: csGroupId, name, service_date: date, service_time: time })
     .select()
     .single()
 
+  btn.disabled = false; btn.textContent = 'Crear Servicio'
+
+  if (error) { showToast('No se pudo crear el servicio'); return }
+  cerrarServicio()
+  window.location.href = `/service-view.html?id=${svc.id}`
+}
+
+/* ─── Create group modal ─── */
+function abrirCrearGrupo() {
+  document.getElementById('new-group-name').value = ''
+  document.getElementById('modal-grupo').classList.add('open')
+  setTimeout(() => document.getElementById('new-group-name').focus(), 150)
+}
+
+function cerrarCrearGrupo() {
+  document.getElementById('modal-grupo').classList.remove('open')
+}
+
+async function confirmarCrearGrupo() {
+  const name = document.getElementById('new-group-name').value.trim()
+  if (!name) { showToast('Escribí un nombre para el grupo'); return }
+
+  const btn = document.getElementById('crear-grupo-btn')
+  btn.disabled = true; btn.textContent = 'Creando...'
+
+  const invite_code = generarCodigo()
+  const { data: group, error } = await _supabase
+    .from('groups')
+    .insert({ name, invite_code, leader_id: currentUser.id })
+    .select().single()
+
   if (error) {
     showToast('No se pudo crear el grupo')
-    btn.disabled = false
-    btn.textContent = 'Crear grupo'
+    btn.disabled = false; btn.textContent = 'Crear grupo'
     return
   }
 
   await _supabase.from('group_members').insert({ group_id: group.id, user_id: currentUser.id, roles: [] })
-  cerrarModalCrear()
+  cerrarCrearGrupo()
   window.location.href = `/group-view.html?id=${group.id}`
 }
 
-function unirseConCodigo() {
+/* ─── Join group modal ─── */
+function abrirJoin() {
+  document.getElementById('join-code').value = ''
+  document.getElementById('modal-join').classList.add('open')
+  setTimeout(() => document.getElementById('join-code').focus(), 150)
+}
+
+function cerrarJoin() {
+  document.getElementById('modal-join').classList.remove('open')
+}
+
+function confirmarJoin() {
   let val = document.getElementById('join-code').value.trim()
-  // If user pasted a full invite URL, extract just the code
   try {
     const url = new URL(val)
     const codeParam = url.searchParams.get('code')
     if (codeParam) val = codeParam
   } catch(e) {}
   const code = val.toUpperCase()
-  if (!code) { showToast('Ingresa el código de invitación'); return }
+  if (!code) { showToast('Ingresá el código de invitación'); return }
   window.location.href = `/join-group.html?code=${encodeURIComponent(code)}`
 }
+
+// Close modals on overlay click
+document.querySelectorAll('.overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open') })
+})
 
 init()
 </script>
