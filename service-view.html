@@ -16,242 +16,304 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   background: linear-gradient(135deg, #060b18 0%, #0b1628 35%, #0d0c20 65%, #13082a 100%) fixed;
-  color: #ffffff;
+  color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100vh;
-  padding-bottom: calc(80px + env(safe-area-inset-bottom, 12px));
+  padding-bottom: calc(90px + env(safe-area-inset-bottom, 12px));
 }
 body::before {
   content: '';
   position: fixed; inset: 0;
   background:
     radial-gradient(ellipse at 20% 20%, rgba(59,130,246,0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.10) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 10%, rgba(34,197,94,0.06) 0%, transparent 40%);
+    radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.10) 0%, transparent 50%);
   pointer-events: none; z-index: 0;
 }
 body > * { position: relative; z-index: 1; }
 
+/* Header */
 header {
-  background: rgba(8, 15, 28, 0.85);
+  background: rgba(8,15,28,0.88);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border-bottom: 1px solid rgba(59,130,246,0.15);
-  padding: 1rem 1.25rem;
-  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.6rem 1.25rem 0.6rem 0.75rem;
+  display: flex; align-items: center; gap: 0.5rem;
   position: sticky; top: 0; z-index: 10;
+  min-height: 54px;
 }
-.back-btn { background: none; border: none; color: #3b82f6; font-size: 1.3rem; cursor: pointer; padding: 4px; display: flex; align-items: center; flex-shrink: 0; }
-.header-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.back-btn { background: none; border: none; color: #3b82f6; font-size: 1.2rem; cursor: pointer; padding: 6px; display: flex; align-items: center; flex-shrink: 0; }
+.header-breadcrumb { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 6px; overflow: hidden; }
+.header-month { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; }
+.header-name { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.header-day { font-size: 0.75rem; color: #64748b; flex-shrink: 0; white-space: nowrap; }
+.header-actions { display: flex; gap: 4px; flex-shrink: 0; }
 .icon-btn {
-  background: rgba(30, 45, 69, 0.60);
-  border: 1px solid rgba(59,130,246,0.15);
-  border-radius: 8px;
-  width: 34px; height: 34px;
+  background: rgba(30,45,69,0.60); border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 8px; width: 34px; height: 34px;
   display: flex; align-items: center; justify-content: center;
   font-size: 1rem; cursor: pointer; color: #94a3b8;
   transition: background 0.2s, color 0.2s;
-  flex-shrink: 0;
 }
 .icon-btn:hover { background: rgba(239,68,68,0.15); color: #ef4444; border-color: rgba(239,68,68,0.20); }
 
-.content { padding: 1.25rem; }
+/* Content */
+.content { padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
 
-/* Date banner */
-.date-banner {
-  background: rgba(13, 22, 38, 0.60);
+/* Cards */
+.card {
+  background: rgba(13,22,38,0.65);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(59,130,246,0.15);
-  border-radius: 14px;
-  padding: 1rem 1.1rem;
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 1.25rem;
+  border: 1px solid rgba(59,130,246,0.13);
+  border-radius: 16px;
+  overflow: hidden;
 }
-.date-icon {
-  width: 48px; height: 48px; border-radius: 12px;
-  background: rgba(59,130,246,0.15);
-  border: 1px solid rgba(59,130,246,0.20);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.date-icon-day { font-size: 1.2rem; font-weight: 700; color: #3b82f6; line-height: 1; }
-.date-icon-mon { font-size: 0.6rem; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.5px; }
-.date-info { flex: 1; }
-.date-full { font-size: 0.88rem; font-weight: 600; color: #e2e8f0; }
-.date-relative { font-size: 0.73rem; color: #64748b; margin-top: 3px; }
-
-/* Section */
-.section-header {
+.card-header {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 0.85rem; margin-top: 1.25rem;
+  padding: 0.85rem 1rem 0.6rem;
 }
-.section-label { font-size: 0.7rem; color: #4a5568; letter-spacing: 1.5px; text-transform: uppercase; }
+.card-label { font-size: 0.68rem; color: #64748b; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; }
+.card-action-btn {
+  background: none; border: none; color: #3b82f6;
+  font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 4px; padding: 2px 4px;
+}
+.card-action-btn:active { opacity: 0.7; }
 
-/* Content card */
-.content-card {
-  background: rgba(13, 22, 38, 0.55);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(59,130,246,0.10);
-  border-radius: 14px;
-  padding: 1rem;
-  display: flex; align-items: center; gap: 12px;
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.2s, transform 0.15s;
+/* Contenido card */
+.content-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0.7rem 1rem 0.9rem;
+  cursor: pointer; text-decoration: none;
 }
-.content-card:active { transform: scale(0.98); }
-.content-card:hover { border-color: rgba(59,130,246,0.22); }
+.content-item:active { opacity: 0.75; }
 .content-icon {
-  width: 42px; height: 42px; border-radius: 10px;
-  background: rgba(59,130,246,0.12);
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(59,130,246,0.15);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.1rem; color: #3b82f6; flex-shrink: 0;
+  border: 1px solid rgba(59,130,246,0.20);
 }
 .content-name { font-size: 0.9rem; font-weight: 600; color: #e2e8f0; }
-.content-type { font-size: 0.72rem; color: #64748b; margin-top: 3px; }
-.content-arrow { color: #2d3f5a; font-size: 0.95rem; flex-shrink: 0; margin-left: auto; }
-.no-content-card {
-  background: rgba(13, 22, 38, 0.40);
-  border: 1px dashed rgba(59,130,246,0.12);
-  border-radius: 14px;
-  padding: 1rem;
-  display: flex; align-items: center; gap: 10px;
-  color: #4a5568; font-size: 0.85rem;
-}
-.no-content-card i { font-size: 1.1rem; }
-.assign-content-btn {
-  margin-left: auto;
-  background: rgba(59,130,246,0.12);
-  border: 1px solid rgba(59,130,246,0.20);
-  border-radius: 8px;
-  color: #3b82f6;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 4px 10px;
-  cursor: pointer;
-  flex-shrink: 0;
-  display: none;
+.content-meta { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
+.content-chevron { color: #3b82f6; font-size: 0.9rem; margin-left: auto; }
+
+.no-content {
+  padding: 0.7rem 1rem 0.9rem;
+  font-size: 0.85rem; color: #4a5568; font-style: italic;
 }
 
-/* Member rows */
-.member-row {
-  background: rgba(13, 22, 38, 0.55);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(59,130,246,0.10);
-  border-radius: 12px;
-  padding: 0.8rem 1rem;
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 0.6rem;
+/* Equipo card */
+.equipo-counter {
+  font-size: 0.72rem; color: #64748b;
+  display: flex; align-items: center; gap: 4px;
 }
-.m-avatar {
-  width: 38px; height: 38px; border-radius: 50%;
-  background: rgba(30, 45, 69, 0.80); color: #3b82f6;
+.equipo-counter .confirmed { color: #22c55e; font-weight: 700; }
+
+.team-member-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0.65rem 1rem;
+  border-top: 1px solid rgba(30,45,69,0.50);
+}
+.team-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(30,45,69,0.80); color: #3b82f6;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.88rem; font-weight: 700; flex-shrink: 0;
-  border: 2px solid rgba(59,130,246,0.15); overflow: hidden;
+  font-size: 0.78rem; font-weight: 700; flex-shrink: 0;
+  border: 1.5px solid rgba(59,130,246,0.15);
+  overflow: hidden;
 }
-.m-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.m-info { flex: 1; min-width: 0; }
-.m-name { font-size: 0.88rem; font-weight: 600; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.m-instrument { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
+.team-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.team-info { flex: 1; min-width: 0; }
+.team-name { font-size: 0.88rem; color: #e2e8f0; font-weight: 500; }
+.team-role { font-size: 0.72rem; color: #64748b; margin-top: 1px; display: flex; align-items: center; gap: 3px; }
+.team-role i { font-size: 0.7rem; }
+
+/* Status badges */
 .status-badge {
-  padding: 3px 9px; border-radius: 20px;
-  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px;
-  flex-shrink: 0;
+  font-size: 0.68rem; font-weight: 700; padding: 3px 9px;
+  border-radius: 20px; letter-spacing: 0.3px; flex-shrink: 0;
 }
-.status-badge.pending { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.20); }
-.status-badge.accepted { background: rgba(34,197,94,0.12); color: #22c55e; border: 1px solid rgba(34,197,94,0.20); }
+.status-badge.accepted { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.25); }
+.status-badge.pending { background: rgba(234,179,8,0.12); color: #eab308; border: 1px solid rgba(234,179,8,0.20); }
 .status-badge.declined { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.20); }
 
-/* My response banner (musician) */
-.my-response-banner {
-  background: rgba(13, 22, 38, 0.70);
-  border: 1px solid rgba(59,130,246,0.18);
-  border-radius: 14px;
+/* Response banner (músico) */
+.response-banner {
+  background: rgba(13,22,38,0.65);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 16px;
   padding: 1rem 1.1rem;
-  margin-bottom: 1.25rem;
-  display: none;
 }
-.my-response-banner.visible { display: block; }
-.response-label { font-size: 0.7rem; color: #4a5568; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 0.75rem; }
-.response-instrument { font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.85rem; }
-.response-instrument strong { color: #e2e8f0; }
+.response-banner-title { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.6rem; }
+.response-banner-service { font-size: 0.88rem; font-weight: 600; color: #e2e8f0; margin-bottom: 2px; }
+.response-banner-meta { font-size: 0.75rem; color: #64748b; margin-bottom: 1rem; }
 .response-btns { display: flex; gap: 8px; }
-.response-btns button {
-  flex: 1; padding: 0.7rem; border-radius: 10px; border: none;
-  font-weight: 600; font-size: 0.82rem; cursor: pointer;
-  transition: opacity 0.2s;
+.btn-acepto {
+  flex: 1; padding: 0.75rem; border: none; border-radius: 12px; cursor: pointer;
+  background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff;
+  font-weight: 700; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
 }
-.response-btns button.current { opacity: 0.5; pointer-events: none; }
-.btn-accept { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.25) !important; }
-.btn-accept.active { background: rgba(34,197,94,0.25); }
-.btn-decline { background: rgba(239,68,68,0.10); color: #ef4444; border: 1px solid rgba(239,68,68,0.20) !important; }
-.btn-decline.active { background: rgba(239,68,68,0.20); }
+.btn-nopuedo {
+  flex: 1; padding: 0.75rem; border: none; border-radius: 12px; cursor: pointer;
+  background: rgba(30,45,69,0.70); color: #94a3b8;
+  font-weight: 600; font-size: 0.9rem; border: 1px solid rgba(59,130,246,0.15);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-acepto:active, .btn-nopuedo:active { opacity: 0.8; }
 
-/* Delete service btn */
-.delete-service-wrap { margin-top: 2rem; }
-.delete-service-btn {
-  width: 100%; background: rgba(26,8,8,0.60);
-  border: 1px solid rgba(127,29,29,0.50); border-radius: 12px;
-  color: #ef4444; font-size: 0.88rem; font-weight: 600;
-  padding: 0.85rem; cursor: pointer;
+/* Already responded */
+.responded-state {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0.7rem 0;
+  font-size: 0.88rem; color: #94a3b8;
+}
+
+/* Enviar requests btn */
+.enviar-btn-wrap {
+  padding: 0 1.25rem 0.5rem;
+}
+.btn-enviar {
+  width: 100%; padding: 0.9rem;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  border: none; border-radius: 14px; cursor: pointer;
+  color: #fff; font-size: 0.95rem; font-weight: 700;
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: background 0.2s;
+  box-shadow: 0 4px 16px rgba(59,130,246,0.30);
+  letter-spacing: 0.3px;
 }
-.delete-service-btn:hover { background: rgba(39,8,8,0.80); }
+.btn-enviar:active { opacity: 0.85; }
+.btn-enviar.sent {
+  background: rgba(22,163,74,0.20);
+  border: 1px solid rgba(34,197,94,0.30);
+  color: #22c55e;
+  box-shadow: none;
+}
 
-/* Empty */
-.empty-state { text-align: center; padding: 1.5rem 1rem; color: #4a5568; font-size: 0.82rem; }
+/* Calendar card */
+.calendar-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  padding: 0.65rem 1rem 0.9rem;
+}
+.calendar-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(20,32,55,0.70);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 10px; padding: 0.65rem 0.85rem;
+  cursor: pointer; color: #94a3b8; font-size: 0.8rem;
+  text-decoration: none; transition: background 0.15s;
+}
+.calendar-btn:hover { background: rgba(59,130,246,0.10); color: #e2e8f0; }
+.calendar-btn i { font-size: 1rem; color: #3b82f6; flex-shrink: 0; }
 
-/* Modals */
+/* Add member modal */
 .modal-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
-  z-index: 50; align-items: flex-end; justify-content: center;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+  z-index: 100; display: none; align-items: flex-end;
 }
 .modal-overlay.open { display: flex; }
 .modal-sheet {
-  background: rgba(10,18,35,0.97); backdrop-filter: blur(20px);
-  border: 1px solid rgba(59,130,246,0.18);
-  border-radius: 20px 20px 0 0;
-  padding: 1.25rem 1.25rem 1.5rem;
-  width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto;
+  background: #0d1626;
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 24px 24px 0 0;
+  padding: 1rem 1.25rem 2rem;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
 }
-.modal-handle { width: 36px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; margin: 0 auto 1.25rem; }
-.modal-title { font-size: 1.05rem; font-weight: 700; color: #e2e8f0; margin-bottom: 1rem; }
-.confirm-message { font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin-bottom: 0.25rem; }
+.modal-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: rgba(59,130,246,0.25);
+  margin: 0 auto 1rem;
+}
+.modal-title { font-size: 1rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.25rem; }
+.modal-subtitle { font-size: 0.8rem; color: #64748b; margin-bottom: 1rem; }
 .modal-btns { display: flex; gap: 8px; margin-top: 1.1rem; }
 .modal-btns button { flex: 1; padding: 0.8rem; border-radius: 12px; border: none; font-weight: 600; font-size: 0.88rem; cursor: pointer; }
 .btn-cancel { background: rgba(30,45,69,0.70); color: #94a3b8; }
-.btn-danger { background: linear-gradient(135deg,#ef4444,#dc2626); color: #fff; }
+.btn-primary { background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff; }
+.btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+
+/* Add member list */
+.add-member-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0.65rem 0.25rem;
+  border-bottom: 1px solid rgba(30,45,69,0.40);
+}
+.add-member-item:last-child { border-bottom: none; }
+.add-member-name { font-size: 0.88rem; color: #e2e8f0; flex: 1; }
+.add-member-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(30,45,69,0.80); color: #3b82f6;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 700; flex-shrink: 0;
+  border: 1.5px solid rgba(59,130,246,0.15);
+  overflow: hidden;
+}
+.add-member-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.role-select {
+  background: rgba(20,32,55,0.80);
+  border: 1px solid rgba(59,130,246,0.18);
+  border-radius: 8px; color: #94a3b8;
+  font-size: 0.72rem; padding: 4px 6px; outline: none; cursor: pointer;
+  max-width: 110px;
+}
+
+/* Content picker */
+.content-type-tabs { display: flex; gap: 8px; margin-bottom: 0.75rem; }
+.ctype-tab {
+  flex: 1; padding: 0.55rem; border-radius: 10px; border: 1px solid rgba(59,130,246,0.15);
+  background: rgba(20,32,55,0.70); color: #64748b;
+  font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.ctype-tab.active { background: rgba(59,130,246,0.15); color: #3b82f6; border-color: rgba(59,130,246,0.35); }
+.picker-list { max-height: 200px; overflow-y: auto; }
+.picker-item {
+  display: flex; align-items: center; padding: 0.65rem 0.5rem;
+  border-bottom: 1px solid rgba(30,45,69,0.50);
+  cursor: pointer; border-radius: 8px; gap: 10px;
+}
+.picker-item:last-child { border-bottom: none; }
+.picker-item:hover { background: rgba(59,130,246,0.08); }
+.picker-item.selected { background: rgba(59,130,246,0.12); }
+.picker-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(59,130,246,0.35); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.picker-radio.checked { background: #3b82f6; border-color: #3b82f6; }
+.picker-radio.checked::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+.picker-name { font-size: 0.88rem; color: #e2e8f0; flex: 1; }
+.picker-meta { font-size: 0.7rem; color: #64748b; }
+
+/* Confirm modal */
+.confirm-message { font-size: 0.85rem; color: #94a3b8; line-height: 1.5; }
 
 /* Bottom nav */
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0;
-  background: rgba(8,15,28,0.88);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  border-top: 1px solid rgba(59,130,246,0.13);
-  display: flex;
-  padding: 8px 0 calc(12px + env(safe-area-inset-bottom, 0px));
-  z-index: 20;
+  background: rgba(8,15,28,0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid rgba(59,130,246,0.12);
+  padding-bottom: env(safe-area-inset-bottom, 12px);
+  z-index: 50;
 }
-.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 0; text-decoration: none; }
-.nav-item i { font-size: 1.2rem; color: #4a5568; }
-.nav-item span { font-size: 0.6rem; color: #4a5568; letter-spacing: 0.5px; }
+.nav-row { display: flex; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px 6px; text-decoration: none; }
+.nav-item i { font-size: 1.25rem; color: #4a5568; }
+.nav-item span { font-size: 0.58rem; color: #4a5568; letter-spacing: 0.3px; }
 .nav-item.active i, .nav-item.active span { color: #3b82f6; }
 
 /* Toast */
 .toast {
   position: fixed; bottom: 90px; left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: rgba(13,22,38,0.95); backdrop-filter: blur(12px);
-  border: 1px solid rgba(59,130,246,0.20); border-radius: 12px;
-  padding: 0.7rem 1.2rem; color: #e2e8f0; font-size: 0.85rem;
-  white-space: nowrap; z-index: 200; opacity: 0;
-  transition: opacity 0.25s, transform 0.25s; pointer-events: none;
-  display: flex; align-items: center; gap: 6px;
+  background: rgba(13,22,38,0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.20);
+  border-radius: 12px; padding: 0.7rem 1.2rem;
+  color: #e2e8f0; font-size: 0.85rem; white-space: nowrap;
+  z-index: 200; opacity: 0; transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none; display: flex; align-items: center; gap: 6px;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .toast.success { border-color: rgba(34,197,94,0.30); }
@@ -261,70 +323,125 @@ header {
 <body>
 
 <header>
-  <button class="back-btn" id="back-btn"><i class="ti ti-arrow-left"></i></button>
-  <div class="header-title" id="service-title">Cargando...</div>
-  <button class="icon-btn" id="delete-svc-btn" style="display:none" title="Eliminar servicio" onclick="abrirConfirmEliminar()">
-    <i class="ti ti-trash"></i>
-  </button>
+  <button class="back-btn" id="back-btn" onclick="goBack()"><i class="ti ti-arrow-left"></i></button>
+  <div class="header-breadcrumb">
+    <span class="header-month" id="h-month"></span>
+    <span class="header-name" id="h-name">Cargando...</span>
+    <span class="header-day" id="h-day"></span>
+  </div>
+  <div class="header-actions">
+    <button class="icon-btn" id="delete-btn" style="display:none" title="Eliminar servicio" onclick="abrirConfirmEliminar()">
+      <i class="ti ti-trash"></i>
+    </button>
+  </div>
 </header>
 
-<div class="content">
+<div class="content" id="main-content" style="display:none">
 
-  <!-- Date banner -->
-  <div class="date-banner" id="date-banner" style="display:none">
-    <div class="date-icon">
-      <div class="date-icon-day" id="date-day">—</div>
-      <div class="date-icon-mon" id="date-mon">—</div>
+  <!-- Músico: banner de respuesta (solo cuando status=pending) -->
+  <div id="response-banner" style="display:none" class="response-banner">
+    <div class="response-banner-title">Te necesitan en</div>
+    <div class="response-banner-service" id="rb-role"></div>
+    <div class="response-banner-meta" id="rb-meta"></div>
+    <div class="response-btns" id="rb-btns">
+      <button class="btn-acepto" onclick="responder('accepted')"><i class="ti ti-check"></i> Acepto</button>
+      <button class="btn-nopuedo" onclick="responder('declined')"><i class="ti ti-x"></i> No puedo</button>
     </div>
-    <div class="date-info">
-      <div class="date-full" id="date-full">—</div>
-      <div class="date-relative" id="date-relative">—</div>
-    </div>
+    <div id="rb-responded" class="responded-state" style="display:none"></div>
   </div>
 
-  <!-- My response banner (musicians only) -->
-  <div class="my-response-banner" id="my-response-banner">
-    <div class="response-label">Tu participación en este servicio</div>
-    <div class="response-instrument" id="response-instrument">Instrumento: <strong>—</strong></div>
-    <div class="response-btns">
-      <button class="btn-accept" id="btn-accept" onclick="responder('accepted')">
-        <i class="ti ti-check"></i> Acepto
-      </button>
-      <button class="btn-decline" id="btn-decline" onclick="responder('declined')">
-        <i class="ti ti-x"></i> No puedo
+  <!-- Contenido card -->
+  <div class="card" id="content-card">
+    <div class="card-header">
+      <span class="card-label">Contenido</span>
+      <button class="card-action-btn" id="cambiar-content-btn" style="display:none" onclick="abrirPickerContent()">
+        <i class="ti ti-pencil"></i> Cambiar
       </button>
     </div>
+    <div id="content-display"></div>
   </div>
 
-  <!-- Contenido asignado -->
-  <div class="section-header" style="margin-top:0">
-    <div class="section-label">Contenido</div>
+  <!-- Equipo card -->
+  <div class="card" id="team-card">
+    <div class="card-header">
+      <span class="card-label">Equipo</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="equipo-counter" id="team-counter" style="display:none"></div>
+        <button class="card-action-btn" id="add-member-btn" style="display:none" onclick="abrirAgregarMiembro()">
+          <i class="ti ti-plus"></i> Agregar
+        </button>
+      </div>
+    </div>
+    <div id="team-list"></div>
   </div>
-  <div id="content-section"></div>
 
-  <!-- Equipo -->
-  <div class="section-header">
-    <div class="section-label">Equipo</div>
-    <div style="font-size:0.68rem;color:#4a5568" id="team-summary"></div>
-  </div>
-  <div id="team-list"></div>
-
-  <!-- Eliminar (solo lider) -->
-  <div class="delete-service-wrap" id="delete-wrap" style="display:none">
-    <button class="delete-service-btn" onclick="abrirConfirmEliminar()">
-      <i class="ti ti-trash"></i> Eliminar servicio
-    </button>
+  <!-- Calendario (solo para músicos que aceptaron) -->
+  <div class="card" id="calendar-card" style="display:none">
+    <div class="card-header">
+      <span class="card-label">Agregar al calendario</span>
+    </div>
+    <div class="calendar-row">
+      <a class="calendar-btn" id="cal-ical" href="#" onclick="exportarIcal(event)">
+        <i class="ti ti-calendar"></i> iPhone / iOS
+      </a>
+      <a class="calendar-btn" id="cal-google" href="#" target="_blank">
+        <i class="ti ti-brand-google"></i> Google
+      </a>
+    </div>
   </div>
 
 </div>
 
-<!-- Confirm delete -->
+<!-- Botón Enviar requests (leader) -->
+<div class="enviar-btn-wrap" id="enviar-wrap" style="display:none">
+  <button class="btn-enviar" id="enviar-btn" onclick="enviarRequests()">
+    Enviar requests <i class="ti ti-send"></i>
+  </button>
+</div>
+
+<!-- MODAL: Picker de contenido -->
+<div class="modal-overlay" id="content-picker-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Seleccionar contenido</div>
+    <div class="modal-subtitle">Elegí qué van a usar en este servicio</div>
+    <div class="content-type-tabs">
+      <button class="ctype-tab active" id="ctab-setlist" onclick="cambiarPickerTab('setlist')">
+        <i class="ti ti-list-check"></i> Setlists
+      </button>
+      <button class="ctype-tab" id="ctab-medley" onclick="cambiarPickerTab('medley')">
+        <i class="ti ti-layers-intersect"></i> Medleys
+      </button>
+    </div>
+    <div class="picker-list" id="content-picker-items"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="cerrarPickerContent()">Cancelar</button>
+      <button class="btn-primary" onclick="guardarContent()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Agregar miembro al equipo -->
+<div class="modal-overlay" id="add-member-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Agregar al equipo</div>
+    <div class="modal-subtitle">Elegí los músicos y asignales un instrumento</div>
+    <div id="add-member-list"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="cerrarAgregarMiembro()">Cancelar</button>
+      <button class="btn-primary" onclick="guardarMiembros()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Confirmar eliminar -->
 <div class="modal-overlay" id="confirm-eliminar-modal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title">Eliminar servicio</div>
-    <p class="confirm-message">Esta acción eliminará el servicio y las asignaciones de los miembros. No se puede deshacer.</p>
-    <div class="modal-btns">
+    <p class="confirm-message">¿Seguro que querés eliminar este servicio? No se puede deshacer.</p>
+    <div class="modal-btns" style="margin-top:1.25rem">
       <button class="btn-cancel" onclick="cerrarConfirmEliminar()">Cancelar</button>
       <button class="btn-danger" onclick="eliminarServicio()">Eliminar</button>
     </div>
@@ -334,10 +451,12 @@ header {
 <div class="toast" id="toast"></div>
 
 <nav class="bottom-nav">
-  <a class="nav-item" href="/library.html"><i class="ti ti-music"></i><span>Canciones</span></a>
-  <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
-  <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
-  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
+  <div class="nav-row">
+    <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
+    <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
+    <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medleys</span></a>
+    <a class="nav-item active" href="/groups.html"><i class="ti ti-users-group"></i><span>Grupos</span></a>
+  </div>
 </nav>
 
 <script>
@@ -346,21 +465,27 @@ const _supabase = supabase.createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
 )
 
-const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
-const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
-const DAYS_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado']
+const ROLE_OPTIONS = ['Cantante','Pianista','Pianista 2','Guitarrista','Guitarrista 2','Bajista','Coristas','Violinista','Trompetista','Drummer']
+const MONTHS_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+const DAYS_ES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
 
-const urlParams = new URLSearchParams(window.location.search)
-const serviceId = urlParams.get('id')
-const groupId = urlParams.get('group')
+const params = new URLSearchParams(window.location.search)
+const serviceId = params.get('id')
+const groupId = params.get('group')
 
 let currentUser = null
 let isLeader = false
-let myServiceMember = null
+let svcData = null
+let groupMembers = []
+let myMembership = null // my service_member row
+let pickerTab = 'setlist'
+let pickerSelectedId = null
+let pickerSelectedTitle = null
 let toastTimer = null
 
-document.getElementById('back-btn').onclick = () => {
-  window.location.href = groupId ? `/group-view.html?id=${groupId}` : '/groups.html'
+function goBack() {
+  if (groupId) window.location.href = `/group-view.html?id=${groupId}`
+  else history.back()
 }
 
 function showToast(msg, type = '') {
@@ -371,196 +496,508 @@ function showToast(msg, type = '') {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2800)
 }
 
-function relativeFecha(dateStr) {
-  const today = new Date(); today.setHours(0,0,0,0)
-  const d = new Date(dateStr + 'T12:00:00'); d.setHours(0,0,0,0)
-  const diff = Math.round((d - today) / (1000 * 60 * 60 * 24))
-  if (diff === 0) return 'Hoy'
-  if (diff === 1) return 'Mañana'
-  if (diff === -1) return 'Ayer'
-  if (diff > 1 && diff < 7) return `En ${diff} días`
-  if (diff < 0) return `Hace ${Math.abs(diff)} días`
-  return `En ${Math.round(diff / 7)} semana${Math.round(diff / 7) > 1 ? 's' : ''}`
-}
-
+/* ---- Init ---- */
 async function init() {
   const { data: { session } } = await _supabase.auth.getSession()
   if (!session) { window.location.href = '/login.html'; return }
   currentUser = session.user
+  if (!serviceId) { goBack(); return }
+  await cargarServicio()
+}
 
-  if (!serviceId) { window.history.back(); return }
-
+async function cargarServicio() {
   const { data: svc, error } = await _supabase
     .from('group_services')
     .select(`
-      id, name, service_date, setlist_id, medley_id, group_id, created_by,
+      id, name, service_date, service_time, setlist_id, medley_id, group_id, created_by,
       setlist(id, name),
       medleys(id, name),
-      groups(leader_id),
       service_members(id, user_id, instrument, status)
     `)
     .eq('id', serviceId)
     .single()
 
-  if (error || !svc) {
-    document.getElementById('service-title').textContent = 'Sin acceso'
-    return
-  }
+  if (error || !svc) { showToast('No se pudo cargar el servicio'); return }
+  svcData = svc
 
-  isLeader = svc.groups?.leader_id === currentUser.id
-  document.getElementById('service-title').textContent = svc.name
+  // Check if leader
+  const { data: group } = await _supabase
+    .from('groups')
+    .select('leader_id, name')
+    .eq('id', svc.group_id)
+    .single()
 
-  // Date banner
+  isLeader = group?.leader_id === currentUser.id
+
+  // My membership in this service
+  myMembership = (svc.service_members || []).find(m => m.user_id === currentUser.id) || null
+
+  // Render header
   const d = new Date(svc.service_date + 'T12:00:00')
-  document.getElementById('date-day').textContent = d.getDate()
-  document.getElementById('date-mon').textContent = MONTHS_SHORT[d.getMonth()]
-  document.getElementById('date-full').textContent = `${DAYS_ES[d.getDay()]} ${d.getDate()} de ${MONTHS_ES[d.getMonth()]}`
-  document.getElementById('date-relative').textContent = relativeFecha(svc.service_date)
-  document.getElementById('date-banner').style.display = 'flex'
+  document.getElementById('h-month').textContent = MONTHS_ES[d.getMonth()]
+  document.getElementById('h-name').textContent = svc.name
+  document.getElementById('h-day').textContent = `${DAYS_ES[d.getDay()]} ${d.getDate()}`
 
-  // Leader controls
+  // Leader actions
   if (isLeader) {
-    document.getElementById('delete-svc-btn').style.display = 'flex'
-    document.getElementById('delete-wrap').style.display = 'block'
+    document.getElementById('delete-btn').style.display = 'flex'
+    document.getElementById('cambiar-content-btn').style.display = 'flex'
+    document.getElementById('add-member-btn').style.display = 'flex'
+    document.getElementById('enviar-wrap').style.display = 'block'
   }
 
-  // Content section
-  const contentSec = document.getElementById('content-section')
-  if (svc.setlist_id && svc.setlist) {
-    contentSec.innerHTML = `
-      <a class="content-card" href="/setlist-view.html?id=${svc.setlist_id}">
-        <div class="content-icon"><i class="ti ti-list-check"></i></div>
-        <div>
-          <div class="content-name">${svc.setlist.name}</div>
-          <div class="content-type">Setlist</div>
-        </div>
-        <i class="ti ti-chevron-right content-arrow"></i>
-      </a>`
-  } else if (svc.medley_id && svc.medleys) {
-    contentSec.innerHTML = `
-      <a class="content-card" href="/medley-view.html?id=${svc.medley_id}">
-        <div class="content-icon"><i class="ti ti-layers-intersect"></i></div>
-        <div>
-          <div class="content-name">${svc.medleys.name}</div>
-          <div class="content-type">Medley</div>
-        </div>
-        <i class="ti ti-chevron-right content-arrow"></i>
-      </a>`
-  } else {
-    contentSec.innerHTML = `
-      <div class="no-content-card">
-        <i class="ti ti-minus"></i>
-        <span>Sin contenido asignado</span>
-      </div>`
-  }
-
-  // Team
-  const members = svc.service_members || []
-  const userIds = members.map(m => m.user_id)
+  // Load member profiles
+  const userIds = (svc.service_members || []).map(m => m.user_id)
   let profilesById = {}
   if (userIds.length) {
     const { data: profs } = await _supabase
       .from('profiles')
       .select('id, display_name, avatar_url')
       .in('id', userIds)
-    ;(profs||[]).forEach(p => { profilesById[p.id] = p })
+    ;(profs || []).forEach(p => { profilesById[p.id] = p })
   }
 
-  const accepted = members.filter(m => m.status === 'accepted').length
-  const pending = members.filter(m => m.status === 'pending').length
-  const declined = members.filter(m => m.status === 'declined').length
-  if (members.length) {
-    document.getElementById('team-summary').textContent =
-      `${accepted} sí · ${pending} pendiente · ${declined} no`
+  // Load group members for add-member modal
+  if (isLeader) {
+    const { data: gm } = await _supabase
+      .from('group_members')
+      .select('user_id, roles')
+      .eq('group_id', svc.group_id)
+    const gmUserIds = (gm || []).map(m => m.user_id)
+    let gmProfiles = {}
+    if (gmUserIds.length) {
+      const { data: gmP } = await _supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url')
+        .in('id', gmUserIds)
+      ;(gmP || []).forEach(p => { gmProfiles[p.id] = p })
+    }
+    groupMembers = (gm || []).map(m => ({
+      user_id: m.user_id,
+      display_name: gmProfiles[m.user_id]?.display_name || 'Músico',
+      avatar_url: gmProfiles[m.user_id]?.avatar_url || null,
+      roles: m.roles || []
+    }))
   }
 
-  const teamList = document.getElementById('team-list')
-  if (members.length === 0) {
-    teamList.innerHTML = '<div class="empty-state">No hay músicos asignados aún.</div>'
+  renderContent(svc)
+  renderTeam(svc, profilesById)
+  renderResponseBanner(svc)
+  renderCalendar(svc, group?.name || '')
+  renderEnviarBtn(svc)
+
+  document.getElementById('main-content').style.display = 'flex'
+}
+
+/* ---- Render contenido ---- */
+function renderContent(svc) {
+  const display = document.getElementById('content-display')
+  if (svc.setlist_id && svc.setlist) {
+    const url = `/setlist-view.html?id=${svc.setlist_id}`
+    display.innerHTML = `
+      <a class="content-item" href="${url}">
+        <div class="content-icon"><i class="ti ti-list-check"></i></div>
+        <div>
+          <div class="content-name">${svc.setlist.name}</div>
+          <div class="content-meta">Setlist · ver canciones →</div>
+        </div>
+        <i class="ti ti-chevron-right content-chevron"></i>
+      </a>`
+  } else if (svc.medley_id && svc.medleys) {
+    const url = `/medley-view.html?id=${svc.medley_id}`
+    display.innerHTML = `
+      <a class="content-item" href="${url}">
+        <div class="content-icon"><i class="ti ti-layers-intersect"></i></div>
+        <div>
+          <div class="content-name">${svc.medleys.name}</div>
+          <div class="content-meta">Medley · ver canciones →</div>
+        </div>
+        <i class="ti ti-chevron-right content-chevron"></i>
+      </a>`
   } else {
-    members.forEach(m => {
-      const p = profilesById[m.user_id] || {}
-      const name = p.display_name || 'Músico'
-      const initials = name.substring(0, 2).toUpperCase()
-      const statusLabel = { pending: 'PENDIENTE', accepted: 'ACEPTADO', declined: 'NO PUEDE' }[m.status] || 'PENDIENTE'
-
-      const row = document.createElement('div')
-      row.className = 'member-row'
-      row.innerHTML = `
-        <div class="m-avatar">
-          ${p.avatar_url ? `<img src="${p.avatar_url}" alt="${initials}">` : initials}
-        </div>
-        <div class="m-info">
-          <div class="m-name">${name}</div>
-          <div class="m-instrument">${m.instrument || 'Sin instrumento asignado'}</div>
-        </div>
-        <div class="status-badge ${m.status || 'pending'}">${statusLabel}</div>
-      `
-      teamList.appendChild(row)
-
-      // My entry
-      if (m.user_id === currentUser.id) {
-        myServiceMember = m
-      }
-    })
-  }
-
-  // Show my response banner (only if I'm a member and not the leader)
-  if (myServiceMember && !isLeader) {
-    const banner = document.getElementById('my-response-banner')
-    banner.classList.add('visible')
-    document.getElementById('response-instrument').innerHTML =
-      `Instrumento: <strong>${myServiceMember.instrument || 'Sin asignar'}</strong>`
-    actualizarBotonesRespuesta(myServiceMember.status)
+    display.innerHTML = `<div class="no-content">${isLeader ? 'Sin contenido — usá "Cambiar" para asignar un setlist o medley.' : 'El líder aún no asignó contenido.'}</div>`
   }
 }
 
-function actualizarBotonesRespuesta(status) {
-  document.getElementById('btn-accept').classList.toggle('active', status === 'accepted')
-  document.getElementById('btn-decline').classList.toggle('active', status === 'declined')
-  document.getElementById('btn-accept').classList.toggle('current', status === 'accepted')
-  document.getElementById('btn-decline').classList.toggle('current', status === 'declined')
+/* ---- Render equipo ---- */
+function renderTeam(svc, profilesById) {
+  const members = svc.service_members || []
+  const confirmed = members.filter(m => m.status === 'accepted').length
+  const list = document.getElementById('team-list')
+  const counter = document.getElementById('team-counter')
+
+  if (members.length > 0) {
+    counter.style.display = 'flex'
+    counter.innerHTML = `<span class="confirmed">${confirmed}</span>&nbsp;de ${members.length} confirmados`
+  } else {
+    counter.style.display = 'none'
+  }
+
+  if (!members.length) {
+    list.innerHTML = `<div style="padding:0.7rem 1rem 0.9rem;font-size:0.82rem;color:#4a5568;font-style:italic">${isLeader ? 'Usá "+ Agregar" para convocar músicos.' : 'El líder aún no armó el equipo.'}</div>`
+    return
+  }
+
+  list.innerHTML = members.map(m => {
+    const p = profilesById[m.user_id] || {}
+    const name = p.display_name || 'Músico'
+    const initials = name.substring(0, 2).toUpperCase()
+    const avatarHtml = p.avatar_url
+      ? `<img src="${p.avatar_url}" alt="${initials}">`
+      : initials
+    const statusLabel = m.status === 'accepted' ? 'Listo' : m.status === 'declined' ? 'No puede' : 'Pendiente'
+    const statusClass = m.status === 'accepted' ? 'accepted' : m.status === 'declined' ? 'declined' : 'pending'
+
+    let actionsHtml = `<span class="status-badge ${statusClass}">${statusLabel}</span>`
+    if (isLeader) {
+      actionsHtml += `<button onclick="quitarDelEquipo('${m.id}')" style="background:none;border:none;color:#4a5568;cursor:pointer;padding:4px;font-size:0.85rem;margin-left:2px" title="Quitar"><i class="ti ti-x"></i></button>`
+    }
+
+    return `
+      <div class="team-member-row">
+        <div class="team-avatar">${avatarHtml}</div>
+        <div class="team-info">
+          <div class="team-name">${name}</div>
+          ${m.instrument ? `<div class="team-role"><i class="ti ti-guitar-pick"></i>${m.instrument}</div>` : ''}
+        </div>
+        ${actionsHtml}
+      </div>`
+  }).join('')
 }
 
+/* ---- Render banner de respuesta ---- */
+function renderResponseBanner(svc) {
+  if (!myMembership) return
+  const banner = document.getElementById('response-banner')
+  banner.style.display = 'block'
+
+  const d = new Date(svc.service_date + 'T12:00:00')
+  const dateStr = `${DAYS_ES[d.getDay()]} ${d.getDate()} ${MONTHS_ES[d.getMonth()]}${svc.service_time ? ' · ' + svc.service_time : ''}`
+
+  document.getElementById('rb-role').textContent = myMembership.instrument || svc.name
+  document.getElementById('rb-meta').textContent = dateStr
+
+  if (myMembership.status === 'pending') {
+    document.getElementById('rb-btns').style.display = 'flex'
+    document.getElementById('rb-responded').style.display = 'none'
+  } else {
+    document.getElementById('rb-btns').style.display = 'none'
+    const respondedEl = document.getElementById('rb-responded')
+    respondedEl.style.display = 'flex'
+    if (myMembership.status === 'accepted') {
+      respondedEl.innerHTML = `<i class="ti ti-circle-check" style="color:#22c55e"></i> <span style="color:#22c55e;font-weight:600">Confirmado</span> — nos vemos ahí!`
+    } else {
+      respondedEl.innerHTML = `<i class="ti ti-circle-x" style="color:#ef4444"></i> <span style="color:#94a3b8">Marcaste que no podés venir.</span>`
+    }
+  }
+}
+
+/* ---- Render calendario ---- */
+function renderCalendar(svc, groupName) {
+  const show = myMembership?.status === 'accepted' || isLeader
+  if (!show) return
+
+  const calCard = document.getElementById('calendar-card')
+  calCard.style.display = 'block'
+
+  const d = new Date(svc.service_date + 'T12:00:00')
+  const [h, min] = (svc.service_time || '10:00').split(':').map(Number)
+  const startDate = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h, min)
+  const endDate = new Date(startDate.getTime() + 90 * 60000)
+
+  const fmt = dt => dt.toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z'
+  const title = encodeURIComponent(`${svc.name} — ${groupName}`)
+  const loc = encodeURIComponent(groupName)
+
+  // Google Calendar link
+  document.getElementById('cal-google').href =
+    `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(startDate)}/${fmt(endDate)}&location=${loc}`
+}
+
+/* ---- Render enviar btn ---- */
+function renderEnviarBtn(svc) {
+  if (!isLeader) return
+  const members = svc.service_members || []
+  const allResponded = members.length > 0 && members.every(m => m.status !== 'pending')
+  const btn = document.getElementById('enviar-btn')
+  if (allResponded) {
+    btn.className = 'btn-enviar sent'
+    btn.innerHTML = '<i class="ti ti-circle-check"></i> Todos respondieron'
+  }
+}
+
+/* ---- Responder como músico ---- */
 async function responder(status) {
-  if (!myServiceMember) return
+  if (!myMembership) return
+  const btns = document.getElementById('rb-btns')
+  btns.style.opacity = '0.5'
+  btns.style.pointerEvents = 'none'
+
   const { error } = await _supabase
     .from('service_members')
     .update({ status })
-    .eq('id', myServiceMember.id)
+    .eq('id', myMembership.id)
 
-  if (error) { showToast('No se pudo actualizar tu respuesta'); return }
-  myServiceMember.status = status
-  actualizarBotonesRespuesta(status)
+  if (error) { showToast('Error al guardar'); btns.style.opacity = ''; btns.style.pointerEvents = ''; return }
+  myMembership.status = status
+  showToast(status === 'accepted' ? '¡Genial, confirmado!' : 'Marcado como no disponible', 'success')
 
-  // Update the badge in the team list
-  const rows = document.querySelectorAll('.member-row')
-  rows.forEach(row => {
-    const nameEl = row.querySelector('.m-name')
-    if (nameEl) {
-      const badge = row.querySelector('.status-badge')
-      // Simple check: update row if it matches our member by re-loading
-    }
-  })
+  const respondedEl = document.getElementById('rb-responded')
+  btns.style.display = 'none'
+  respondedEl.style.display = 'flex'
+  if (status === 'accepted') {
+    respondedEl.innerHTML = `<i class="ti ti-circle-check" style="color:#22c55e"></i> <span style="color:#22c55e;font-weight:600">Confirmado</span> — nos vemos ahí!`
+    document.getElementById('calendar-card').style.display = 'block'
+    renderCalendar(svcData, '')
+  } else {
+    respondedEl.innerHTML = `<i class="ti ti-circle-x" style="color:#ef4444"></i> <span style="color:#94a3b8">Marcaste que no podés venir.</span>`
+  }
 
-  showToast(status === 'accepted' ? 'Confirmaste tu participación' : 'Marcaste que no podés', 'success')
-  // Reload team to update badges
-  setTimeout(() => init(), 800)
+  // Refresh team display
+  await refreshTeam()
 }
 
+/* ---- Refresh team ---- */
+async function refreshTeam() {
+  const { data: members } = await _supabase
+    .from('service_members')
+    .select('id, user_id, instrument, status')
+    .eq('service_id', serviceId)
+
+  const userIds = (members || []).map(m => m.user_id)
+  let profilesById = {}
+  if (userIds.length) {
+    const { data: profs } = await _supabase.from('profiles').select('id, display_name, avatar_url').in('id', userIds)
+    ;(profs || []).forEach(p => { profilesById[p.id] = p })
+  }
+  svcData.service_members = members || []
+  renderTeam(svcData, profilesById)
+  renderEnviarBtn(svcData)
+}
+
+/* ---- Enviar requests ---- */
+async function enviarRequests() {
+  const members = svcData.service_members || []
+  if (!members.length) { showToast('Agregá músicos al equipo primero'); return }
+
+  // Mark all pending as "sent" (they already exist as pending in DB - this is the notification trigger)
+  const btn = document.getElementById('enviar-btn')
+  btn.disabled = true
+  btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Enviando...'
+
+  // Simulate send (in a real app this would trigger push notifications)
+  await new Promise(r => setTimeout(r, 800))
+
+  btn.disabled = false
+  btn.className = 'btn-enviar sent'
+  btn.innerHTML = '<i class="ti ti-circle-check"></i> Requests enviados'
+  showToast('Los músicos ya pueden ver el servicio', 'success')
+}
+
+/* ---- Cambiar contenido ---- */
+let pickerSelType = 'setlist'
+let pickerSelId = null
+let pickerSelTitle = null
+
+function abrirPickerContent() {
+  pickerSelType = 'setlist'
+  pickerSelId = null
+  document.getElementById('ctab-setlist').classList.add('active')
+  document.getElementById('ctab-medley').classList.remove('active')
+  cargarPickerItems('setlist')
+  document.getElementById('content-picker-modal').classList.add('open')
+}
+
+function cerrarPickerContent() {
+  document.getElementById('content-picker-modal').classList.remove('open')
+}
+
+function cambiarPickerTab(tipo) {
+  pickerSelType = tipo
+  pickerSelId = null
+  pickerSelTitle = null
+  document.getElementById('ctab-setlist').classList.toggle('active', tipo === 'setlist')
+  document.getElementById('ctab-medley').classList.toggle('active', tipo === 'medley')
+  cargarPickerItems(tipo)
+}
+
+async function cargarPickerItems(tipo) {
+  const list = document.getElementById('content-picker-items')
+  list.innerHTML = '<div style="padding:0.5rem;color:#64748b;font-size:0.8rem">Cargando...</div>'
+
+  const tabla = tipo === 'setlist' ? 'setlist' : 'medleys'
+  const { data } = await _supabase
+    .from(tabla)
+    .select('id, name')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  if (!data || !data.length) {
+    list.innerHTML = `<div style="padding:0.6rem;color:#64748b;font-size:0.8rem">No tenés ${tipo === 'setlist' ? 'setlists' : 'medleys'} creados.</div>`
+    return
+  }
+
+  list.innerHTML = data.map(item => `
+    <div class="picker-item" id="pi-${item.id}" onclick="selectPickerItem('${item.id}', '${item.name.replace(/'/g,"\\'")}')">
+      <div class="picker-radio" id="pr-${item.id}"></div>
+      <div class="picker-name">${item.name}</div>
+    </div>`).join('')
+}
+
+function selectPickerItem(id, title) {
+  document.querySelectorAll('.picker-item').forEach(el => el.classList.remove('selected'))
+  document.querySelectorAll('[id^="pr-"]').forEach(el => { el.classList.remove('checked'); el.innerHTML = '' })
+  pickerSelId = id
+  pickerSelTitle = title
+  document.getElementById('pi-' + id)?.classList.add('selected')
+  const r = document.getElementById('pr-' + id)
+  if (r) r.classList.add('checked')
+}
+
+async function guardarContent() {
+  if (!pickerSelId) { showToast('Elegí un item primero'); return }
+  const update = pickerSelType === 'setlist'
+    ? { setlist_id: pickerSelId, medley_id: null }
+    : { medley_id: pickerSelId, setlist_id: null }
+
+  const { error } = await _supabase.from('group_services').update(update).eq('id', serviceId)
+  if (error) { showToast('No se pudo guardar'); return }
+
+  cerrarPickerContent()
+  showToast('Contenido actualizado', 'success')
+
+  // Refresh
+  if (pickerSelType === 'setlist') {
+    svcData.setlist_id = pickerSelId
+    svcData.setlist = { id: pickerSelId, name: pickerSelTitle }
+    svcData.medley_id = null
+    svcData.medleys = null
+  } else {
+    svcData.medley_id = pickerSelId
+    svcData.medleys = { id: pickerSelId, name: pickerSelTitle }
+    svcData.setlist_id = null
+    svcData.setlist = null
+  }
+  renderContent(svcData)
+}
+
+/* ---- Agregar miembro ---- */
+let addAssignments = {}
+
+function abrirAgregarMiembro() {
+  addAssignments = {}
+  const existing = (svcData.service_members || []).map(m => m.user_id)
+  const available = groupMembers.filter(m => !existing.includes(m.user_id))
+
+  const list = document.getElementById('add-member-list')
+  if (!available.length) {
+    list.innerHTML = '<div style="padding:0.6rem;color:#64748b;font-size:0.82rem">Todos los miembros del grupo ya están en el equipo.</div>'
+  } else {
+    list.innerHTML = available.map(m => {
+      const initials = m.display_name.substring(0, 2).toUpperCase()
+      const avatarHtml = m.avatar_url ? `<img src="${m.avatar_url}" alt="${initials}">` : initials
+      const defaultRole = m.roles && m.roles.length ? m.roles[0] : ''
+      return `
+        <div class="add-member-item">
+          <div class="add-member-avatar">${avatarHtml}</div>
+          <div class="add-member-name">${m.display_name}</div>
+          <select class="role-select" id="am-${m.user_id}" onchange="addAssignments['${m.user_id}']=this.value">
+            <option value="">— rol —</option>
+            ${ROLE_OPTIONS.map(r => `<option value="${r}" ${r === defaultRole ? 'selected' : ''}>${r}</option>`).join('')}
+          </select>
+        </div>`
+    }).join('')
+    // Pre-fill default roles
+    available.forEach(m => {
+      if (m.roles && m.roles.length) addAssignments[m.user_id] = m.roles[0]
+    })
+  }
+  document.getElementById('add-member-modal').classList.add('open')
+}
+
+function cerrarAgregarMiembro() {
+  document.getElementById('add-member-modal').classList.remove('open')
+}
+
+async function guardarMiembros() {
+  // Sync selections from DOM
+  const existing = (svcData.service_members || []).map(m => m.user_id)
+  const available = groupMembers.filter(m => !existing.includes(m.user_id))
+  available.forEach(m => {
+    const sel = document.getElementById('am-' + m.user_id)
+    if (sel) addAssignments[m.user_id] = sel.value
+  })
+
+  const toAdd = Object.entries(addAssignments)
+    .filter(([uid, role]) => role && !existing.includes(uid))
+    .map(([uid, role]) => ({ service_id: serviceId, user_id: uid, instrument: role, status: 'pending' }))
+
+  if (!toAdd.length) { cerrarAgregarMiembro(); return }
+
+  const { error } = await _supabase.from('service_members').insert(toAdd)
+  if (error) { showToast('Error al guardar'); return }
+
+  cerrarAgregarMiembro()
+  showToast(`${toAdd.length} músico${toAdd.length > 1 ? 's' : ''} agregado${toAdd.length > 1 ? 's' : ''}`, 'success')
+  await refreshTeam()
+}
+
+/* ---- Quitar del equipo ---- */
+async function quitarDelEquipo(memberId) {
+  const { error } = await _supabase.from('service_members').delete().eq('id', memberId)
+  if (error) { showToast('Error al quitar'); return }
+  svcData.service_members = (svcData.service_members || []).filter(m => m.id !== memberId)
+  await refreshTeam()
+}
+
+/* ---- Exportar iCal ---- */
+function exportarIcal(e) {
+  e.preventDefault()
+  const d = new Date(svcData.service_date + 'T12:00:00')
+  const [h, min] = (svcData.service_time || '10:00').split(':').map(Number)
+  const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h, min)
+  const end = new Date(start.getTime() + 90 * 60000)
+
+  const fmt = dt => dt.toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z'
+  const ics = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//CQM//Musishens//ES',
+    'BEGIN:VEVENT',
+    `DTSTART:${fmt(start)}`,
+    `DTEND:${fmt(end)}`,
+    `SUMMARY:${svcData.name}`,
+    `DESCRIPTION:Servicio de adoración`,
+    'END:VEVENT', 'END:VCALENDAR'
+  ].join('\r\n')
+
+  const blob = new Blob([ics], { type: 'text/calendar' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = `${svcData.name}.ics`
+  a.click(); URL.revokeObjectURL(url)
+}
+
+/* ---- Eliminar servicio ---- */
 function abrirConfirmEliminar() { document.getElementById('confirm-eliminar-modal').classList.add('open') }
 function cerrarConfirmEliminar() { document.getElementById('confirm-eliminar-modal').classList.remove('open') }
 async function eliminarServicio() {
   cerrarConfirmEliminar()
-  await _supabase.from('service_members').delete().eq('service_id', serviceId)
   const { error } = await _supabase.from('group_services').delete().eq('id', serviceId)
   if (error) { showToast('No se pudo eliminar'); return }
-  window.location.href = groupId ? `/group-view.html?id=${groupId}` : '/groups.html'
+  goBack()
 }
 
-document.querySelectorAll('.modal-overlay').forEach(o => {
-  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open') })
+/* ---- Close modals on backdrop ---- */
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open')
+  })
 })
+
+// Spin animation for loader
+const style = document.createElement('style')
+style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }'
+document.head.appendChild(style)
 
 init()
 </script>

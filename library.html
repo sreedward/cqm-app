@@ -118,6 +118,86 @@
     }
     .empty { text-align: center; color: #4a5568; padding: 3rem 0; font-size: 0.9rem; }
     .loading { text-align: center; color: #4a5568; padding: 3rem 0; }
+
+    /* ── Requests pendientes ── */
+    #requests-section { padding: 0 1.25rem; }
+    .requests-label {
+      font-size: 0.7rem;
+      color: #f59e0b;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 0.75rem 0 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .requests-label i { font-size: 0.85rem; }
+    .request-card {
+      background: rgba(245,158,11,0.07);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 14px;
+      padding: 1rem;
+      margin-bottom: 10px;
+    }
+    .request-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 0.6rem;
+    }
+    .request-service-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      line-height: 1.3;
+    }
+    .request-group-name {
+      font-size: 0.75rem;
+      color: #f59e0b;
+      margin-top: 2px;
+    }
+    .request-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.78rem;
+      color: #8a9bb0;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .request-meta i { font-size: 0.8rem; }
+    .request-instrument {
+      font-size: 0.75rem;
+      color: #60a5fa;
+      background: rgba(59,130,246,0.12);
+      border-radius: 5px;
+      padding: 2px 8px;
+    }
+    .request-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .req-btn {
+      flex: 1;
+      padding: 0.55rem 0;
+      border-radius: 9px;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .req-btn:active { opacity: 0.7; }
+    .req-btn-accept {
+      background: #16a34a;
+      color: #fff;
+    }
+    .req-btn-decline {
+      background: rgba(239,68,68,0.15);
+      color: #f87171;
+      border: 1px solid rgba(239,68,68,0.3);
+    }
     /* ── Onboarding Modal ── */
     #onboarding-overlay {
       display: none;
@@ -393,6 +473,8 @@
     </div>
   </div>
 
+  <div id="requests-section"></div>
+
   <div class="section-label" id="count-label">Cargando...</div>
   <div class="songs-list" id="lista">
     <div class="loading">Cargando canciones...</div>
@@ -403,7 +485,7 @@
     <a class="nav-item active" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
     <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
     <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medleys</span></a>
-    <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
+    <a class="nav-item" href="/groups.html"><i class="ti ti-users-group"></i><span>Grupos</span></a>
   </div>
 </nav>
 
@@ -413,15 +495,109 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
     )
 
-    const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
     let todasLasCanciones = []
 
     async function init() {
       const { data: { session } } = await _supabase.auth.getSession()
       if (!session) { window.location.href = '/login.html'; return }
       cargarCanciones()
+      cargarRequestsPendientes(session.user.id)
       // verificarOnboarding(session.user.id) // Onboarding v1 desactivado
       verificarInstalacionPWA(session.user.id)
+    }
+
+    async function cargarRequestsPendientes(userId) {
+      const { data, error } = await _supabase
+        .from('service_members')
+        .select(`
+          id,
+          instrument,
+          status,
+          group_services (
+            id,
+            name,
+            service_date,
+            service_time,
+            groups (name)
+          )
+        `)
+        .eq('user_id', userId)
+        .eq('status', 'pending')
+        .order('id', { ascending: false })
+
+      if (error || !data || data.length === 0) return
+
+      const sec = document.getElementById('requests-section')
+      const diasSemana = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
+      const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+
+      function fmtFecha(dateStr) {
+        if (!dateStr) return ''
+        const [y,m,d] = dateStr.split('-').map(Number)
+        const dt = new Date(y, m-1, d)
+        return `${diasSemana[dt.getDay()]} ${d} ${meses[m-1]}`
+      }
+
+      function fmtHora(timeStr) {
+        if (!timeStr) return ''
+        return timeStr.slice(0,5)
+      }
+
+      sec.innerHTML = `
+        <div class="requests-label"><i class="ti ti-bell-ringing"></i> Requests pendientes</div>
+        ${data.map(r => {
+          const svc = r.group_services
+          const grp = svc?.groups
+          return `
+          <div class="request-card" id="req-${r.id}">
+            <div class="request-card-top">
+              <div>
+                <div class="request-service-name">${svc?.name || 'Servicio'}</div>
+                <div class="request-group-name"><i class="ti ti-users"></i> ${grp?.name || ''}</div>
+              </div>
+              <span class="request-instrument">${r.instrument || 'Músico'}</span>
+            </div>
+            <div class="request-meta">
+              ${svc?.service_date ? `<span><i class="ti ti-calendar"></i> ${fmtFecha(svc.service_date)}</span>` : ''}
+              ${svc?.service_time ? `<span><i class="ti ti-clock"></i> ${fmtHora(svc.service_time)}</span>` : ''}
+            </div>
+            <div class="request-actions">
+              <button class="req-btn req-btn-accept" onclick="responderServicio(${r.id}, 'accepted')">✅ Acepto</button>
+              <button class="req-btn req-btn-decline" onclick="responderServicio(${r.id}, 'declined')">❌ No puedo</button>
+            </div>
+          </div>`
+        }).join('')}
+      `
+    }
+
+    async function responderServicio(memberId, status) {
+      const card = document.getElementById('req-' + memberId)
+      if (card) {
+        card.style.opacity = '0.5'
+        card.style.pointerEvents = 'none'
+      }
+      const { error } = await _supabase
+        .from('service_members')
+        .update({ status })
+        .eq('id', memberId)
+      if (!error && card) {
+        card.style.transition = 'max-height 0.35s ease, opacity 0.25s'
+        card.style.maxHeight = '0'
+        card.style.overflow = 'hidden'
+        card.style.opacity = '0'
+        card.style.marginBottom = '0'
+        card.style.padding = '0'
+        setTimeout(() => {
+          card.remove()
+          // hide label if no more cards
+          const sec = document.getElementById('requests-section')
+          if (sec && !sec.querySelector('.request-card')) sec.innerHTML = ''
+        }, 380)
+      } else if (error && card) {
+        card.style.opacity = '1'
+        card.style.pointerEvents = ''
+        alert('No se pudo actualizar. Intentá de nuevo.')
+      }
     }
 
     // ── PWA Install Prompt (reemplaza onboarding v1) ──
@@ -551,12 +727,12 @@
 
       lista.innerHTML = canciones.map(c => `
         <div class="song-card" onclick="window.location.href='/song.html?id=${c.id}'">
-          <div class="song-icon">${esc(getInitials(c.title))}</div>
+          <div class="song-icon">${getInitials(c.title)}</div>
           <div class="song-info">
-            <div class="song-title">${esc(c.title)}</div>
-            <div class="song-artist">${esc(c.artist || 'Artista desconocido')}</div>
+            <div class="song-title">${c.title}</div>
+            <div class="song-artist">${c.artist || 'Artista desconocido'}</div>
           </div>
-          <div class="song-key">${esc(c['original key'] || '?')}</div>
+          <div class="song-key">${c['original key'] || '?'}</div>
         </div>
       `).join('')
     }

@@ -186,6 +186,7 @@ header {
 }
 .service-content-ref i { font-size: 0.8rem; color: #475569; }
 .service-arrow { color: #2d3f5a; font-size: 0.95rem; flex-shrink: 0; }
+.service-time-ref { font-size: 0.72rem; color: #64748b; margin-top: 2px; display: flex; align-items: center; gap: 3px; }
 .service-card-bottom {
   padding: 0.6rem 1rem;
   border-top: 1px solid rgba(30, 45, 69, 0.60);
@@ -620,9 +621,15 @@ header {
         <div class="modal-input-label">Nombre</div>
         <input class="modal-input" type="text" id="cs-name" placeholder="Ej: Servicio 21 Sep" maxlength="80" autocomplete="off">
       </div>
-      <div class="modal-input-wrap">
-        <div class="modal-input-label">Fecha</div>
-        <input class="modal-input" type="date" id="cs-date">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
+        <div class="modal-input-wrap">
+          <div class="modal-input-label">Fecha</div>
+          <input class="modal-input" type="date" id="cs-date">
+        </div>
+        <div class="modal-input-wrap">
+          <div class="modal-input-label">Hora</div>
+          <input class="modal-input" type="time" id="cs-time" value="10:00" style="min-width:90px">
+        </div>
       </div>
       <div class="modal-btns">
         <button class="btn-cancel" onclick="cerrarCrearServicio()">Cancelar</button>
@@ -735,10 +742,10 @@ header {
 
 <!-- Bottom nav — igual que el resto de la app -->
 <nav class="bottom-nav">
-  <a class="nav-item" href="/library.html"><i class="ti ti-music"></i><span>Canciones</span></a>
+  <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
   <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
   <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
-  <a class="nav-item" href="/more.html"><i class="ti ti-dots-circle-horizontal"></i><span>Más</span></a>
+  <a class="nav-item" href="/groups.html"><i class="ti ti-users-group"></i><span>Grupos</span></a>
 </nav>
 
 <script>
@@ -760,7 +767,7 @@ let editingMemberId = null
 let toastTimer = null
 
 // State for create service wizard
-let csState = { name:'', date:'', type:'none', contentId:null, contentTitle:'' }
+let csState = { name:'', date:'', time:'10:00', type:'none', contentId:null, contentTitle:'' }
 let groupMembers = [] // [{user_id, display_name, avatar_url, roles:[]}]
 let csAssignments = {} // userId -> instrument
 
@@ -935,7 +942,7 @@ async function cargarServicios() {
   const { data, error } = await _supabase
     .from('group_services')
     .select(`
-      id, name, service_date, setlist_id, medley_id,
+      id, name, service_date, service_time, setlist_id, medley_id,
       setlist(name),
       medleys(name),
       service_members(user_id, instrument, status)
@@ -1015,6 +1022,7 @@ async function cargarServicios() {
         <div class="service-info">
           <div class="service-name">${svc.name}</div>
           <div class="service-content-ref">${contentRef}</div>
+          ${svc.service_time ? `<div class="service-time-ref"><i class="ti ti-clock"></i> ${svc.service_time}</div>` : ''}
         </div>
         <i class="ti ti-chevron-right service-arrow"></i>
       </div>
@@ -1056,6 +1064,7 @@ async function csNext(paso) {
     if (!date) { showToast('Elegí una fecha'); return }
     csState.name = name
     csState.date = date
+    csState.time = document.getElementById('cs-time').value || '10:00'
     // Reset content type selection
     document.querySelectorAll('.content-type-btn').forEach(b => b.classList.remove('selected'))
     csState.type = 'none'
@@ -1157,6 +1166,7 @@ async function csCrear() {
     group_id: groupId,
     name: csState.name,
     service_date: csState.date,
+    service_time: csState.time || null,
     created_by: currentUser.id,
     setlist_id: csState.type === 'setlist' && csState.contentId ? csState.contentId : null,
     medley_id: csState.type === 'medley' && csState.contentId ? csState.contentId : null
