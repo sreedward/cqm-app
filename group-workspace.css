@@ -12,6 +12,8 @@ body {
   background: var(--cqm-bg) !important;
   color: var(--cqm-text);
 }
+body:has(.overlay.open),
+body:has(.modal-overlay.open) { overflow: hidden; }
 body::before { display: none !important; }
 header, .tab-bar, .bottom-nav, .nav-row {
   backdrop-filter: none !important;
@@ -169,6 +171,20 @@ textarea.modal-input { resize: vertical; line-height: 1.4; }
 .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; color: #aebbd0; font-size: .79rem; }
 .simple-toggle { width: 42px; height: 24px; accent-color: #3b82f6; }
 
+/* Modal layers must sit above the floating bottom navigation. */
+.overlay,
+.modal-overlay {
+  z-index: 2000 !important;
+  overscroll-behavior: contain;
+}
+.sheet,
+.modal-sheet {
+  max-height: calc(100dvh - 16px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1rem));
+}
+
 .channel-member { position: relative; }
 .channel-member::before {
   content: '';
@@ -183,6 +199,21 @@ textarea.modal-input { resize: vertical; line-height: 1.4; }
 
 @media (min-width: 760px) {
   .content { max-width: 980px; margin: 0 auto; width: 100%; }
-  .modal-sheet, .sheet { max-width: 520px; left: 50%; transform: translateX(-50%); }
+  .overlay,
+  .modal-overlay {
+    align-items: center !important;
+    padding: 24px;
+  }
+  .modal-sheet,
+  .sheet {
+    width: min(100%, 520px);
+    max-width: 520px;
+    max-height: calc(100dvh - 48px);
+    left: auto;
+    transform: none;
+    border-radius: 18px;
+  }
+  .modal-handle,
+  .sheet-handle { display: none; }
   .workspace-card { max-width: 900px; margin-left: auto; margin-right: auto; }
 }
