@@ -198,54 +198,6 @@ header {
 }
 .no-services i { font-size: 1.5rem; display: block; margin-bottom: 6px; opacity: 0.4; }
 
-/* ── Inline create service form ── */
-.inline-create {
-  background: rgba(13,22,38,0.70);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(59,130,246,0.18);
-  border-radius: 18px;
-  padding: 1.4rem 1.25rem 1.5rem;
-}
-.inline-create-title {
-  font-size: 1.05rem; font-weight: 700; color: #e2e8f0;
-  margin-bottom: 0.2rem;
-}
-.inline-create-sub {
-  font-size: 0.75rem; color: #64748b; margin-bottom: 1.25rem;
-}
-.ic-field { margin-bottom: 1rem; }
-.ic-label {
-  font-size: 0.68rem; color: #64748b;
-  letter-spacing: 0.8px; text-transform: uppercase;
-  margin-bottom: 0.4rem;
-}
-.ic-input {
-  width: 100%;
-  background: rgba(8,15,28,0.60);
-  border: 1px solid rgba(59,130,246,0.18);
-  border-radius: 10px;
-  padding: 0.75rem 0.9rem;
-  color: #fff; font-size: 16px; outline: none;
-  transition: border-color 0.2s;
-}
-.ic-input:focus { border-color: rgba(59,130,246,0.50); }
-.ic-input::placeholder { color: #4a5568; }
-.ic-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-.ic-input-time { min-width: 105px; }
-.ic-submit {
-  width: 100%;
-  background: linear-gradient(135deg,#3b82f6,#6366f1);
-  border: none; border-radius: 12px;
-  padding: 0.85rem;
-  font-size: 0.95rem; font-weight: 700; color: #fff;
-  cursor: pointer; margin-top: 0.25rem;
-  box-shadow: 0 4px 16px rgba(59,130,246,0.35);
-  transition: opacity 0.2s;
-}
-.ic-submit:hover { opacity: 0.88; }
-.ic-submit:disabled { opacity: 0.5; }
-
 /* ── Empty state (no groups) ── */
 .empty-state {
   text-align: center; padding: 4rem 2rem;
@@ -306,6 +258,9 @@ header {
 .field-input::placeholder { color: #4a5568; }
 .field-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .field-input-time { min-width: 90px; }
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.field textarea.field-input { min-height: 82px; resize: vertical; line-height: 1.4; font-family: inherit; }
+.field-help { color: #53637b; font-size: 0.68rem; line-height: 1.4; margin-top: 0.4rem; }
 .sheet-btns { display: flex; gap: 8px; margin-top: 1.25rem; }
 .sheet-btns button {
   flex: 1; padding: 0.85rem; border-radius: 12px; border: none;
@@ -402,11 +357,37 @@ header {
       <input class="field-input" type="text" id="cs-name" placeholder="Ej: Domingo Mañana" maxlength="60" autocomplete="off">
     </div>
     <div class="field">
-      <div class="field-label">Fecha y Hora</div>
+      <div class="field-label">Fecha e inicio</div>
       <div class="field-row">
         <input class="field-input" type="date" id="cs-date">
         <input class="field-input field-input-time" type="time" id="cs-time" value="10:00">
       </div>
+    </div>
+    <div class="field-grid">
+      <div class="field">
+        <div class="field-label">Hora de llegada</div>
+        <input class="field-input" type="time" id="cs-arrival" value="09:15">
+      </div>
+      <div class="field">
+        <div class="field-label">Lugar</div>
+        <input class="field-input" type="text" id="cs-location" placeholder="Auditorio principal" maxlength="100">
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">Ensayo <span style="text-transform:none;letter-spacing:0">(opcional)</span></div>
+      <div class="field-row">
+        <input class="field-input" type="date" id="cs-rehearsal-date">
+        <input class="field-input field-input-time" type="time" id="cs-rehearsal-time" value="18:00">
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">Vestimenta <span style="text-transform:none;letter-spacing:0">(opcional)</span></div>
+      <input class="field-input" type="text" id="cs-dress" placeholder="Ej: Negro y denim" maxlength="100">
+    </div>
+    <div class="field">
+      <div class="field-label">Indicaciones para el equipo <span style="text-transform:none;letter-spacing:0">(opcional)</span></div>
+      <textarea class="field-input" id="cs-note" placeholder="Ej: Llegar con in-ears listos" maxlength="500"></textarea>
+      <div class="field-help">Todo esto aparecerá en el resumen del servicio.</div>
     </div>
     <div class="sheet-btns">
       <button class="btn-cancel" onclick="cerrarServicio()">Cancelar</button>
@@ -494,12 +475,6 @@ function generarCodigo() {
 const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
 
-function nextSunday() {
-  const d = new Date()
-  d.setDate(d.getDate() + ((7 - d.getDay()) % 7 || 7))
-  return d.toISOString().slice(0, 10)
-}
-
 function fmtFecha(dateStr) {
   if (!dateStr) return ''
   const [y, m, d] = dateStr.split('-').map(Number)
@@ -580,22 +555,7 @@ async function cargarDashboard() {
         <div class="services-list">
           ${groupServices.length === 0
             ? isLeader
-              ? `<div class="inline-create" id="ic-${g.id}">
-                  <div class="inline-create-title">Nuevo Servicio</div>
-                  <div class="inline-create-sub">${g.name}</div>
-                  <div class="ic-field">
-                    <div class="ic-label">Nombre</div>
-                    <input class="ic-input" type="text" id="ic-name-${g.id}" placeholder="Ej: Domingo Mañana" maxlength="60" autocomplete="off">
-                  </div>
-                  <div class="ic-field">
-                    <div class="ic-label">Fecha y Hora</div>
-                    <div class="ic-row">
-                      <input class="ic-input" type="date" id="ic-date-${g.id}" value="${nextSunday()}">
-                      <input class="ic-input ic-input-time" type="time" id="ic-time-${g.id}" value="10:00">
-                    </div>
-                  </div>
-                  <button class="ic-submit" id="ic-btn-${g.id}" onclick="crearServicioInline(${g.id})">Crear Servicio</button>
-                </div>`
+              ? `<div class="no-services"><i class="ti ti-calendar-plus"></i>Todavía no hay servicios próximos.<button class="new-service-btn" onclick="abrirServicio(${g.id}, '${g.name.replace(/'/g,"\\'")}')"><i class="ti ti-plus"></i> Crear primer servicio</button></div>`
               : `<div class="no-services"><i class="ti ti-calendar-off"></i>Sin servicios próximos</div>`
             : groupServices.map(s => renderServiceCard(s, isLeader)).join('')
           }
@@ -676,23 +636,6 @@ function irAGrupo(groupId) {
   window.location.href = `/group-view.html?id=${groupId}`
 }
 
-/* ─── Create service inline (empty state form) ─── */
-async function crearServicioInline(groupId) {
-  const name = document.getElementById(`ic-name-${groupId}`).value.trim()
-  const date = document.getElementById(`ic-date-${groupId}`).value
-  const time = document.getElementById(`ic-time-${groupId}`).value || '10:00'
-  if (!name) { showToast('Ingresá un nombre para el servicio'); document.getElementById(`ic-name-${groupId}`).focus(); return }
-  if (!date) { showToast('Seleccioná una fecha'); return }
-  const btn = document.getElementById(`ic-btn-${groupId}`)
-  btn.disabled = true; btn.textContent = 'Creando...'
-  const { data: svc, error } = await _supabase
-    .from('group_services')
-    .insert({ group_id: groupId, name, service_date: date, service_time: time })
-    .select().single()
-  if (error) { showToast('No se pudo crear el servicio'); btn.disabled = false; btn.textContent = 'Crear Servicio'; return }
-  window.location.href = `/service-view.html?id=${svc.id}`
-}
-
 /* ─── Create service modal ─── */
 function abrirServicio(groupId, groupName) {
   csGroupId = groupId
@@ -704,6 +647,12 @@ function abrirServicio(groupId, groupName) {
   d.setDate(d.getDate() + ((7 - d.getDay()) % 7 || 7))
   document.getElementById('cs-date').value = d.toISOString().slice(0, 10)
   document.getElementById('cs-time').value = '10:00'
+  document.getElementById('cs-arrival').value = '09:15'
+  document.getElementById('cs-location').value = ''
+  document.getElementById('cs-rehearsal-date').value = ''
+  document.getElementById('cs-rehearsal-time').value = '18:00'
+  document.getElementById('cs-dress').value = ''
+  document.getElementById('cs-note').value = ''
   document.getElementById('modal-servicio').classList.add('open')
   setTimeout(() => document.getElementById('cs-name').focus(), 150)
 }
@@ -716,6 +665,12 @@ async function crearServicio() {
   const name = document.getElementById('cs-name').value.trim()
   const date = document.getElementById('cs-date').value
   const time = document.getElementById('cs-time').value || '10:00'
+  const arrival = document.getElementById('cs-arrival').value || null
+  const location = document.getElementById('cs-location').value.trim() || null
+  const rehearsalDate = document.getElementById('cs-rehearsal-date').value || null
+  const rehearsalTime = rehearsalDate ? (document.getElementById('cs-rehearsal-time').value || null) : null
+  const dressCode = document.getElementById('cs-dress').value.trim() || null
+  const leaderNote = document.getElementById('cs-note').value.trim() || null
   if (!name) { showToast('Ingresá un nombre para el servicio'); return }
   if (!date) { showToast('Seleccioná una fecha'); return }
 
@@ -724,7 +679,19 @@ async function crearServicio() {
 
   const { data: svc, error } = await _supabase
     .from('group_services')
-    .insert({ group_id: csGroupId, name, service_date: date, service_time: time })
+    .insert({
+      group_id: csGroupId,
+      name,
+      service_date: date,
+      service_time: time,
+      arrival_time: arrival,
+      location,
+      rehearsal_date: rehearsalDate,
+      rehearsal_time: rehearsalTime,
+      dress_code: dressCode,
+      leader_note: leaderNote,
+      created_by: currentUser.id
+    })
     .select()
     .single()
 

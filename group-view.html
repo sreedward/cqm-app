@@ -665,6 +665,10 @@ header {
         </div>
       </div>
       <div class="modal-input-wrap">
+        <div class="modal-input-label">Vestimenta (opcional)</div>
+        <input class="modal-input" type="text" id="cs-dress" placeholder="Ej: Negro y denim" maxlength="100">
+      </div>
+      <div class="modal-input-wrap">
         <div class="modal-input-label">Nota para el equipo (opcional)</div>
         <input class="modal-input" type="text" id="cs-note" placeholder="Ej: Llegar con in-ears listos" maxlength="180">
       </div>
@@ -805,7 +809,7 @@ let editingMemberId = null
 let toastTimer = null
 
 // State for create service wizard
-let csState = { name:'', date:'', time:'10:00', arrival:'', location:'', rehearsalDate:'', rehearsalTime:'', note:'', type:'none', contentId:null, contentTitle:'' }
+let csState = { name:'', date:'', time:'10:00', arrival:'', location:'', rehearsalDate:'', rehearsalTime:'', dress:'', note:'', type:'none', contentId:null, contentTitle:'' }
 let groupMembers = [] // [{user_id, display_name, avatar_url, roles:[]}]
 let csAssignments = {} // userId -> instrument
 
@@ -1081,7 +1085,7 @@ async function cargarServicios() {
 
 /* ---- Crear servicio wizard ---- */
 function abrirCrearServicio() {
-  csState = { name:'', date:'', time:'10:00', arrival:'09:15', location:'', rehearsalDate:'', rehearsalTime:'18:00', note:'', type:'none', contentId:null, contentTitle:'' }
+  csState = { name:'', date:'', time:'10:00', arrival:'09:15', location:'', rehearsalDate:'', rehearsalTime:'18:00', dress:'', note:'', type:'none', contentId:null, contentTitle:'' }
   csAssignments = {}
   document.getElementById('cs-name').value = ''
   // Default to next Sunday
@@ -1093,6 +1097,7 @@ function abrirCrearServicio() {
   document.getElementById('cs-location').value = ''
   document.getElementById('cs-rehearsal-date').value = ''
   document.getElementById('cs-rehearsal-time').value = '18:00'
+  document.getElementById('cs-dress').value = ''
   document.getElementById('cs-note').value = ''
 
   mostrarPasoCS(1)
@@ -1122,6 +1127,7 @@ async function csNext(paso) {
     csState.location = document.getElementById('cs-location').value.trim()
     csState.rehearsalDate = document.getElementById('cs-rehearsal-date').value || ''
     csState.rehearsalTime = csState.rehearsalDate ? (document.getElementById('cs-rehearsal-time').value || '') : ''
+    csState.dress = document.getElementById('cs-dress').value.trim()
     csState.note = document.getElementById('cs-note').value.trim()
     // Reset content type selection
     document.querySelectorAll('.content-type-btn').forEach(b => b.classList.remove('selected'))
@@ -1229,6 +1235,7 @@ async function csCrear() {
     location: csState.location || null,
     rehearsal_date: csState.rehearsalDate || null,
     rehearsal_time: csState.rehearsalTime || null,
+    dress_code: csState.dress || null,
     leader_note: csState.note || null,
     created_by: currentUser.id,
     setlist_id: csState.type === 'setlist' && csState.contentId ? csState.contentId : null,
