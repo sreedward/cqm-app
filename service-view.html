@@ -319,6 +319,7 @@ header {
 .toast.success { border-color: rgba(34,197,94,0.30); }
 .toast.success i { color: #22c55e; }
 </style>
+<link rel="stylesheet" href="/group-workspace.css">
 </head>
 <body>
 
@@ -350,53 +351,63 @@ header {
     <div id="rb-responded" class="responded-state" style="display:none"></div>
   </div>
 
-  <!-- Contenido card -->
-  <div class="card" id="content-card">
-    <div class="card-header">
-      <span class="card-label">Contenido</span>
-      <button class="card-action-btn" id="cambiar-content-btn" style="display:none" onclick="abrirPickerContent()">
-        <i class="ti ti-pencil"></i> Cambiar
-      </button>
+  <div class="card workspace-card">
+    <div class="workspace-tabs">
+      <button class="workspace-tab active" id="workspace-tab-resumen" onclick="cambiarWorkspaceTab('resumen')">Resumen</button>
+      <button class="workspace-tab" id="workspace-tab-equipo" onclick="cambiarWorkspaceTab('equipo')">Equipo <span id="team-tab-count"></span></button>
+      <button class="workspace-tab" id="workspace-tab-recursos" onclick="cambiarWorkspaceTab('recursos')">Recursos <span id="resource-tab-count"></span></button>
     </div>
-    <div id="content-display"></div>
-  </div>
 
-  <!-- Equipo card -->
-  <div class="card" id="team-card">
-    <div class="card-header">
-      <span class="card-label">Equipo</span>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="equipo-counter" id="team-counter" style="display:none"></div>
-        <button class="card-action-btn" id="add-member-btn" style="display:none" onclick="abrirAgregarMiembro()">
-          <i class="ti ti-plus"></i> Agregar
+    <section class="workspace-panel active" id="workspace-panel-resumen">
+      <div class="service-summary" id="service-summary"></div>
+      <div class="detail-section" id="rehearsal-section" style="display:none"></div>
+      <div class="detail-section">
+        <div class="detail-title">Contenido</div>
+        <button class="card-action-btn" id="cambiar-content-btn" style="display:none;float:right;margin-top:-1.8rem" onclick="abrirPickerContent()">
+          <i class="ti ti-pencil"></i> Cambiar
         </button>
+        <div id="content-display"></div>
       </div>
-    </div>
-    <div id="team-list"></div>
+      <div class="detail-section" id="run-of-show-section"></div>
+      <div class="detail-section" id="leader-note-section" style="display:none"></div>
+      <div class="detail-section" id="edit-service-wrap" style="display:none">
+        <button class="card-action-btn" onclick="abrirEditarServicio()"><i class="ti ti-pencil"></i> Editar detalles del servicio</button>
+      </div>
+      <div class="detail-section" id="calendar-card" style="display:none">
+        <div class="detail-title">Agregar al calendario</div>
+        <div class="calendar-row" style="padding:0">
+          <a class="calendar-btn" id="cal-ical" href="#" onclick="exportarIcal(event)"><i class="ti ti-calendar"></i> iPhone / iOS</a>
+          <a class="calendar-btn" id="cal-google" href="#" target="_blank"><i class="ti ti-brand-google"></i> Google</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace-panel" id="workspace-panel-equipo">
+      <div class="card-header">
+        <div class="equipo-counter" id="team-counter" style="display:none"></div>
+        <button class="card-action-btn" id="add-member-btn" style="display:none" onclick="abrirAgregarMiembro()"><i class="ti ti-plus"></i> Agregar</button>
+      </div>
+      <div id="team-list"></div>
+      <div class="enviar-btn-wrap" id="enviar-wrap" style="display:none">
+        <button class="btn-enviar" id="enviar-btn" onclick="enviarRequests()">Enviar solicitudes <i class="ti ti-send"></i></button>
+      </div>
+    </section>
+
+    <section class="workspace-panel" id="workspace-panel-recursos">
+      <div class="resource-toolbar" id="resource-filters">
+        <button class="resource-filter active" onclick="filtrarRecursos('all', this)">Todos</button>
+        <button class="resource-filter" onclick="filtrarRecursos('link', this)">Video / links</button>
+        <button class="resource-filter" onclick="filtrarRecursos('pdf', this)">PDF</button>
+        <button class="resource-filter" onclick="filtrarRecursos('audio', this)">Audio</button>
+        <button class="resource-filter" onclick="filtrarRecursos('note', this)">Notas</button>
+      </div>
+      <div class="resource-list" id="resource-list"><div class="resource-empty">Cargando recursos...</div></div>
+      <div class="detail-section" id="add-resource-wrap" style="display:none">
+        <button class="btn-enviar" onclick="abrirAgregarRecurso()"><i class="ti ti-plus"></i> Agregar recurso</button>
+      </div>
+    </section>
   </div>
 
-  <!-- Calendario (solo para músicos que aceptaron) -->
-  <div class="card" id="calendar-card" style="display:none">
-    <div class="card-header">
-      <span class="card-label">Agregar al calendario</span>
-    </div>
-    <div class="calendar-row">
-      <a class="calendar-btn" id="cal-ical" href="#" onclick="exportarIcal(event)">
-        <i class="ti ti-calendar"></i> iPhone / iOS
-      </a>
-      <a class="calendar-btn" id="cal-google" href="#" target="_blank">
-        <i class="ti ti-brand-google"></i> Google
-      </a>
-    </div>
-  </div>
-
-</div>
-
-<!-- Botón Enviar requests (leader) -->
-<div class="enviar-btn-wrap" id="enviar-wrap" style="display:none">
-  <button class="btn-enviar" id="enviar-btn" onclick="enviarRequests()">
-    Enviar requests <i class="ti ti-send"></i>
-  </button>
 </div>
 
 <!-- MODAL: Picker de contenido -->
@@ -448,6 +459,50 @@ header {
   </div>
 </div>
 
+<!-- MODAL: Editar detalles del servicio -->
+<div class="modal-overlay" id="edit-service-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Detalles del servicio</div>
+    <div class="modal-subtitle">Horarios e indicaciones visibles para todo el equipo</div>
+    <div class="modal-input-wrap"><div class="modal-input-label">Nombre</div><input class="modal-input" id="edit-name" maxlength="80"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="modal-input-wrap"><div class="modal-input-label">Fecha</div><input class="modal-input" type="date" id="edit-date"></div>
+      <div class="modal-input-wrap"><div class="modal-input-label">Inicio</div><input class="modal-input" type="time" id="edit-time"></div>
+      <div class="modal-input-wrap"><div class="modal-input-label">Llegada</div><input class="modal-input" type="time" id="edit-arrival"></div>
+      <div class="modal-input-wrap"><div class="modal-input-label">Lugar</div><input class="modal-input" id="edit-location" maxlength="100"></div>
+      <div class="modal-input-wrap"><div class="modal-input-label">Fecha de ensayo</div><input class="modal-input" type="date" id="edit-rehearsal-date"></div>
+      <div class="modal-input-wrap"><div class="modal-input-label">Hora de ensayo</div><input class="modal-input" type="time" id="edit-rehearsal-time"></div>
+    </div>
+    <div class="modal-input-wrap"><div class="modal-input-label">Vestimenta</div><input class="modal-input" id="edit-dress" maxlength="100" placeholder="Opcional"></div>
+    <div class="modal-input-wrap"><div class="modal-input-label">Nota para el equipo</div><textarea class="modal-input" id="edit-note" rows="3" maxlength="500" placeholder="Indicaciones importantes"></textarea></div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="cerrarEditarServicio()">Cancelar</button><button class="btn-primary" onclick="guardarDetallesServicio()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Agregar recurso -->
+<div class="modal-overlay" id="resource-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Agregar recurso</div>
+    <div class="modal-subtitle">Compartí una referencia útil para preparar el servicio</div>
+    <div class="resource-type-grid">
+      <button class="resource-type active" data-kind="link" onclick="seleccionarTipoRecurso('link')"><i class="ti ti-link"></i>Enlace</button>
+      <button class="resource-type" data-kind="pdf" onclick="seleccionarTipoRecurso('pdf')"><i class="ti ti-file-type-pdf"></i>PDF</button>
+      <button class="resource-type" data-kind="audio" onclick="seleccionarTipoRecurso('audio')"><i class="ti ti-music"></i>Audio</button>
+      <button class="resource-type" data-kind="note" onclick="seleccionarTipoRecurso('note')"><i class="ti ti-note"></i>Nota</button>
+    </div>
+    <div class="modal-input-wrap"><div class="modal-input-label">Título</div><input class="modal-input" id="resource-title" maxlength="140" placeholder="Ej: Worship Night · referencia"></div>
+    <div class="modal-input-wrap" id="resource-url-wrap"><div class="modal-input-label">Enlace de YouTube o web</div><input class="modal-input" id="resource-url" type="url" placeholder="https://youtube.com/..."></div>
+    <div class="modal-input-wrap" id="resource-file-wrap" style="display:none"><div class="modal-input-label">Archivo</div><input class="modal-input" id="resource-file" type="file" accept="application/pdf,audio/*"><div class="resource-help">PDF o audio · máximo 25 MB</div></div>
+    <div class="modal-input-wrap" id="resource-note-wrap" style="display:none"><div class="modal-input-label">Nota</div><textarea class="modal-input" id="resource-note" rows="4" maxlength="1000" placeholder="Escribí la indicación para el equipo"></textarea></div>
+    <div class="modal-input-wrap"><div class="modal-input-label">Visible para</div><select class="modal-input" id="resource-audience" onchange="actualizarAudienciaRecurso()"><option value="all">Todo el equipo</option><option value="roles">Solo algunos roles</option></select></div>
+    <div id="resource-role-options" style="display:none"></div>
+    <label class="toggle-row"><span>Avisar al equipo</span><input class="simple-toggle" id="resource-notify" type="checkbox" checked></label>
+    <div class="modal-btns"><button class="btn-cancel" onclick="cerrarAgregarRecurso()">Cancelar</button><button class="btn-primary" id="resource-save-btn" onclick="guardarRecurso()">Guardar recurso</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <nav class="bottom-nav">
@@ -459,13 +514,14 @@ header {
   </div>
 </nav>
 
+<script src="/group-ui.js"></script>
 <script>
 const _supabase = supabase.createClient(
   'https://kzqnsbztfyhyyageuboz.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
 )
 
-const ROLE_OPTIONS = ['Cantante','Pianista','Pianista 2','Guitarrista','Guitarrista 2','Bajista','Coristas','Violinista','Trompetista','Drummer']
+const ROLE_OPTIONS = CQM_ROLE_OPTIONS
 const MONTHS_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
 const DAYS_ES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
 
@@ -482,6 +538,11 @@ let pickerTab = 'setlist'
 let pickerSelectedId = null
 let pickerSelectedTitle = null
 let toastTimer = null
+let groupData = null
+let profilesById = {}
+let resources = []
+let resourceFilter = 'all'
+let resourceKind = 'link'
 
 function goBack() {
   if (groupId) window.location.href = `/group-view.html?id=${groupId}`
@@ -494,6 +555,14 @@ function showToast(msg, type = '') {
   t.className = 'toast' + (type ? ' ' + type : '') + ' show'
   clearTimeout(toastTimer)
   toastTimer = setTimeout(() => t.classList.remove('show'), 2800)
+}
+
+function cambiarWorkspaceTab(tab) {
+  ;['resumen', 'equipo', 'recursos'].forEach(name => {
+    document.getElementById('workspace-tab-' + name)?.classList.toggle('active', name === tab)
+    document.getElementById('workspace-panel-' + name)?.classList.toggle('active', name === tab)
+  })
+  if (tab === 'recursos') cargarRecursos()
 }
 
 /* ---- Init ---- */
@@ -509,7 +578,9 @@ async function cargarServicio() {
   const { data: svc, error } = await _supabase
     .from('group_services')
     .select(`
-      id, name, service_date, service_time, setlist_id, medley_id, group_id, created_by,
+      id, name, service_date, service_time, arrival_time, location,
+      rehearsal_date, rehearsal_time, dress_code, leader_note, schedule,
+      setlist_id, medley_id, group_id, created_by,
       setlist(id, name),
       medleys(id, name),
       service_members(id, user_id, instrument, status)
@@ -528,6 +599,7 @@ async function cargarServicio() {
     .single()
 
   isLeader = group?.leader_id === currentUser.id
+  groupData = group || { name: '' }
 
   // My membership in this service
   myMembership = (svc.service_members || []).find(m => m.user_id === currentUser.id) || null
@@ -544,11 +616,13 @@ async function cargarServicio() {
     document.getElementById('cambiar-content-btn').style.display = 'flex'
     document.getElementById('add-member-btn').style.display = 'flex'
     document.getElementById('enviar-wrap').style.display = 'block'
+    document.getElementById('edit-service-wrap').style.display = 'block'
+    document.getElementById('add-resource-wrap').style.display = 'block'
   }
 
   // Load member profiles
   const userIds = (svc.service_members || []).map(m => m.user_id)
-  let profilesById = {}
+  profilesById = {}
   if (userIds.length) {
     const { data: profs } = await _supabase
       .from('profiles')
@@ -581,12 +655,49 @@ async function cargarServicio() {
   }
 
   renderContent(svc)
+  renderServiceSummary(svc)
   renderTeam(svc, profilesById)
   renderResponseBanner(svc)
   renderCalendar(svc, group?.name || '')
   renderEnviarBtn(svc)
+  await cargarRecursos()
 
   document.getElementById('main-content').style.display = 'flex'
+}
+
+function renderServiceSummary(svc) {
+  const date = new Date(svc.service_date + 'T12:00:00')
+  const dateLabel = `${DAYS_ES[date.getDay()]} ${date.getDate()} ${MONTHS_ES[date.getMonth()]}`
+  const summary = [
+    ['ti-calendar', 'Fecha', dateLabel],
+    ['ti-clock', 'Llegada / inicio', `${svc.arrival_time || '—'} · ${svc.service_time || '—'}`],
+    ['ti-map-pin', 'Lugar', svc.location || 'Por definir']
+  ]
+  document.getElementById('service-summary').innerHTML = summary.map(([icon, label, value]) => `
+    <div class="summary-fact"><i class="ti ${icon}"></i><div class="summary-fact-label">${label}</div><div class="summary-fact-value">${cqmEscape(value)}</div></div>`).join('')
+
+  const rehearsal = document.getElementById('rehearsal-section')
+  if (svc.rehearsal_date) {
+    const rd = new Date(svc.rehearsal_date + 'T12:00:00')
+    rehearsal.style.display = 'block'
+    rehearsal.innerHTML = `<div class="detail-title">Ensayo</div><div class="detail-note"><i class="ti ti-calendar-time" style="color:#60a5fa;margin-right:7px"></i>${DAYS_ES[rd.getDay()]} ${rd.getDate()} ${MONTHS_ES[rd.getMonth()]}${svc.rehearsal_time ? ` · ${cqmEscape(svc.rehearsal_time)}` : ''}</div>`
+  } else rehearsal.style.display = 'none'
+
+  const schedule = Array.isArray(svc.schedule) && svc.schedule.length
+    ? svc.schedule
+    : [
+        svc.arrival_time && { time: svc.arrival_time, label: 'Llegada del equipo' },
+        svc.service_time && { time: svc.service_time, label: 'Inicio del servicio' }
+      ].filter(Boolean)
+  document.getElementById('run-of-show-section').innerHTML = `
+    <div class="detail-title">Orden</div>
+    ${schedule.length ? schedule.map(item => `<div class="run-row"><span class="run-time">${cqmEscape(item.time || '')}</span><span class="run-label">${cqmEscape(item.label || '')}</span></div>`).join('') : '<div class="detail-note">El líder aún no agregó horarios.</div>'}`
+
+  const note = document.getElementById('leader-note-section')
+  if (svc.leader_note || svc.dress_code) {
+    note.style.display = 'block'
+    note.innerHTML = `<div class="detail-title">Indicaciones</div>${svc.leader_note ? `<div class="detail-note">${cqmEscape(svc.leader_note)}</div>` : ''}${svc.dress_code ? `<div class="resource-meta" style="margin-top:.6rem">Vestimenta · ${cqmEscape(svc.dress_code)}</div>` : ''}`
+  } else note.style.display = 'none'
 }
 
 /* ---- Render contenido ---- */
@@ -632,6 +743,7 @@ function renderTeam(svc, profilesById) {
   } else {
     counter.style.display = 'none'
   }
+  document.getElementById('team-tab-count').textContent = members.length ? `· ${members.length}` : ''
 
   if (!members.length) {
     list.innerHTML = `<div style="padding:0.7rem 1rem 0.9rem;font-size:0.82rem;color:#4a5568;font-style:italic">${isLeader ? 'Usá "+ Agregar" para convocar músicos.' : 'El líder aún no armó el equipo.'}</div>`
@@ -647,6 +759,7 @@ function renderTeam(svc, profilesById) {
       : initials
     const statusLabel = m.status === 'accepted' ? 'Listo' : m.status === 'declined' ? 'No puede' : 'Pendiente'
     const statusClass = m.status === 'accepted' ? 'accepted' : m.status === 'declined' ? 'declined' : 'pending'
+    const identity = cqmRoleIdentity([m.instrument], m.user_id === groupData?.leader_id)
 
     let actionsHtml = `<span class="status-badge ${statusClass}">${statusLabel}</span>`
     if (isLeader) {
@@ -654,11 +767,12 @@ function renderTeam(svc, profilesById) {
     }
 
     return `
-      <div class="team-member-row">
+      <div class="team-member-row channel-member" style="--role-color:${identity.color};padding-left:1.25rem">
         <div class="team-avatar">${avatarHtml}</div>
         <div class="team-info">
           <div class="team-name">${name}</div>
-          ${m.instrument ? `<div class="team-role"><i class="ti ti-guitar-pick"></i>${m.instrument}</div>` : ''}
+          <div class="role-label">${cqmEscape(identity.label)}</div>
+          <div class="role-phrase">${cqmEscape(identity.phrase)}</div>
         </div>
         ${actionsHtml}
       </div>`
@@ -674,7 +788,8 @@ function renderResponseBanner(svc) {
   const d = new Date(svc.service_date + 'T12:00:00')
   const dateStr = `${DAYS_ES[d.getDay()]} ${d.getDate()} ${MONTHS_ES[d.getMonth()]}${svc.service_time ? ' · ' + svc.service_time : ''}`
 
-  document.getElementById('rb-role').textContent = myMembership.instrument || svc.name
+  const identity = cqmRoleIdentity([myMembership.instrument], myMembership.user_id === groupData?.leader_id)
+  document.getElementById('rb-role').innerHTML = `${cqmEscape(identity.label)} <span style="display:block;color:#71819a;font-size:.72rem;font-weight:400;margin-top:3px">${cqmEscape(identity.phrase)}</span>`
   document.getElementById('rb-meta').textContent = dateStr
 
   if (myMembership.status === 'pending') {
@@ -707,7 +822,7 @@ function renderCalendar(svc, groupName) {
 
   const fmt = dt => dt.toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z'
   const title = encodeURIComponent(`${svc.name} — ${groupName}`)
-  const loc = encodeURIComponent(groupName)
+  const loc = encodeURIComponent(svc.location || groupName)
 
   // Google Calendar link
   document.getElementById('cal-google').href =
@@ -829,7 +944,7 @@ async function cargarPickerItems(tipo) {
   const { data } = await _supabase
     .from(tabla)
     .select('id, name')
-    .eq('user_id', currentUser.id)
+    .or(`user_id.eq.${currentUser.id},group_id.eq.${svcData.group_id}`)
     .order('created_at', { ascending: false })
     .limit(50)
 
@@ -949,6 +1064,223 @@ async function quitarDelEquipo(memberId) {
   if (error) { showToast('Error al quitar'); return }
   svcData.service_members = (svcData.service_members || []).filter(m => m.id !== memberId)
   await refreshTeam()
+}
+
+/* ---- Detalles del servicio ---- */
+function abrirEditarServicio() {
+  document.getElementById('edit-name').value = svcData.name || ''
+  document.getElementById('edit-date').value = svcData.service_date || ''
+  document.getElementById('edit-time').value = svcData.service_time || ''
+  document.getElementById('edit-arrival').value = svcData.arrival_time || ''
+  document.getElementById('edit-location').value = svcData.location || ''
+  document.getElementById('edit-rehearsal-date').value = svcData.rehearsal_date || ''
+  document.getElementById('edit-rehearsal-time').value = svcData.rehearsal_time || ''
+  document.getElementById('edit-dress').value = svcData.dress_code || ''
+  document.getElementById('edit-note').value = svcData.leader_note || ''
+  document.getElementById('edit-service-modal').classList.add('open')
+}
+
+function cerrarEditarServicio() { document.getElementById('edit-service-modal').classList.remove('open') }
+
+async function guardarDetallesServicio() {
+  const payload = {
+    name: document.getElementById('edit-name').value.trim(),
+    service_date: document.getElementById('edit-date').value,
+    service_time: document.getElementById('edit-time').value || null,
+    arrival_time: document.getElementById('edit-arrival').value || null,
+    location: document.getElementById('edit-location').value.trim() || null,
+    rehearsal_date: document.getElementById('edit-rehearsal-date').value || null,
+    rehearsal_time: document.getElementById('edit-rehearsal-date').value ? (document.getElementById('edit-rehearsal-time').value || null) : null,
+    dress_code: document.getElementById('edit-dress').value.trim() || null,
+    leader_note: document.getElementById('edit-note').value.trim() || null
+  }
+  if (!payload.name || !payload.service_date) { showToast('Nombre y fecha son obligatorios'); return }
+
+  const needsReconfirm = payload.service_date !== svcData.service_date || payload.service_time !== svcData.service_time
+  if (needsReconfirm && (svcData.service_members || []).some(m => m.status === 'accepted')) {
+    if (!confirm('Cambiaste la fecha o la hora. El equipo deberá confirmar nuevamente. ¿Continuar?')) return
+  }
+
+  const { error } = await _supabase.from('group_services').update(payload).eq('id', serviceId)
+  if (error) { showToast('No se pudieron guardar los detalles'); return }
+  if (needsReconfirm) {
+    await _supabase.from('service_members').update({ status: 'pending' }).eq('service_id', serviceId)
+    await refreshTeam()
+  }
+  Object.assign(svcData, payload)
+  document.getElementById('h-name').textContent = payload.name
+  renderServiceSummary(svcData)
+  renderCalendar(svcData, groupData?.name || '')
+  cerrarEditarServicio()
+  showToast(needsReconfirm ? 'Guardado · se solicitó reconfirmación' : 'Detalles actualizados', 'success')
+}
+
+/* ---- Recursos ---- */
+async function cargarRecursos() {
+  const list = document.getElementById('resource-list')
+  if (!resources.length) list.innerHTML = '<div class="resource-empty">Cargando recursos...</div>'
+  const { data, error } = await _supabase
+    .from('group_resources')
+    .select('*')
+    .eq('service_id', serviceId)
+    .order('created_at', { ascending: false })
+  if (error) {
+    list.innerHTML = '<div class="resource-empty">No se pudieron cargar los recursos.</div>'
+    return
+  }
+  resources = data || []
+  document.getElementById('resource-tab-count').textContent = resources.length ? `· ${resources.length}` : ''
+  renderRecursos()
+}
+
+function filtrarRecursos(kind, button) {
+  resourceFilter = kind
+  document.querySelectorAll('.resource-filter').forEach(el => el.classList.toggle('active', el === button))
+  renderRecursos()
+}
+
+function renderRecursos() {
+  const list = document.getElementById('resource-list')
+  const visible = resourceFilter === 'all' ? resources : resources.filter(r => r.kind === resourceFilter)
+  if (!visible.length) {
+    list.innerHTML = `<div class="resource-empty"><i class="ti ti-paperclip" style="display:block;font-size:1.5rem;margin-bottom:.5rem"></i>${isLeader ? 'Agregá videos, PDFs, audios o notas para que el equipo llegue preparado.' : 'Todavía no hay recursos disponibles para tu rol.'}</div>`
+    return
+  }
+  const groups = [
+    ['REFERENCIAS', visible.filter(r => r.kind === 'link')],
+    ['CHARTS Y DOCUMENTOS', visible.filter(r => r.kind === 'pdf')],
+    ['AUDIO', visible.filter(r => r.kind === 'audio')],
+    ['NOTAS', visible.filter(r => r.kind === 'note')]
+  ]
+  list.innerHTML = groups.filter(([, items]) => items.length).map(([label, items]) => `
+    <div class="resource-group-label">${label}</div>
+    ${items.map(resourceRowHtml).join('')}`).join('')
+}
+
+function resourceRowHtml(resource) {
+  const isYoutube = resource.kind === 'link' && /youtu(?:\.be|be\.com)/i.test(resource.external_url || '')
+  const icon = isYoutube ? 'ti-brand-youtube' : resource.kind === 'link' ? 'ti-link' : resource.kind === 'pdf' ? 'ti-file-type-pdf' : resource.kind === 'audio' ? 'ti-music' : 'ti-note'
+  const audience = resource.audience_roles?.length ? resource.audience_roles.map(cqmRoleLabel).join(', ') : 'Todo el equipo'
+  const detail = resource.kind === 'link' ? (isYoutube ? 'YouTube' : 'Enlace') : resource.kind === 'note' ? 'Nota del líder' : `${resource.kind.toUpperCase()}${resource.file_size ? ' · ' + cqmFormatBytes(resource.file_size) : ''}`
+  return `<div class="resource-row" onclick="abrirRecurso('${resource.id}')" role="button" tabindex="0">
+    <span class="resource-icon ${isYoutube ? 'youtube' : resource.kind}"><i class="ti ${icon}"></i></span>
+    <div><div class="resource-title">${cqmEscape(resource.title)}</div><div class="resource-meta">${cqmEscape(detail)} · ${cqmEscape(audience)}</div>${resource.kind === 'note' ? `<div class="resource-meta" style="color:#9aabc2">${cqmEscape(resource.body || '')}</div>` : ''}</div>
+    ${isLeader ? `<button class="resource-action" onclick="event.stopPropagation();eliminarRecurso('${resource.id}')" aria-label="Eliminar recurso"><i class="ti ti-trash"></i></button>` : '<i class="ti ti-chevron-right" style="color:#52627a"></i>'}
+  </div>`
+}
+
+async function abrirRecurso(id) {
+  const resource = resources.find(r => String(r.id) === String(id))
+  if (!resource || resource.kind === 'note') return
+  if (resource.kind === 'link') {
+    window.open(resource.external_url, '_blank', 'noopener,noreferrer')
+    return
+  }
+  const { data, error } = await _supabase.storage.from('group-resources').createSignedUrl(resource.storage_path, 600)
+  if (error || !data?.signedUrl) { showToast('No se pudo abrir el archivo'); return }
+  window.open(data.signedUrl, '_blank', 'noopener,noreferrer')
+}
+
+function abrirAgregarRecurso() {
+  resourceKind = 'link'
+  document.getElementById('resource-title').value = ''
+  document.getElementById('resource-url').value = ''
+  document.getElementById('resource-note').value = ''
+  document.getElementById('resource-file').value = ''
+  document.getElementById('resource-audience').value = 'all'
+  document.getElementById('resource-notify').checked = true
+  seleccionarTipoRecurso('link')
+  actualizarAudienciaRecurso()
+  document.getElementById('resource-modal').classList.add('open')
+}
+
+function cerrarAgregarRecurso() { document.getElementById('resource-modal').classList.remove('open') }
+
+function seleccionarTipoRecurso(kind) {
+  resourceKind = kind
+  document.querySelectorAll('.resource-type').forEach(el => el.classList.toggle('active', el.dataset.kind === kind))
+  document.getElementById('resource-url-wrap').style.display = kind === 'link' ? 'block' : 'none'
+  document.getElementById('resource-file-wrap').style.display = ['pdf', 'audio'].includes(kind) ? 'block' : 'none'
+  document.getElementById('resource-note-wrap').style.display = kind === 'note' ? 'block' : 'none'
+  document.getElementById('resource-file').accept = kind === 'pdf' ? 'application/pdf' : kind === 'audio' ? 'audio/*' : ''
+}
+
+function actualizarAudienciaRecurso() {
+  const roles = [...new Set(groupMembers.flatMap(m => m.roles || []))]
+  const wrap = document.getElementById('resource-role-options')
+  const show = document.getElementById('resource-audience').value === 'roles'
+  wrap.style.display = show ? 'grid' : 'none'
+  wrap.style.gridTemplateColumns = '1fr 1fr'
+  wrap.innerHTML = roles.map(role => `<label class="role-option"><input type="checkbox" value="${cqmEscape(role)}"><span>${cqmEscape(cqmRoleLabel(role))}</span></label>`).join('')
+}
+
+async function guardarRecurso() {
+  const title = document.getElementById('resource-title').value.trim()
+  if (!title) { showToast('Escribí un título'); return }
+  const selectedRoles = document.getElementById('resource-audience').value === 'roles'
+    ? Array.from(document.querySelectorAll('#resource-role-options input:checked')).map(input => input.value)
+    : []
+  if (document.getElementById('resource-audience').value === 'roles' && !selectedRoles.length) { showToast('Elegí al menos un rol'); return }
+
+  const payload = {
+    group_id: svcData.group_id,
+    service_id: Number(serviceId),
+    kind: resourceKind,
+    title,
+    audience_roles: selectedRoles,
+    notify_team: document.getElementById('resource-notify').checked,
+    created_by: currentUser.id
+  }
+  let uploadedPath = null
+  if (resourceKind === 'link') {
+    const url = document.getElementById('resource-url').value.trim()
+    try {
+      const parsed = new URL(url)
+      if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('protocol')
+      payload.external_url = parsed.href
+    } catch { showToast('Ingresá un enlace válido'); return }
+  } else if (resourceKind === 'note') {
+    payload.body = document.getElementById('resource-note').value.trim()
+    if (!payload.body) { showToast('Escribí la nota'); return }
+  } else {
+    const file = document.getElementById('resource-file').files[0]
+    if (!file) { showToast('Elegí un archivo'); return }
+    if (file.size > 25 * 1024 * 1024) { showToast('El archivo supera 25 MB'); return }
+    if (resourceKind === 'pdf' && file.type !== 'application/pdf') { showToast('Elegí un archivo PDF'); return }
+    if (resourceKind === 'audio' && !file.type.startsWith('audio/')) { showToast('Elegí un archivo de audio'); return }
+    uploadedPath = `${svcData.group_id}/${serviceId}/${currentUser.id}/${Date.now()}-${cqmSafeFileName(file.name)}`
+    const { error: uploadError } = await _supabase.storage.from('group-resources').upload(uploadedPath, file, { upsert: false, contentType: file.type })
+    if (uploadError) { showToast('No se pudo subir el archivo'); return }
+    payload.storage_path = uploadedPath
+    payload.file_name = file.name
+    payload.mime_type = file.type
+    payload.file_size = file.size
+  }
+
+  const button = document.getElementById('resource-save-btn')
+  button.disabled = true; button.textContent = 'Guardando...'
+  const { error } = await _supabase.from('group_resources').insert(payload)
+  button.disabled = false; button.textContent = 'Guardar recurso'
+  if (error) {
+    if (uploadedPath) await _supabase.storage.from('group-resources').remove([uploadedPath])
+    showToast('No se pudo guardar el recurso')
+    return
+  }
+  cerrarAgregarRecurso()
+  await cargarRecursos()
+  showToast('Recurso compartido con el equipo', 'success')
+}
+
+async function eliminarRecurso(id) {
+  const resource = resources.find(r => String(r.id) === String(id))
+  if (!resource || !confirm(`¿Eliminar “${resource.title}”?`)) return
+  const { error } = await _supabase.from('group_resources').delete().eq('id', id)
+  if (error) { showToast('No se pudo eliminar'); return }
+  if (resource.storage_path) await _supabase.storage.from('group-resources').remove([resource.storage_path])
+  resources = resources.filter(r => String(r.id) !== String(id))
+  document.getElementById('resource-tab-count').textContent = resources.length ? `· ${resources.length}` : ''
+  renderRecursos()
+  showToast('Recurso eliminado', 'success')
 }
 
 /* ---- Exportar iCal ---- */

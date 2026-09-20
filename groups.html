@@ -375,6 +375,7 @@ header {
 .nav-item.active i { color: #60a5fa; }
 .nav-item.active span { color: #60a5fa; font-weight: 700; }
 </style>
+<link rel="stylesheet" href="/group-workspace.css">
 </head>
 <body>
 
@@ -461,6 +462,7 @@ header {
   </div>
 </nav>
 
+<script src="/group-ui.js"></script>
 <script>
 const _supabase = supabase.createClient(
   'https://kzqnsbztfyhyyageuboz.supabase.co',
@@ -566,7 +568,7 @@ async function cargarDashboard() {
           <div class="group-block-info">
             <div class="group-block-name">${g.name}</div>
             <div class="group-block-meta">
-              <span class="role-badge ${isLeader ? 'role-leader' : 'role-member'}">${isLeader ? '⚓ LÍDER' : 'MIEMBRO'}</span>
+              <span class="role-badge ${isLeader ? 'role-leader' : 'role-member'}">${cqmEscape(cqmRoleIdentity(mem.roles || [], isLeader).label.toUpperCase())}</span>
               ${isLeader ? `<span class="group-members-count" title="Código de invitación">Código: ${g.invite_code}</span>` : ''}
             </div>
           </div>
@@ -632,7 +634,8 @@ function renderServiceCard(s, isLeader) {
     : `<span class="service-footer-item" style="color:#4a5568"><i class="ti ti-music-off"></i> Sin contenido</span>`
 
   // My role
-  const roleLabel = myMember ? `<span class="service-footer-item"><i class="ti ti-music"></i>${myMember.instrument || 'Músico'}</span>` : ''
+  const myIdentity = myMember ? cqmRoleIdentity([myMember.instrument]) : null
+  const roleLabel = myMember ? `<span class="service-footer-item"><i class="ti ti-music"></i>${cqmEscape(myIdentity.label)} · ${cqmEscape(myIdentity.phrase)}</span>` : ''
 
   return `
     <a class="service-card" href="/service-view.html?id=${s.id}">
@@ -762,7 +765,7 @@ async function confirmarCrearGrupo() {
     return
   }
 
-  await _supabase.from('group_members').insert({ group_id: group.id, user_id: currentUser.id, roles: [] })
+  await _supabase.from('group_members').insert({ group_id: group.id, user_id: currentUser.id, roles: ['Líder'] })
   cerrarCrearGrupo()
   window.location.href = `/group-view.html?id=${group.id}`
 }

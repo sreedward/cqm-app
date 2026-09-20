@@ -530,6 +530,7 @@ header {
 .toast.success { border-color: rgba(34,197,94,0.30); }
 .toast.success i { color: #22c55e; }
 </style>
+<link rel="stylesheet" href="/group-workspace.css">
 </head>
 <body>
 
@@ -553,6 +554,9 @@ header {
   </button>
   <button class="tab-btn" id="tab-miembros" onclick="cambiarTab('miembros')">
     <i class="ti ti-users"></i> Miembros
+  </button>
+  <button class="tab-btn" id="tab-archivos" onclick="cambiarTab('archivos')">
+    <i class="ti ti-folder"></i> Archivos
   </button>
 </div>
 
@@ -599,6 +603,18 @@ header {
     </div>
   </div>
 
+  <div class="tab-content" id="tab-archivos-content">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Biblioteca del grupo</div>
+        <div style="color:#64748b;font-size:.72rem;margin-top:.25rem">Referencias, charts y notas de todos los servicios</div>
+      </div>
+    </div>
+    <div id="group-files-list" class="card">
+      <div class="resource-empty">Los recursos compartidos en los servicios aparecerán aquí.</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ============================================================ -->
@@ -630,6 +646,27 @@ header {
           <div class="modal-input-label">Hora</div>
           <input class="modal-input" type="time" id="cs-time" value="10:00" style="min-width:90px">
         </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="modal-input-wrap">
+          <div class="modal-input-label">Hora de llegada</div>
+          <input class="modal-input" type="time" id="cs-arrival" value="09:15">
+        </div>
+        <div class="modal-input-wrap">
+          <div class="modal-input-label">Lugar</div>
+          <input class="modal-input" type="text" id="cs-location" placeholder="Auditorio principal" maxlength="100">
+        </div>
+      </div>
+      <div class="modal-input-wrap">
+        <div class="modal-input-label">Ensayo (opcional)</div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
+          <input class="modal-input" type="date" id="cs-rehearsal-date">
+          <input class="modal-input" type="time" id="cs-rehearsal-time" value="18:00" style="min-width:90px">
+        </div>
+      </div>
+      <div class="modal-input-wrap">
+        <div class="modal-input-label">Nota para el equipo (opcional)</div>
+        <input class="modal-input" type="text" id="cs-note" placeholder="Ej: Llegar con in-ears listos" maxlength="180">
       </div>
       <div class="modal-btns">
         <button class="btn-cancel" onclick="cerrarCrearServicio()">Cancelar</button>
@@ -744,17 +781,18 @@ header {
 <nav class="bottom-nav">
   <a class="nav-item" href="/library.html"><i class="ti ti-home"></i><span>Inicio</span></a>
   <a class="nav-item" href="/setlist.html"><i class="ti ti-list-check"></i><span>Setlist</span></a>
-  <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medley</span></a>
+  <a class="nav-item" href="/medleys.html"><i class="ti ti-layers-intersect"></i><span>Medleys</span></a>
   <a class="nav-item" href="/groups.html"><i class="ti ti-users-group"></i><span>Grupos</span></a>
 </nav>
 
+<script src="/group-ui.js"></script>
 <script>
 const _supabase = supabase.createClient(
   'https://kzqnsbztfyhyyageuboz.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
 )
 
-const ROLE_OPTIONS = ['Cantante','Pianista','Pianista 2','Guitarrista','Guitarrista 2','Guitarrista 3','Bajista','Coristas','Violinista','Trompetista','Drummer']
+const ROLE_OPTIONS = CQM_ROLE_OPTIONS
 const MONTHS_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
 
 const params = new URLSearchParams(window.location.search)
@@ -767,7 +805,7 @@ let editingMemberId = null
 let toastTimer = null
 
 // State for create service wizard
-let csState = { name:'', date:'', time:'10:00', type:'none', contentId:null, contentTitle:'' }
+let csState = { name:'', date:'', time:'10:00', arrival:'', location:'', rehearsalDate:'', rehearsalTime:'', note:'', type:'none', contentId:null, contentTitle:'' }
 let groupMembers = [] // [{user_id, display_name, avatar_url, roles:[]}]
 let csAssignments = {} // userId -> instrument
 
@@ -784,8 +822,11 @@ function showToast(msg, type = '') {
 function cambiarTab(tab) {
   document.getElementById('tab-servicios').classList.toggle('active', tab === 'servicios')
   document.getElementById('tab-miembros').classList.toggle('active', tab === 'miembros')
+  document.getElementById('tab-archivos').classList.toggle('active', tab === 'archivos')
   document.getElementById('tab-servicios-content').classList.toggle('visible', tab === 'servicios')
   document.getElementById('tab-miembros-content').classList.toggle('visible', tab === 'miembros')
+  document.getElementById('tab-archivos-content').classList.toggle('visible', tab === 'archivos')
+  if (tab === 'archivos') cargarArchivosGrupo()
 }
 
 /* ---- Init ---- */
@@ -904,7 +945,7 @@ async function cargarMiembros() {
     const initials = name.substring(0, 2).toUpperCase()
     const memberIsLeader = m.user_id === currentGroup.leader_id
     const isSelf = m.user_id === currentUser.id
-    const roles = (m.roles && m.roles.length) ? m.roles.join(', ') : 'Sin rol asignado'
+    const identity = cqmRoleIdentity(m.roles || [], memberIsLeader)
 
     const card = document.createElement('div')
     card.className = 'member-card'
@@ -926,7 +967,13 @@ async function cargarMiembros() {
           <div class="member-name">${name}</div>
           ${memberIsLeader ? '<span class="leader-tag">⚓ LÍDER</span>' : ''}
         </div>
-        <div class="member-roles${m.roles && m.roles.length ? ' has-roles' : ''}">${roles}</div>
+        <div class="role-identity">
+          <span class="role-rail" style="background:${identity.color}"></span>
+          <div class="role-copy">
+            <div class="role-label">${cqmEscape(identity.label)}</div>
+            <div class="role-phrase">${cqmEscape(identity.phrase)}</div>
+          </div>
+        </div>
       </div>
       <div class="member-actions">${actionsHtml}</div>
     `
@@ -942,7 +989,7 @@ async function cargarServicios() {
   const { data, error } = await _supabase
     .from('group_services')
     .select(`
-      id, name, service_date, service_time, setlist_id, medley_id,
+      id, name, service_date, service_time, arrival_time, location, setlist_id, medley_id,
       setlist(name),
       medleys(name),
       service_members(user_id, instrument, status)
@@ -1022,7 +1069,7 @@ async function cargarServicios() {
         <div class="service-info">
           <div class="service-name">${svc.name}</div>
           <div class="service-content-ref">${contentRef}</div>
-          ${svc.service_time ? `<div class="service-time-ref"><i class="ti ti-clock"></i> ${svc.service_time}</div>` : ''}
+          ${svc.service_time ? `<div class="service-time-ref"><i class="ti ti-clock"></i> ${svc.service_time}${svc.arrival_time ? ` · Llegada ${svc.arrival_time}` : ''}${svc.location ? ` · ${cqmEscape(svc.location)}` : ''}</div>` : ''}
         </div>
         <i class="ti ti-chevron-right service-arrow"></i>
       </div>
@@ -1034,13 +1081,19 @@ async function cargarServicios() {
 
 /* ---- Crear servicio wizard ---- */
 function abrirCrearServicio() {
-  csState = { name:'', date:'', type:'none', contentId:null, contentTitle:'' }
+  csState = { name:'', date:'', time:'10:00', arrival:'09:15', location:'', rehearsalDate:'', rehearsalTime:'18:00', note:'', type:'none', contentId:null, contentTitle:'' }
   csAssignments = {}
   document.getElementById('cs-name').value = ''
   // Default to next Sunday
   const d = new Date()
   d.setDate(d.getDate() + (7 - d.getDay()) % 7 || 7)
   document.getElementById('cs-date').value = d.toISOString().split('T')[0]
+  document.getElementById('cs-time').value = '10:00'
+  document.getElementById('cs-arrival').value = '09:15'
+  document.getElementById('cs-location').value = ''
+  document.getElementById('cs-rehearsal-date').value = ''
+  document.getElementById('cs-rehearsal-time').value = '18:00'
+  document.getElementById('cs-note').value = ''
 
   mostrarPasoCS(1)
   document.getElementById('create-service-modal').classList.add('open')
@@ -1065,6 +1118,11 @@ async function csNext(paso) {
     csState.name = name
     csState.date = date
     csState.time = document.getElementById('cs-time').value || '10:00'
+    csState.arrival = document.getElementById('cs-arrival').value || ''
+    csState.location = document.getElementById('cs-location').value.trim()
+    csState.rehearsalDate = document.getElementById('cs-rehearsal-date').value || ''
+    csState.rehearsalTime = csState.rehearsalDate ? (document.getElementById('cs-rehearsal-time').value || '') : ''
+    csState.note = document.getElementById('cs-note').value.trim()
     // Reset content type selection
     document.querySelectorAll('.content-type-btn').forEach(b => b.classList.remove('selected'))
     csState.type = 'none'
@@ -1102,8 +1160,8 @@ async function cargarPickerContent(tipo) {
   const tabla = tipo === 'setlist' ? 'setlist' : 'medleys'
   const { data, error } = await _supabase
     .from(tabla)
-    .select('id, name')
-    .eq('user_id', currentUser.id)
+    .select('id, name, group_id')
+    .or(`user_id.eq.${currentUser.id},group_id.eq.${groupId}`)
     .order('created_at', { ascending: false })
     .limit(50)
 
@@ -1141,7 +1199,7 @@ function buildAssignList() {
     return `
       <div class="assign-member-row">
         <div class="assign-avatar">${avatarEl}</div>
-        <div class="assign-name">${m.display_name}</div>
+        <div class="assign-name"><div>${cqmEscape(m.display_name)}</div><div style="color:#64748b;font-size:.64rem;margin-top:2px">${cqmEscape(cqmRoleIdentity(m.roles || [], m.user_id === currentGroup.leader_id).phrase)}</div></div>
         <select class="assign-select" id="assign-${m.user_id}" onchange="csAssignments['${m.user_id}']=this.value">
           <option value="">Sin asignar</option>
           ${ROLE_OPTIONS.map(r => `<option value="${r}" ${r === defaultRole ? 'selected' : ''}>${r}</option>`).join('')}
@@ -1167,6 +1225,11 @@ async function csCrear() {
     name: csState.name,
     service_date: csState.date,
     service_time: csState.time || null,
+    arrival_time: csState.arrival || null,
+    location: csState.location || null,
+    rehearsal_date: csState.rehearsalDate || null,
+    rehearsal_time: csState.rehearsalTime || null,
+    leader_note: csState.note || null,
     created_by: currentUser.id,
     setlist_id: csState.type === 'setlist' && csState.contentId ? csState.contentId : null,
     medley_id: csState.type === 'medley' && csState.contentId ? csState.contentId : null
@@ -1219,6 +1282,39 @@ function abrirModalRoles(memberId, rolesArr) {
     </label>
   `).join('')
   document.getElementById('role-modal').classList.add('open')
+}
+
+async function cargarArchivosGrupo() {
+  const list = document.getElementById('group-files-list')
+  list.innerHTML = '<div class="resource-empty">Cargando archivos...</div>'
+  const { data, error } = await _supabase
+    .from('group_resources')
+    .select('*, group_services(name)')
+    .eq('group_id', groupId)
+    .order('created_at', { ascending: false })
+  if (error || !data?.length) {
+    list.innerHTML = '<div class="resource-empty">Todavía no hay recursos. Agregalos desde la pestaña Recursos de un servicio.</div>'
+    return
+  }
+  list.innerHTML = `<div class="resource-list">${data.map(r => {
+    const icon = r.kind === 'link' ? 'ti-link' : r.kind === 'pdf' ? 'ti-file-type-pdf' : r.kind === 'audio' ? 'ti-music' : 'ti-note'
+    const serviceName = r.group_services?.name || 'Recurso general'
+    return `<div class="resource-row" role="button" tabindex="0" onclick="abrirArchivoGrupo('${r.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirArchivoGrupo('${r.id}')}" data-resource-id="${r.id}"><span class="resource-icon ${r.kind}"><i class="ti ${icon}"></i></span><div><div class="resource-title">${cqmEscape(r.title)}</div><div class="resource-meta">${cqmEscape(serviceName)} · ${cqmEscape(r.kind.toUpperCase())}</div>${r.kind === 'note' ? `<div class="resource-meta" style="color:#9aabc2">${cqmEscape(r.body || '')}</div>` : ''}</div><i class="ti ti-chevron-right" style="color:#52627a"></i></div>`
+  }).join('')}</div>`
+  list._resources = data
+}
+
+async function abrirArchivoGrupo(id) {
+  const list = document.getElementById('group-files-list')
+  const resource = (list._resources || []).find(r => String(r.id) === String(id))
+  if (!resource || resource.kind === 'note') return
+  if (resource.kind === 'link') {
+    window.open(resource.external_url, '_blank', 'noopener,noreferrer')
+    return
+  }
+  const { data, error } = await _supabase.storage.from('group-resources').createSignedUrl(resource.storage_path, 600)
+  if (error || !data?.signedUrl) { showToast('No se pudo abrir el archivo'); return }
+  window.open(data.signedUrl, '_blank', 'noopener,noreferrer')
 }
 function cerrarModalRoles() {
   document.getElementById('role-modal').classList.remove('open')

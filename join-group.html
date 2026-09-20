@@ -206,6 +206,7 @@ header {
     }
     /* ===== FIN GLASSMORPHISM ===== */
 </style>
+<link rel="stylesheet" href="/group-workspace.css">
 </head>
 <body>
 <header>
@@ -217,13 +218,12 @@ header {
   <div class="status-box"><i class="ti ti-loader"></i>Cargando invitación...</div>
 </div>
 
+<script src="/group-ui.js"></script>
 <script>
 const _supabase = supabase.createClient(
   'https://kzqnsbztfyhyyageuboz.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6cW5zYnp0ZnloeXlhZ2V1Ym96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTgzOTQsImV4cCI6MjA5MTQ5NDM5NH0.n0scEJcx6tZ7IihDKxdr3R2LDipZhv2oDbxwLiLq53w'
 )
-
-const ROLE_OPTIONS = ['Cantante','Pianista','Pianista 2','Guitarrista','Guitarrista 2','Guitarrista 3','Bajista','Coristas','Violinista','Trompetista','Drummer']
 
 const params = new URLSearchParams(window.location.search)
 const code = (params.get('code') || '').trim()
@@ -275,16 +275,34 @@ async function init() {
       <h1>${targetGroup.name}</h1>
       <p>Te han invitado a unirte a este grupo de alabanza</p>
     </div>
-    <div class="section-label">¿Qué tocas o cantas? (puedes elegir varios)</div>
+    <div class="section-label">¿Qué hacés en el equipo?</div>
+    <p style="color:#71819a;font-size:.78rem;margin:-.4rem 0 .8rem">Elegí uno o más roles. Podrás actualizarlos después.</p>
     <div id="role-options"></div>
+    <div id="role-preview" style="display:none;margin-top:1rem"></div>
     <button class="join-btn" id="join-btn" onclick="unirse()">Unirme al grupo</button>
   `
-  document.getElementById('role-options').innerHTML = ROLE_OPTIONS.map(r => `
+  document.getElementById('role-options').innerHTML = CQM_ROLE_OPTIONS.map(r => `
     <label class="role-option">
-      <input type="checkbox" value="${r}">
+      <input type="checkbox" value="${r}" onchange="updateRolePreview()">
       <span>${r}</span>
     </label>
   `).join('')
+}
+
+function updateRolePreview() {
+  const roles = Array.from(document.querySelectorAll('#role-options input:checked')).map(i => i.value)
+  const preview = document.getElementById('role-preview')
+  if (!roles.length) { preview.style.display = 'none'; return }
+  const identity = cqmRoleIdentity(roles)
+  preview.style.display = 'block'
+  preview.innerHTML = `
+    <div class="role-identity" style="padding:.85rem;border:1px solid #1d2d45;border-radius:12px;background:#0c1626">
+      <span class="role-rail" style="background:${identity.color}"></span>
+      <div class="role-copy">
+        <div class="role-label">${cqmEscape(identity.label)}</div>
+        <div class="role-phrase">${cqmEscape(identity.phrase)}</div>
+      </div>
+    </div>`
 }
 
 async function unirse() {
