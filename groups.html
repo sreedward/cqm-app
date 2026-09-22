@@ -332,10 +332,13 @@ header {
 </style>
 <link rel="stylesheet" href="/group-workspace.css">
 </head>
-<body>
+<body class="groups-page">
 
 <header>
-  <div class="header-title">Grupos</div>
+  <div class="header-copy">
+    <div class="header-kicker">CQM · EQUIPOS</div>
+    <div class="header-title">Grupos</div>
+  </div>
   <div class="header-actions">
     <button class="join-btn-header" onclick="abrirJoin()"><i class="ti ti-link"></i> Unirse</button>
     <button class="icon-btn" onclick="abrirCrearGrupo()" title="Crear grupo"><i class="ti ti-plus"></i></button>
@@ -521,7 +524,8 @@ async function cargarDashboard() {
   const { data: allServices } = await _supabase
     .from('group_services')
     .select(`
-      id, name, service_date, service_time, setlist_id, medley_id, group_id,
+      id, name, service_date, service_time, arrival_time, location, setlist_id, medley_id, group_id,
+      setlist(name), medleys(name),
       service_members(user_id, instrument, status)
     `)
     .in('group_id', groupIds)
@@ -529,7 +533,11 @@ async function cargarDashboard() {
     .order('service_date')
 
   // 3. Render
-  let html = ''
+  let html = `<section class="groups-intro">
+    <div class="groups-intro-kicker">TU ESPACIO DE EQUIPO</div>
+    <h1>Todo listo antes de subir.</h1>
+    <p>Servicios, contenido y músicos en un solo lugar.</p>
+  </section>`
   memberships.forEach((mem, idx) => {
     const g = mem.groups
     if (!g) return
@@ -537,14 +545,14 @@ async function cargarDashboard() {
     const groupServices = (allServices || []).filter(s => s.group_id === g.id).slice(0, 4)
 
     html += `
-      <div class="group-block ${isLeader ? 'leader' : ''}">
+      <section class="group-block ${isLeader ? 'leader' : ''}">
         <div class="group-block-header">
           <div class="group-avatar"><i class="ti ti-${isLeader ? 'crown' : 'users'}"></i></div>
           <div class="group-block-info">
             <div class="group-block-name">${g.name}</div>
             <div class="group-block-meta">
               <span class="role-badge ${isLeader ? 'role-leader' : 'role-member'}">${cqmEscape(cqmRoleIdentity(mem.roles || [], isLeader).label.toUpperCase())}</span>
-              ${isLeader ? `<span class="group-members-count" title="Código de invitación">Código: ${g.invite_code}</span>` : ''}
+              <span class="group-role-phrase">${cqmEscape(cqmRoleIdentity(mem.roles || [], isLeader).phrase)}</span>
             </div>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0;align-items:center">
@@ -560,8 +568,10 @@ async function cargarDashboard() {
             : groupServices.map(s => renderServiceCard(s, isLeader)).join('')
           }
         </div>
-      </div>
-      ${idx < memberships.length - 1 ? '<hr class="divider">' : ''}
+        <button class="group-open-btn" onclick="irAGrupo(${g.id})">
+          <span>Ver espacio del grupo</span><i class="ti ti-arrow-up-right"></i>
+        </button>
+      </section>
     `
   })
 
@@ -588,23 +598,29 @@ function renderServiceCard(s, isLeader) {
 
   // Content label
   const contentLabel = s.setlist_id
-    ? `<span class="service-footer-item"><i class="ti ti-list-check"></i> Setlist</span>`
+    ? `<span class="service-footer-item"><i class="ti ti-list-check"></i> Setlist · ${cqmEscape(s.setlist?.name || 'Asignado')}</span>`
     : s.medley_id
-    ? `<span class="service-footer-item"><i class="ti ti-layers-intersect"></i> Medley</span>`
+    ? `<span class="service-footer-item"><i class="ti ti-layers-intersect"></i> Medley · ${cqmEscape(s.medleys?.name || 'Asignado')}</span>`
     : `<span class="service-footer-item" style="color:#4a5568"><i class="ti ti-music-off"></i> Sin contenido</span>`
 
   // My role
   const myIdentity = myMember ? cqmRoleIdentity([myMember.instrument]) : null
   const roleLabel = myMember ? `<span class="service-footer-item"><i class="ti ti-music"></i>${cqmEscape(myIdentity.label)} · ${cqmEscape(myIdentity.phrase)}</span>` : ''
 
+  const date = new Date(s.service_date + 'T12:00:00')
+  const dateBlock = `<div class="service-date-block"><strong>${date.getDate()}</strong><span>${MESES[date.getMonth()].toUpperCase()}</span></div>`
+
   return `
-    <a class="service-card" href="/service-view.html?id=${s.id}">
+    <a class="service-card" href="/service-view.html?id=${s.id}&group=${s.group_id}">
+      ${dateBlock}
+      <div class="service-card-body">
       <div class="service-card-top">
         <div>
           <div class="service-name">${s.name}</div>
           <div class="service-datetime">
-            <span><i class="ti ti-calendar"></i>${fmtFecha(s.service_date)}</span>
             ${s.service_time ? `<span><i class="ti ti-clock"></i>${fmtHora(s.service_time)}</span>` : ''}
+            ${s.arrival_time ? `<span>Llegada ${fmtHora(s.arrival_time)}</span>` : ''}
+            ${s.location ? `<span><i class="ti ti-map-pin"></i>${cqmEscape(s.location)}</span>` : ''}
           </div>
         </div>
         ${chip}
@@ -614,6 +630,8 @@ function renderServiceCard(s, isLeader) {
         ${roleLabel}
         ${isLeader && totalMembers > 0 ? `<span class="confirmed-count" style="margin-left:auto"><i class="ti ti-users"></i>${confirmed} de ${totalMembers} confirmados</span>` : ''}
       </div>
+      </div>
+      <i class="ti ti-chevron-right service-row-arrow"></i>
     </a>
   `
 }

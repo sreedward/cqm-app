@@ -321,7 +321,7 @@ header {
 </style>
 <link rel="stylesheet" href="/group-workspace.css">
 </head>
-<body>
+<body class="service-page">
 
 <header>
   <button class="back-btn" id="back-btn" onclick="goBack()"><i class="ti ti-arrow-left"></i></button>
@@ -351,14 +351,9 @@ header {
     <div id="rb-responded" class="responded-state" style="display:none"></div>
   </div>
 
-  <div class="card workspace-card">
-    <div class="workspace-tabs">
-      <button class="workspace-tab active" id="workspace-tab-resumen" onclick="cambiarWorkspaceTab('resumen')">Resumen</button>
-      <button class="workspace-tab" id="workspace-tab-equipo" onclick="cambiarWorkspaceTab('equipo')">Equipo <span id="team-tab-count"></span></button>
-      <button class="workspace-tab" id="workspace-tab-recursos" onclick="cambiarWorkspaceTab('recursos')">Recursos <span id="resource-tab-count"></span></button>
-    </div>
-
-    <section class="workspace-panel active" id="workspace-panel-resumen">
+  <div class="service-workspace workspace-card">
+    <section class="workspace-panel active service-panel service-overview" id="workspace-panel-resumen">
+      <div class="service-panel-heading"><span>DETALLES</span><strong>El plan del día</strong></div>
       <div class="service-summary" id="service-summary"></div>
       <div class="detail-section" id="rehearsal-section" style="display:none"></div>
       <div class="detail-section">
@@ -373,16 +368,10 @@ header {
       <div class="detail-section" id="edit-service-wrap" style="display:none">
         <button class="card-action-btn" onclick="abrirEditarServicio()"><i class="ti ti-pencil"></i> Editar detalles del servicio</button>
       </div>
-      <div class="detail-section" id="calendar-card" style="display:none">
-        <div class="detail-title">Agregar al calendario</div>
-        <div class="calendar-row" style="padding:0">
-          <a class="calendar-btn" id="cal-ical" href="#" onclick="exportarIcal(event)"><i class="ti ti-calendar"></i> iPhone / iOS</a>
-          <a class="calendar-btn" id="cal-google" href="#" target="_blank"><i class="ti ti-brand-google"></i> Google</a>
-        </div>
-      </div>
     </section>
 
-    <section class="workspace-panel" id="workspace-panel-equipo">
+    <section class="workspace-panel active service-panel" id="workspace-panel-equipo">
+      <div class="service-panel-heading"><span>EQUIPO</span><strong>Quién estará ahí</strong></div>
       <div class="card-header">
         <div class="equipo-counter" id="team-counter" style="display:none"></div>
         <button class="card-action-btn" id="add-member-btn" style="display:none" onclick="abrirAgregarMiembro()"><i class="ti ti-plus"></i> Agregar</button>
@@ -393,7 +382,8 @@ header {
       </div>
     </section>
 
-    <section class="workspace-panel" id="workspace-panel-recursos">
+    <section class="workspace-panel active service-panel" id="workspace-panel-recursos">
+      <div class="service-panel-heading"><span>RECURSOS</span><strong>Todo lo que necesitan</strong></div>
       <div class="resource-toolbar" id="resource-filters">
         <button class="resource-filter active" onclick="filtrarRecursos('all', this)">Todos</button>
         <button class="resource-filter" onclick="filtrarRecursos('link', this)">Video / links</button>
@@ -404,6 +394,14 @@ header {
       <div class="resource-list" id="resource-list"><div class="resource-empty">Cargando recursos...</div></div>
       <div class="detail-section" id="add-resource-wrap" style="display:none">
         <button class="btn-enviar" onclick="abrirAgregarRecurso()"><i class="ti ti-plus"></i> Agregar recurso</button>
+      </div>
+    </section>
+
+    <section class="service-panel calendar-panel" id="calendar-card" style="display:none">
+      <div class="service-panel-heading"><span>CALENDARIO</span><strong>Guardá la fecha</strong></div>
+      <div class="calendar-row">
+        <a class="calendar-btn" id="cal-ical" href="#" onclick="exportarIcal(event)"><i class="ti ti-calendar"></i> iPhone / iOS</a>
+        <a class="calendar-btn" id="cal-google" href="#" target="_blank"><i class="ti ti-brand-google"></i> Google</a>
       </div>
     </section>
   </div>

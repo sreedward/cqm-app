@@ -532,7 +532,7 @@ header {
 </style>
 <link rel="stylesheet" href="/group-workspace.css">
 </head>
-<body>
+<body class="group-page">
 
 <header>
   <button class="back-btn" onclick="window.location.href='/groups.html'"><i class="ti ti-arrow-left"></i></button>
@@ -561,6 +561,16 @@ header {
 </div>
 
 <div class="content">
+  <section class="group-context">
+    <div class="group-context-label">ESPACIO DEL GRUPO</div>
+    <div class="group-context-row">
+      <div>
+        <div class="group-context-name" id="group-context-name">Equipo</div>
+        <div class="group-context-role" id="group-context-role">Preparando tu espacio…</div>
+      </div>
+      <div class="group-context-code" id="group-context-code" style="display:none"></div>
+    </div>
+  </section>
 
   <!-- ========== SERVICIOS TAB ========== -->
   <div class="tab-content visible" id="tab-servicios-content">
@@ -854,6 +864,12 @@ async function init() {
   currentGroup = group
   isLeader = group.leader_id === currentUser.id
   document.getElementById('group-title').textContent = group.name
+  document.getElementById('group-context-name').textContent = group.name
+  if (isLeader && group.invite_code) {
+    const codeEl = document.getElementById('group-context-code')
+    codeEl.textContent = `CÓDIGO · ${group.invite_code}`
+    codeEl.style.display = 'inline-flex'
+  }
 
   if (isLeader) {
     document.getElementById('rename-btn').style.display = 'flex'
@@ -950,6 +966,7 @@ async function cargarMiembros() {
     const memberIsLeader = m.user_id === currentGroup.leader_id
     const isSelf = m.user_id === currentUser.id
     const identity = cqmRoleIdentity(m.roles || [], memberIsLeader)
+    if (isSelf) document.getElementById('group-context-role').textContent = `${identity.label} · ${identity.phrase}`
 
     const card = document.createElement('div')
     card.className = 'member-card'
